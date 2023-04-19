@@ -1,11 +1,25 @@
 {
     "cSpell.words": [
         "goroutines",
+        "metaprogramming",
+        "metavariable",
+        "Metavariables",
         "millis",
+        "monomorphization",
         "mpsc",
+        "newtype",
+        "powi",
         "println",
         "rustc",
+        "Rustonomicon",
+        "SIGINT",
+        "SIGTERM",
         "Structs",
+        "supertrait",
+        "Supertraits",
+        "unergonomic",
+        "unrepresentable",
+        "usize",
         "vals"
     ]
 }
