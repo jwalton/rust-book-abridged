@@ -24,7 +24,7 @@ fn main() {
 }
 ```
 
-Here `clear` will try to empty the string, but will fail with the error `` cannot borrow `foo` as mutable, as it is not declared as mutable ``. This is because the `clear` method is defined as requiring `self` to be mutable.
+Here `clear` will try to empty the string, but will fail with the error `` cannot borrow `foo` as mutable, as it is not declared as mutable ``. This is ultimately because, if you go look at the source code for the `clear` method it is defined as requiring `self` to be mutable (`self` is a bit like `this` in other languages).
 
 As we saw in the [previous chapter][chap2], we can declare a variable as mutable with the `mut` keyword:
 
@@ -45,9 +45,11 @@ Rust also has the concept of a _constant_ which at first sounds a lot like an im
 const THREE_HOURS_IN_SECONDS: u32 = 60 * 60 * 3;
 ```
 
-Constants are stored directly in the program binary, and have a few restrictions placed on them. First, constants can't be declared `mut` for hopefully obvious reasons. Second, the type of the constant must always be annotated (here we declare that this const is a u32). Third, constants can be declared in the global scope, where variables cannot be.
+Constants are stored directly in the program binary, and have a few restrictions placed on them. First, constants can't be declared `mut` for hopefully obvious reasons. Second, the type of the constant must always be annotated (here we declare that this const is a u32). Third, constants can be declared in the global scope, where normal variables cannot be, which is the main reason you want to use them.
 
 The value of the constant has to be something that can be determined at compile time, not at runtime. The Rust Reference has a [section on constant evaluation](https://doc.rust-lang.org/stable/reference/const_eval.html) that lays out all the rules for what operators you're allowed to use and what you're not, but here the compiler can convert `60 * 60 * 3` into `10800` for us and store that in the executable.
+
+Rust does have a concept of a global or _static variable_, but they are not often used and we'll talk about them in [chapter 19](./ch19/ch19-01-unsafe.md#accessing-or-modifying-a-mutable-static-variable).
 
 ### Shadowing
 
@@ -79,7 +81,7 @@ When shadowing a variable, the new variable does not have to have the same type 
 
 ## 3.2 - Data Types
 
-Rust is a statically typed language, so the type of every variable (and how much space it will occupy in memory) must be known at compile time.
+Keep in mind that Rust is a statically typed language, so the type of every variable (and how much space it will occupy in memory, if it is stored on the stack) must be known at compile time.  Rust's type inference is amazing, so frequently we don't have to tell Rust what type a variable is, but sometimes a variable's type is ambiguous in which case we need to _annotate_ it (e.g. `let guess: 32 = ...`).
 
 A "scalar type" represents a single value. There are four kinds of scalar types in Rust: integers, floating-point numbers, Booleans, and characters.
 
@@ -137,17 +139,16 @@ A `char` in Rust is a four-byte unicode code point.
 let c = 'z';
 let z: char = 'ℤ';
 let heart_eyed_cat = '😻';
-// This doesn't work since this is a single glyph made up of multiple
-// unicode codepoints joined with zero-width-joins.
-// See chapter 8.
-let space_woman_zwj = '👩🏻‍🚀';
+let space_woman_zwj = '👩🏻‍🚀'; // <== This doesn't work!
 ```
+
+That last example doesn't work.  Our female astronaut friend might look like a single character, but she's actually two emoji joined together with a zero-width-joiner (ZWJ).  We'll talk a lot more about UTF-8 and Unicode in [chapter 8][chap8].
 
 ### `str` and String
 
-You'll see two different string types in Rus: `str` and `String`. str is to an array as String is to a Vector. Any string literal in Rust is a `&str` (it's size is known at compile time, and it can't be modified). `&str` is also often called a _string slice_ which we'll learn more about in [the next chapter][chap4].
+You'll see two different string types in Rust: `str` and `String`. `str` is a bit like an array - it's a list of characters with a fixed length known at compile time.  `String` is more like a `Vector` - it's a data type that stores a list of strings in a variable-length chunk of memory on the heap.  Any time you accept input from the user or read a string from a file, it's going to end up in a `String`.
 
-A `String` is always stored on the heap and (assuming it's stored in a mutable variable) can be modified. Any string you read from a file or from stdin is going to end up as a `String`.
+The type `&str` - a reference to a `str` - is also known as a _string slice_ (which we'll learn more about in [the next chapter][chap4]), and is both a pointer to the string's data and a length for the string.  Any string literal in Rust is a `&str`, since the actual string is stored somewhere in the executable and we just have an immutable reference to it.
 
 ## Compound Types
 
@@ -194,6 +195,17 @@ Array accesses are checked at runtime. Trying to access an index which is out-of
 
 If you're coming to Rust from JavaScript, it's worth pointing out that JavaScript "arrays" are not quite like arrays in any other programming language. The Rust `Vec` type, or _vector_, is much closer to a JavaScript array than a Rust array is. We'll talk about vectors in [chapter 8][chap8].
 
+### `struct` type
+
+We can define our own compound types using the `struct` keyword:
+
+```rust
+struct User {
+    name: String,
+    age: u32,
+}
+```
+
 ## 3.3 - Functions
 
 Functions are defined by `fn` keyword. Parameters are required to have a type annotation, and are annotated with `: type` just like variables (and just like in Typescript).
@@ -212,9 +224,9 @@ fn implicit_return() -> i32 {
     1
 }
 
-// Also returns 1, but this is not idiomatic in
-// Rust unless you want to return from the middle
-// of a function.
+// Also returns 1, but using `return` is not
+// idiomatic in Rust unless you want to return
+// from the middle of a function.
 fn explicit_return() -> i32 {
     return 1;
 }
@@ -264,6 +276,11 @@ let number = if condition { 5 } else { 6 };
 // This breaks! `if` and `else` have
 // incompatible types
 let wat = if condition { 5 } else { "six" };
+
+// But this is OK.
+loop {
+    let wat = if condition { 5 } else { break };
+}
 ```
 
 ### Repetition with Loops
@@ -318,7 +335,7 @@ for element in (1..6) {
 
 We'll see more about iterators in [chapter 13][chap13].
 
-Continue to [chapter 4][chap4].
+Now that we know some basics, it's time to learn about [ownership][chap4].
 
 [chap2]: ./ch02-guessing-game.md "Chapter 2: Guessing Game"
 [chap4]: ./ch04-ownership.md "Chapter 4: Ownership, References, and Slices"
