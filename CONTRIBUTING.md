@@ -27,3 +27,5 @@ When linking to another chapter, we use the convention `[chapter 10][chap10]`.  
 ```
 
 File names, like _lib.rs_ should be italicized.
+
+All .md files should pass markdownlint.

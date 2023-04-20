@@ -12,7 +12,7 @@ Smart pointers in Rust generally implement the `Drop` trait (so they can run som
 
 `Box<T>` is not a very exciting smart pointer. It's perhaps the "least smart" of the smart pointers. `Box<T>` lets us store a single piece of data on the heap instead of on the stack:
 
-```rust
+```rust title="src/main.rs"
 fn main() {
     let b = Box::new(5);
     println!("b = {}", b);
@@ -54,7 +54,7 @@ For an enum, Rust will allocate enough memory to store the largest of the enum's
 
 The solution is to move this to the heap:
 
-```rust
+```rust title="src/main.rs"
 use List::{Cons, Nil}
 
 enum List {
@@ -77,7 +77,7 @@ In this section we're going to implement our own smart pointer called `MyBox`. O
 
 Before we talk about `Deref`, let's talk about what we mean by dereferencing.
 
-```rust
+```rust title="src/main.rs"
 fn main() {
     let x = 5;
     let y = &x;
@@ -91,7 +91,7 @@ Here `x` is of type `i32`, but `y` is of type `&i32`. `y` is essentially a point
 
 If you're coming from a language like C or Go, this is probably second nature to you. If you're coming from JavaScript, this might be a new concept, so let me rewrite the above in Typescript, borrowing React's `Ref` type:
 
-```ts
+```ts title="src/main.rs"
 interface Ref<T> {
   current: T;
 }
@@ -111,7 +111,7 @@ In our Rust example, the `*y` is basically doing the same thing as `y.current` i
 
 Because `Box<T>` implements `Deref`, we can use the `*` operator on it, and treat it just like a reference. This (combined with a Rust feature called _deref coercion_) means that any function that takes a `&i32` can also take a `Box<i32>`:
 
-```rust
+```rust title="src/main.rs"
 fn main() {
     let x = 5;
     let y = Box::new(x);
@@ -153,7 +153,7 @@ impl<T> Deref for MyBox<T> {
 
 And now we can do:
 
-```rust
+```rust title="src/main.rs"
 fn main() {
     let x = 5;
     let y = Box::new(x);
@@ -169,7 +169,7 @@ When we write `*y` here, what's actually happening is Rust is going to replace t
 
 We've noted before that you can pass a `&String` to a function that expects a `&str`:
 
-```rust
+```rust title="src/main.rs"
 fn hello(name: &str) {
     println!("Hello, {name}!");
 }
@@ -186,7 +186,7 @@ If we were to pass a `&MyBox<T>` to the `foo` function above, Rust would convert
 
 If Rust didn't implement deref coercion, we'd have to write something like:
 
-```rust
+```rust title="src/main.rs"
 fn main() {
     let m = MyBox::new(String::from("Rust"));
     hello(&(*m)[..]);
@@ -207,9 +207,9 @@ The `Drop` trait allows us to specify some code that must be run whenever a stru
 
 `Drop` can also be used like [RAII in C++](https://en.cppreference.com/w/cpp/language/raii).  If you have a struct that opens a network connection in its constructor, you can implement the `Drop` trait to ensure the network connection is closed when the struct is dropped, ensuring you won't leak any resources.
 
-The `Drop` trait is included in the prelude, and has only one required method named `drop()`.  Let's see an example:
+The `Drop` trait is included in the prelude, and has only one required method named `drop`.  Let's see an example:
 
-```rust
+```rust title="src/main.rs"
 struct CustomSmartPointer {
     data: String,
 }
@@ -264,7 +264,7 @@ The idea behind `Rc<T>` is that it allocates some data on the heap and a counter
 
 Let's see a concrete example. Lets go back to our cons list, but we'll do something slightly unusual, and join three lists together:
 
-```rust
+```rust title="src/main.rs"
 enum List {
     Cons(i32, Box<List>),
     Nil,
@@ -283,7 +283,7 @@ We have list `a`, and then we make this the tail of both list `b` and list `c`. 
 
 We could fix this particular example with some lifetime references, but that won't work in all situations, so instead we'll fix this with `Rc<T>`:
 
-```rust
+```rust title="src/main.rs"
 enum List {
     Cons(i32, Rc<List>),
     Nil,
@@ -331,7 +331,7 @@ In this section we're not going to write any unsafe code ourselves, but we're go
 
 ### A Use Case for Interior Mutability: Mock Objects
 
-As my mom always said, "PoC||GTFO". Let's look at a concrete example. We're writing code for an email server. Users have quotas, and when they get close to that quota, we want to send them a message. The message gets sent via the `Messenger` trait:
+Let's look at a concrete example. We're writing code for an email server. Users have quotas, and when they get close to that quota, we want to send them a message. The message gets sent via the `Messenger` trait:
 
 ```rust
 pub trait Messenger {
@@ -413,7 +413,7 @@ mod tests {
 }
 ```
 
-`RefCell<T>` is essentially a new kind of smart pointer. It stores some value on the heap, but it lets us call `borrow()` to get an immutable reference to that something and `borrow_mut()` to get a mutable reference, even though the `RefCell<T>` itself is immutable. You can think of `RefCell<T>` as two `Rc<T>` in one - it has a reference count for immutable references, and a second reference count for mutable references (which is always either 0 or 1).
+`RefCell<T>` is essentially a new kind of smart pointer. It stores some value on the heap, but it lets us call `borrow` to get an immutable reference to that something and `borrow_mut` to get a mutable reference, even though the `RefCell<T>` itself is immutable. You can think of `RefCell<T>` as two `Rc<T>` in one - it has a reference count for immutable references, and a second reference count for mutable references (which is always either 0 or 1).
 
 `RefCell<T>` enforces the exact same safety rules as the borrow checker does. You can only have a single mutable reference at a time, and if you have one you can't also have any immutable references. The key difference is that normally these checks happen at compile time, but with `RefCell<T>` they happen at runtime. If we get things wrong, instead of a compiler error before we ship, our users get a `panic`.
 
@@ -425,7 +425,7 @@ One final note about `RefCell<T>` is that, like `Rc<T>`, it is not thread safe.
 
 `Rc<T>` lets us have multiple owners, `RefCell<T>` lets us mutate internal state. We can combine these power together to make something mutable with multiple owners. Looking back to our cons list example:
 
-```rust
+```rust title="src/main.rs"
 #[derive(Debug)]
 enum List {
     Cons(Rc<RefCell<i32>>, Rc<List>),
@@ -462,7 +462,7 @@ In a garbage collected language like Java or JavaScript, this problem is solved 
 
 Let's look at a slightly modified version of our cons list example, where the pointer to the next item in the list is mutable via `RefCell<T>`. We then set up two lists elements which each have a next pointing to each other:
 
-```rust
+```rust title="src/main.rs"
 #[derive(Debug)]
 enum List {
     Cons(i32, RefCell<Rc<List>>),
@@ -505,7 +505,7 @@ fn main() {
 }
 ```
 
-Have a quick read through that example and you'll see that both `a` and `b` end pointing to each other. Both `a` and `b` end up with a `strong_count` of 2. When we hit the end of the `main()` function, `a` will be dropped, reducing the ref count for a's `Rc<List>` to 1 (the one from `b`), and the same will happen to `b`. As a result, even though there are no more `Rc` objects left using this memory, the memory will never be freed.
+Have a quick read through that example and you'll see that both `a` and `b` end pointing to each other. Both `a` and `b` end up with a `strong_count` of 2. When we hit the end of the `main` function, `a` will be dropped, reducing the ref count for a's `Rc<List>` to 1 (the one from `b`), and the same will happen to `b`. As a result, even though there are no more `Rc` objects left using this memory, the memory will never be freed.
 
 ### Preventing Reference Cycles: Turning an `Rc<T>` into a `Weak<T>`
 
@@ -513,7 +513,7 @@ One way to solve the problem we presented in the previous section is to make it 
 
 To prevent a possible memory leak, here we'll make the parent references _strong_ and the child references _weak_. In other words, if a child has a reference to a parent, that reference won't count towards the reference count that `Rc<T>` uses:
 
-```rust
+```rust title="src/main.rs"
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
 

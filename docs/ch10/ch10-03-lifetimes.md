@@ -248,6 +248,6 @@ This takes two string slices and returns whichever is longer. It also prints an 
 
 Continue to [chapter 11][chap11].
 
-[chap4]: ./ch04-ownership.md "Chapter 4: Ownership, References, and Slices"
-[chap11]: ./ch11-automated-tests.md "Chapter 11: Writing Automated Tests"
-[chap17]: ./ch17-object-oriented-features.md "Chapter 17: Object Oriented Features of Rust"
+[chap4]: ../ch04-ownership.md "Chapter 4: Ownership, References, and Slices"
+[chap11]: ../ch11-automated-tests.md "Chapter 11: Writing Automated Tests"
+[chap17]: ../ch17-object-oriented-features.md "Chapter 17: Object Oriented Features of Rust"

@@ -48,7 +48,7 @@ let m = Message::Write(String::from("hello"));
 m.call();
 ```
 
-The `call()` function here could use a match statement to perform different actions based on the variant of the Message enum.
+The `call` function here could use a match statement to perform different actions based on the variant of the Message enum.
 
 ### The Option Enum and Its Advantages Over Null Values
 
@@ -113,7 +113,7 @@ let from_match = match x {
 
 ## 6.2 The `match` Control Flow Construct
 
-`match` is a bit like a switch/case statement. We've seen match a couple of this book. Formally, a match consists of an expression, and then one or more "arms" with patterns that try to match the expression. The pattern for each arm is evalated in order, and the code associated with the first arm that matches will be executed. (TODO: reword:) Patterns can be made up of literals, variable names, wildcards, and other things. We'll explore patterns in greater detail in [chapter 18][chap18]. One thing to note about a match expression is that the patterns must cover every possible value. If there are any unhandled values, the compiler will error.
+`match` is a bit like a switch/case statement. We've seen match a couple of this book. Formally, a match consists of an expression, and then one or more "arms" with patterns that try to match the expression. The pattern for each arm is evaluated in order, and the code associated with the first arm that matches will be executed. (TODO: reword:) Patterns can be made up of literals, variable names, wildcards, and other things. We'll explore patterns in greater detail in [chapter 18][chap18]. One thing to note about a match expression is that the patterns must cover every possible value. If there are any unhandled values, the compiler will error.
 
 Here's a simple example of a match expression, taken directly from the original Rust Book:
 

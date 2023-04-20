@@ -16,7 +16,7 @@ In Rust, the unit of compilation is the _crate_. Crates come in two forms - libr
 
 A _package_ is purely a cargo concept (in other words, `rustc` doesn't know anything about packages). A package is what you get when you run `cargo new` - a _cargo.toml_ file, and a src folder (possibly with subfolders) containing one or more source files.
 
-The _crate root_ is the file (or files) that rustc starts working from. If a package contains a src/main.rs file with a `main()` function, then the package contains a binary crate with the same name as the package. If a package contains a _src/lib.rs_, then it contains a library crate (again with the same name as the package). If it has both, then the package contains both a library crate and a binary crate. You might want to include both if you want a simple program that executes your library. For example, if you were writing a library to convert JPG images to PNG format, you might include both a library crate that other developers can use and a binary crate implementing a command line tool that uses the library. If you want to include more than one binary crate in a package, you can add files in src/bin. Each file placed there will be compiled as a separate binary crate.
+The _crate root_ is the file (or files) that rustc starts working from. If a package contains a src/main.rs file with a `main` function, then the package contains a binary crate with the same name as the package. If a package contains a _src/lib.rs_, then it contains a library crate (again with the same name as the package). If it has both, then the package contains both a library crate and a binary crate. You might want to include both if you want a simple program that executes your library. For example, if you were writing a library to convert JPG images to PNG format, you might include both a library crate that other developers can use and a binary crate implementing a command line tool that uses the library. If you want to include more than one binary crate in a package, you can add files in src/bin. Each file placed there will be compiled as a separate binary crate.
 
 ## 7.2 Defining Modules to Control Scope and Privacy
 
@@ -69,7 +69,7 @@ To refer to an item in the module tree, we use a path. Paths come in two forms:
 - An _absolute path_ starts from the crate root. For external library creates we're using, this starts with the name of the crate (e.g. `rand`) and for code within the current crate it starts with `crate`.
 - A _relative path_ starts from the current module. It starts with an identifier in the current module or with `self` or `super`.
 
-Using our restaurant example, let's say we want to call the `add_to_waitlist()` function. From the top level of src/lib.rs we could do this in two ways:
+Using our restaurant example, let's say we want to call the `add_to_waitlist` function. From the top level of src/lib.rs we could do this in two ways:
 
 ```rust
 mod front_of_house {
@@ -90,7 +90,7 @@ pub fn eat_at_restaurant() {
 
 Relative paths have the clear advantage that they are shorter. Absolute paths have the advantage that, if you move a function from one place to another, all the absolute paths in that function won't have to change (although obviously all the paths pointing to the moved function will).
 
-We have to mark `hosting` and `add_to_waitlist()` as `pub` in order for `eat_at_restaurant()` to compile. This is because `eat_at_restaurant()` is defined at the root of the crate, and `hosting` and `add_to_waitlist()` are in child modules. A parent cannot access the private contents of a another module, unless that other module is an ancestor - `add_to_waitlist()` could access private members of `front_of_house` or the root of the crate.
+We have to mark `hosting` and `add_to_waitlist` as `pub` in order for `eat_at_restaurant` to compile. This is because `eat_at_restaurant` is defined at the root of the crate, and `hosting` and `add_to_waitlist` are in child modules. A parent cannot access the private contents of a another module, unless that other module is an ancestor - `add_to_waitlist` could access private members of `front_of_house` or the root of the crate.
 
 ### Starting Relative Paths with super
 
@@ -102,7 +102,7 @@ fn deliver_order() {}
 mod back_of_house {
     fn fix_incorrect_order() {
         cook_order();
-        // Call into `deliver_order()` in the parent module.
+        // Call into `deliver_order` in the parent module.
         super::deliver_order();
     }
 
@@ -145,7 +145,7 @@ pub fn eat_at_restaurant() {
 }
 ```
 
-The `pub toast` field can be read and written outside of the `back_of_house` module, but the private `seasonal_fruit` cannot. Note that the existence of this private field implies that other modules won't be able to create a new instance of `Breakfast`, since they won't be able to set this private field. Here we've created a public associated function called `summer()` to act as a sort of constructor.
+The `pub toast` field can be read and written outside of the `back_of_house` module, but the private `seasonal_fruit` cannot. Note that the existence of this private field implies that other modules won't be able to create a new instance of `Breakfast`, since they won't be able to set this private field. Here we've created a public associated function called `summer` to act as a sort of constructor.
 
 Enums behave exactly the opposite to structs. When we make an enum `pub`, all of it's variants and all fields defined on all variants are automatically `pub` as well.
 
@@ -163,10 +163,9 @@ mod front_of_house {
 }
 
 pub fn eat_at_restaurant() {
-    // Don't need to use `front_of_house::hosting::add_to_waitlist()`
+    // Don't need to write `front_of_house::hosting::add_to_waitlist()`
     // here because we brought `hosting` into scope with the `use`
     // above.use crate::front_of_house::hosting;
-
 
     hosting::add_to_waitlist();
 }

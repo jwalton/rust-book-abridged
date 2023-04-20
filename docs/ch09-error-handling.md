@@ -11,7 +11,7 @@
 
 ## 9.1 - Unrecoverable Errors with `panic!`
 
-We've already discussed a few times when your program will _panic_: when you try to index an array or vector out-of-bounds, or when you call `expect()` on an `Option::None`, for example.
+We've already discussed a few times when your program will _panic_: when you try to index an array or vector out-of-bounds, or when you call `expect` on an `Option::None`, for example.
 
 You can also force your program to panic with the `panic!` macro:
 
@@ -100,7 +100,7 @@ If you're a JavaScript programmer who remembers the days before async and await,
 
 ### Alternatives to Using match with `Result<T, E>`
 
-That last example had a lot of `match` statements! Fortunately `Result` has many methods defined on it which can be used to write more concise versions of the code above. Here's a quick example using the `unwrap_or_else()` method:
+That last example had a lot of `match` statements! Fortunately `Result` has many methods defined on it which can be used to write more concise versions of the code above. Here's a quick example using the `unwrap_or_else` method:
 
 ```rust
 use std::fs::File;
@@ -123,7 +123,7 @@ This introduces a new concept called _closures_ which we'll talk more about in [
 
 ### Shortcuts for Panic on Error: `unwrap` and `expect`
 
-When we were learning about [the `Option` enum](./ch06-enums-and-pattern-matching.md#the-option-enum-and-its-advantages-over-null-values), we learned about the `unwrap()` and `expect(message)` methods which panic if the Option is `None`. `Result` has `unwrap()` and `expect()` methods that work similarly, causing a panic if the `Result` is an `Err` variant:
+When we were learning about [the `Option` enum](./ch06-enums-and-pattern-matching.md#the-option-enum-and-its-advantages-over-null-values), we learned about the `unwrap` and `expect(message)` methods which panic if the Option is `None`. `Result` has `unwrap` and `expect` methods that work similarly, causing a panic if the `Result` is an `Err` variant:
 
 ```rust
 use std::fs::File;
@@ -136,13 +136,13 @@ fn main() {
 }
 ```
 
-`expect()` is generally preferred over `unwrap()`, as it gives more information about what went wrong and the assumptions that were made for not dealing with this error.
+`expect` is generally preferred over `unwrap`, as it gives more information about what went wrong and the assumptions that were made for not dealing with this error.
 
 ### Propagating Errors
 
 Often if an error occurs in a function, we don't want to handle the error ourselves but propagate the error to the function's caller. If you're coming to Rust from Go, you've no doubt written `if err != nil { return err }` many times in your career.
 
-Here's a very verbose example of a function that reads a username from a file. If the file can't be read, we don't want `read_username_from_file()` to panic, but we also don't know how to handle the error here. We want to return the error back to the caller so the caller can decide what to do about the fact that we can't find the username:
+Here's a very verbose example of a function that reads a username from a file. If the file can't be read, we don't want `read_username_from_file` to panic, but we also don't know how to handle the error here. We want to return the error back to the caller so the caller can decide what to do about the fact that we can't find the username:
 
 ```rust
 use std::fs::File;
@@ -165,7 +165,7 @@ fn read_username_from_file() -> Result<String, io::Error> {
 }
 ```
 
-One important thing to note here is that `read_username_from_file()` returns a `Result<String, io:Error>`. We chose `io:Error` for the `E` part of `Result<T, E>`, because this is the error type that both of the functions we call can return. We can use a shortcut called the `?` operator to reduce a lot of this boilerplate:
+One important thing to note here is that `read_username_from_file` returns a `Result<String, io:Error>`. We chose `io:Error` for the `E` part of `Result<T, E>`, because this is the error type that both of the functions we call can return. We can use a shortcut called the `?` operator to reduce a lot of this boilerplate:
 
 ```rust
 use std::fs::File;
@@ -181,7 +181,7 @@ fn read_username_from_file() -> Result<String, io::Error> {
 
 The `?` operator can be placed after any `Result`, and basically is the same as the `match` expression from the original example. The `?` says: "If `result` is an `Ok` variant, resolve this expression to the value of the `Ok`. If `result` is an `Err` then `return result`".
 
-This works here because the `Result`s we're adding `?` to and our `read_username_from_file()` both return a Result with the same error type, but they don't have to! The `?` operator will pass errors through the `from()` function from the `From` trait on our return type to convert the error from one error type to another.
+This works here because the `Result`s we're adding `?` to and our `read_username_from_file` both return a Result with the same error type, but they don't have to! The `?` operator will pass errors through the `from` function from the `From` trait on our return type to convert the error from one error type to another.
 
 For example, if we wanted to defined a custom error type named `OurError`, we could define `impl From<io::Error> for OurError` to tell Rust how to convert `io:Error`s to `OurError`s, without needing to add any more code to our example.
 
@@ -232,7 +232,7 @@ fn main() {
 }
 ```
 
-This happens because the function signature for `main()` implicitly declares that it returns `()`, not a `Result`. Up until now all our `main()` functions have had this signature, but we can actually allow `main()` to return an error:
+This happens because the function signature for `main` implicitly declares that it returns `()`, not a `Result`. Up until now all our `main` functions have had this signature, but we can actually allow `main` to return an error:
 
 ```rust
 use std::error::Error;
@@ -251,7 +251,7 @@ Whoa! What's this `Box<dyn Error>`? This is a _trait object_, which we'll discus
 
 If you're an experienced programmer, your language of choice probably has a way to handle errors and something much like panic. You know this stuff, you can probably safely [skip ahead to the next chapter][chap10].
 
-If you're still here: A panic halts the entire program, so should be used sparingly. There are some times where it's good to use `expect()`, `unwrap()`, and `panic!()`:
+If you're still here: A panic halts the entire program, so should be used sparingly. There are some times where it's good to use `expect`, `unwrap`, and `panic!`:
 
 - In [unit tests][chap11], where you know there isn't supposed to be an error, and you want to fail the test immediately if there is.
 - When you know something should never happen. It's perfectly OK to write `let home: IpAddr = "127.0.0.1".parse().unwrap();` because you know this string will parse to a valid IP address.

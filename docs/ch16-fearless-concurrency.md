@@ -32,7 +32,7 @@ In [chapter 21][chap21] we'll talk about async programming where many I/O bound 
 
 We start a new thread by call `thread::spawn`, passing it a closure which will be run in the new thread:
 
-```rust
+```rust title="src/main.rs"
 use std::thread;
 use std::time::Duration;
 
@@ -55,13 +55,13 @@ fn main() {
 
 If you run this, then as you'd expect, you'll get a mix of messages from the main thread and the spawned thread intermixed with each other.
 
-If you comment out the call to `join` at the end of the `main()` function and run this, you probably will not see all 9 numbers from the spawned thread being printed. If the main thread quits, all child threads quit immediately. Rust doesn't wait for all threads to finish to quit the program, as some languages such as Java do. The `join` function on `ThreadHandle` will cause the calling thread to wait until the thread the handle references has terminated.
+If you comment out the call to `join` at the end of the `main` function and run this, you probably will not see all 9 numbers from the spawned thread being printed. If the main thread quits, all child threads quit immediately. Rust doesn't wait for all threads to finish to quit the program, as some languages such as Java do. The `join` function on `ThreadHandle` will cause the calling thread to wait until the thread the handle references has terminated.
 
 ### Using `move` Closures with Threads
 
 Here's an example that doesn't compile because of an ownership problem:
 
-```rust
+```rust title="src/main.rs"
 use std::thread;
 
 fn main() {
@@ -95,7 +95,7 @@ We an fix this with the `move` keyword, which forces the closure to take ownersh
 
 Rust has _channels_, which will be very familiar to any Go programmers reading this. A channel is a bit like a FIFO queue - a producer can _transmit_ a message to the channel, and a consumer can _receive_ a message from a channel. Let's see an example:
 
-```rust
+```rust title="src/main.rs"
 use std::sync::mpsc;
 use std::thread;
 
@@ -124,7 +124,7 @@ On the receiving side, we call `rx.recv` to receive a value from the channel. Th
 
 The `Receiver<T>` type implements the `Iterator` trait, which lets us handle incoming messages with a `for` loop or using other `Iterator` functions we've seen:
 
-```rust
+```rust title="src/main.rs"
 use std::sync::mpsc;
 use std::thread;
 use std::time::Duration;
@@ -160,7 +160,7 @@ Notice that the sending thread is sleeping between sending each value. The for l
 
 First let's have a look at a single threaded program that uses a `Mutex<T>`:
 
-```rust
+```rust title="src/main.rs"
 use std::sync::Mutex;
 
 fn main() {
@@ -193,7 +193,7 @@ This is where `Arc<T>` comes in - the "atomic reference counted" smart pointer. 
 
 Here's how we share a `Mutex<T>` with an `Arc<T>`:
 
-```rust
+```rust title="src/main.rs"
 use std::sync::{Arc, Mutex};
 use std::thread;
 

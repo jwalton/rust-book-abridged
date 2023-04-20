@@ -1,4 +1,4 @@
-# Building a Single-Threaded Web Server
+# 20.1 - Building a Single-Threaded Web Server
 
 In this chapter we're going to build a simple HTTP server to put together a number of things we've learned so far. As usual, the code for this project is [available on the GitHub repo](https://github.com/jwalton/rust-book-abridged/examples/ch20-single-threaded-web-server).
 

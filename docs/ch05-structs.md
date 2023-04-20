@@ -126,7 +126,7 @@ fn area(rectangle: &Rectangle) -> u32 {
 }
 ```
 
-`area()` takes an immutable reference to the Rectangle struct. We know when we call area(), it won't modify our struct (even if `rect1` was declared as mutable in the caller). Passing a reference means the caller will retain ownership. Also, accessing fields on the borrowed struct doesn't move them.
+`area` takes an immutable reference to the Rectangle struct. We know when we call area(), it won't modify our struct (even if `rect1` was declared as mutable in the caller). Passing a reference means the caller will retain ownership. Also, accessing fields on the borrowed struct doesn't move them.
 
 ### Adding Useful Functionality with Derived Traits
 
@@ -141,7 +141,7 @@ It would be cool if we could "print" a rectangle:
     println!("A rectangle: {}", rect1); // This will error.
 ```
 
-In Java and JavaScript we could to this with a `toString()` method. In Go we could implement the `Stringer` interface. In Rust we have two different traits we can implement: `std::fmt::Display` and `Debug`. The Debug trait is one that's intended, as the name suggests, for debugging and it's the one we want here.
+In Java and JavaScript we could to this with a `toString` method. In Go we could implement the `Stringer` interface. In Rust we have two different traits we can implement: `std::fmt::Display` and `Debug`. The Debug trait is one that's intended, as the name suggests, for debugging and it's the one we want here.
 
 Instead of implementing this trait ourselves, we can _derive_ this trait, which is a fancy way of saying we can let Rust generate the code for this trait for us:
 
@@ -168,9 +168,9 @@ If you run this, it will print:
 A rectangle: Rectangle { width: 30, height: 50 }
 ```
 
-The placeholder in `println!()` has changed from `{}` to `{:?}`, which lets println!() know we want the debug output format. We could also use `{:#?}` to "pretty print" the output.
+The placeholder in `println!` has changed from `{}` to `{:?}`, which lets println!() know we want the debug output format. We could also use `{:#?}` to "pretty print" the output.
 
-There's also a handy macro called `dbg!()` which will pretty-print the value, and the file name and source line. `dbg!(&rect1);` would print something line:
+There's also a handy macro called `dbg!` which will pretty-print the value, and the file name and source line. `dbg!(&rect1);` would print something line:
 
 ```txt
 [src/main.rs:13] &rect1 = Rectangle {
@@ -216,16 +216,17 @@ fn main() {
 }
 ```
 
-The `impl` (implementation) block defines methods on the Rectangle type.  `area()` takes a reference to `self`.  `&self` is actually a short form for `self: &Self`.  If this were not a reference this method would take ownership of the Rectangle, so we wouldn't be able to use a Rectangle instance after calling area().  Methods that take ownership of self are quite rare, but useful in cases where a method destroys `self` or transforms it into some other structure and moves data out of it.  If a method wants to modify `self`, it needs to declare it as `& mut self`, as `self` is immutable by default, just like any other function parameter.
+The `impl` (implementation) block defines methods on the Rectangle type. `area` takes a reference to `self`. `&self` is actually a short form for `self: &Self`. If this were not a reference this method would take ownership of the Rectangle, so we wouldn't be able to use a Rectangle instance after calling area(). Methods that take ownership of self are quite rare, but useful in cases where a method destroys `self` or transforms it into some other structure and moves data out of it. If a method wants to modify `self`, it needs to declare it as `& mut self`, as `self` is immutable by default, just like any other function parameter.
 
-You can have a method on a struct with the same name as one of the fields.  This is most commonly used to add a _getter_ method to a struct.  You can make it so a rectangle has a private `width: u32` field, and a public `width(): u32` field, which effectively makes `width` read-only.  What are public and private fields and methods?  You'll have to wait for [chapter 7][chap7].
+You can have a method on a struct with the same name as one of the fields. This is most commonly used to add a _getter_ method to a struct. You can make it so a rectangle has a private `width: u32` field, and a public `width(): u32` field, which effectively makes `width` read-only. What are public and private fields and methods? You'll have to wait for [chapter 7][chap7].
 
 ### Automatic Referencing and Dereferencing
 
-You may have noticed that `area()` takes a ref to self, but we called it as `rect1.area()` and not `(&rect1).area()`.  Much like in Go, Rust has automatic referencing and dereferencing. When you call a method on a struct, Rust will automatically add in the `&`, `&mut`, or `*` so the object matches the signature of the method.
+You may have noticed that `area` takes a ref to self, but we called it as `rect1.area()` and not `(&rect1).area()`. Much like in Go, Rust has automatic referencing and dereferencing. When you call a method on a struct, Rust will automatically add in the `&`, `&mut`, or `*` so the object matches the signature of the method.
 
 Continue to [chapter 6][chap6].
 
 [chap6]: ./ch06-enums-and-pattern-matching.md "Chapter 6: Enums and Pattern Matching"
 [chap7]: ./ch07-packages-crates-modules.md "Chapter 7: Managing Growing Projects with Packages, Crates, and Modules"
 [chap10]: ./ch10/ch10-01-generic-data-types.md "Chapter 10: Generic Types, Traits, and Lifetimes"
+[appc]: ./zz-appendix/appendix-03-derivable-traits.md

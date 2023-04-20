@@ -160,4 +160,4 @@ fn generic<T: ?Sized>(t: &T) {
 
 Note that in order to do this, we can't leave the `t` parameter of type `T`. We again need some kind of pointer, in this case we chose `&T`.
 
-[chap2]: ./ch02-guessing-game.md "Chapter 2: Guessing Game"
+[chap2]: ../ch02-guessing-game.md "Chapter 2: Guessing Game"

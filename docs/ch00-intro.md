@@ -1,13 +1,17 @@
 ---
 sidebar_position: 1
 slug: /
+label: "The Rust Book (Abridged)"
+hide_title: true
 ---
 
 # The Rust Book (Abridged)
 
-v0.0.1 - Draft
+v0.0.2 - Draft
 
-By Jason Walton, based on ["The Rust Programming Language"](https://github.com/rust-lang/book/commit/c06006157b14b3d47b5c716fc392b77f3b2e21ce) by Steve Klabnik and Carol Nichols.
+By Jason Walton.
+
+Based on ["The Rust Programming Language"](https://github.com/rust-lang/book/commit/c06006157b14b3d47b5c716fc392b77f3b2e21ce) by Steve Klabnik and Carol Nichols.
 
 ## Why an Abridged Version?
 
@@ -19,17 +23,17 @@ Take, for example, this excerpt from the section on functions:
 
 > We define a function in Rust by entering `fn` followed by a function name and a set of parentheses. The curly brackets tell the compiler where the function body begins and ends. We can call any function we've defined by entering its name followed by a set of parentheses.
 
-If you're a veteran programmer, this paragraph is probably something you didn't need to read. The [start of chapter 10](https://doc.rust-lang.org/stable/book/ch10-00-generics.html#removing-duplication-by-extracting-a-function) essentially explains [DRY principal](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself) at great length, which is something you probably already know. [Chapter 12](https://doc.rust-lang.org/stable/book/ch12-04-testing-the-librarys-functionality.html) spends quite a few paragraphs devoted to learning about test driven development, which is something you are no doubt aware exists, and if you wanted to learn about TDD you'd probably be reading a book about TDD - what you want from this book is how `cargo` expects you to organize your tests and what syntax you need to define them.
+If you're a veteran programmer, this paragraph is probably something you didn't need to read. The [start of chapter 10](https://doc.rust-lang.org/stable/book/ch10-00-generics.html#removing-duplication-by-extracting-a-function) essentially explains [DRY principal](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself) at great length. [Chapter 12](https://doc.rust-lang.org/stable/book/ch12-04-testing-the-librarys-functionality.html) spends quite a few paragraphs devoted to learning about test driven development (TDD). If you wanted to learn TDD, you'd probably be reading a book about TDD. What you want from this book is how `cargo` expects you to organize your tests and what syntax you need to define them.
 
-This isn't meant to be a criticism of the Rust Book. It's an excellent and well written book. The problem here is more that the intended audience of the book isn't you.
+This isn't meant to be a criticism of the Rust Book. It's excellent and well written, and there's a reason I chose it as the basis for this book. The problem here is not with the original book, but more that the intended audience of the book isn't you.
 
 ## What's different about this book?
 
-This book is a rewrite of the Rust book, trying to make it less loquacious. The chapter names are all the same, and in many cases the subsections in each chapter are the same and examples have been copied directly from the original. This book tries to present information in the same order as the original Rust Book, but leaves out all the things an experienced developer would already know and focuses more on the parts that make Rust unique.
+This book is a rewrite of the Rust book, trying to make it less loquacious. The chapter names are all the same, and in many cases the subsections in each chapter are the same. In most cases examples have been copied directly from the original. This book tries to present information in the same order as the original Rust Book, but leaves out all the things an experienced developer would already know and focuses more on the parts that make Rust unique.
 
-It also in many cases lets the code examples speak for themselves where the original book explained the code examples in great detail. Where the original would build up a code example piece by piece, this version presents the finished code so you can read through it, and then points out some interesting parts.
+This book lets the code examples speak for themselves where the original book explained the code examples in great detail. Where the original would build up a code example piece by piece, this version presents the finished code so you can read through it, and then points out some interesting parts. Where possible I've tried to add in material I think an advanced reader would find interesting. In places where I found the original book confusing I've tried to explain things in a different way.
 
-By using the same example code and keeping things in more or less the same order, the hope is that you can read this book, and if you come across something new or unclear, you can switch over to the original version of the Rust book and read the same section, with the exact same examples, and hopefully it will clear things up for you. (If this happens, please raise an issue to let me know where you got lost so I can improve this version!)
+By using the same example code and keeping things in more or less the same order, the hope is that you can read this book, and if you come across something new or unclear, you can switch over to the original version of the Rust book and read the same section, with the exact same examples, and hopefully it will clear things up for you. (If this happens, please [raise an issue](https://github.com/jwalton/rust-book-abridged/issues) to let me know where you got lost so I can improve this version!)
 
 The original "The Rust Programming Language" is frequently abbreviated as "the Rust book". We clearly need an even shorter abbreviation for this book, so we'll call this one "the rs book".
 
@@ -38,6 +42,8 @@ The original "The Rust Programming Language" is frequently abbreviated as "the R
 This book is a work-in-progress. I wrote this while I was reading "The Rust Programming Language" and learning Rust, so if there are things you find in here that you think are wrong, it's entirely possible that this is because they _are_ wrong! Again, please feel free to raise an issue, or a PR and let me know!
 
 :::
+
+If you enjoyed this book, please [give it a star on GitHub](https://github.com/jwalton/rust-book-abridged), or [buy me a coffee](https://github.com/sponsors/jwalton).
 
 ## Table of Contents
 

@@ -16,7 +16,7 @@ If you want to know the details about how a vector is implemented, check out [Th
 
 ### Creating a New Vector
 
-Like many structs in Rust, we can create a vector with the associated `new()` function:
+Like many structs in Rust, we can create a vector with the associated `new` function:
 
 ```rust
 let v: Vec<i32> = Vec::new();
@@ -41,11 +41,11 @@ v.push(6);
 v.push(7);
 ```
 
-We don't need to annotate the type of `v` here. Since we're passing `i32`s to `push()`, Rust can infer the type of the vector. We do need to mark `v` as mutable though, otherwise we wouldn't be allowed to call `push()`. In addition to `push()`, there's a `pop()` method that removes and returns the last element.
+We don't need to annotate the type of `v` here. Since we're passing `i32`s to `push`, Rust can infer the type of the vector. We do need to mark `v` as mutable though, otherwise we wouldn't be allowed to call `push`. In addition to `push`, there's a `pop` method that removes and returns the last element.
 
 ### Reading Elements of Vectors
 
-You can read elements from a vector using the same syntax you'd use to index elements of an array, or you can use the `get()` method:
+You can read elements from a vector using the same syntax you'd use to index elements of an array, or you can use the `get` method:
 
 ```rust
 let v = vec![1, 2, 3, 4, 5];
@@ -55,7 +55,7 @@ let third = &v[2]; // This is an &i32.
 let fourth = v.get(3); // This is an Option<&i32>
 ```
 
-`get()` returns an `Option`; if we try to `get()` an index outside the bounds of the vector, then `get()` will return `None`. Since the `[]` syntax doesn't return an Option then, as you might expect, it will cause a panic if you try to retrieve an index which is out-of-bounds.
+`get` returns an `Option`; if we try to `get` an index outside the bounds of the vector, then `get` will return `None`. Since the `[]` syntax doesn't return an Option then, as you might expect, it will cause a panic if you try to retrieve an index which is out-of-bounds.
 
 Here's a quick example that looks at first glance like it ought to work, but will fail to compile:
 
@@ -71,7 +71,7 @@ println!("The first element is: {first}");
 
 The simple explanation of why this doesn't work is that, as you may recall from [chapter 4](./ch04-ownership.md#mutable-references), if you have a mutable reference to a value, you can have no other references to that value. Here `v.push(6)` needs a mutable reference to the vector, which it can't get because of the ref stored in `first`. But `first` is just a ref to the first item in the vector? Why does that prevent us from modifying some other part of the vector?
 
-The problem here has to do with the way that vector is implemented. Vector is, at heart, an array. When we `push` an element onto the vector, if there isn't enough room in the underlying array, vector will allocate a new chunk of memory to hold a larger array and copy elements from the old array to the new one. This means that the reference to `first` is really a pointer to a part of that buffer. If `push()` were to free this memory, then `first` would point to unallocated memory.
+The problem here has to do with the way that vector is implemented. Vector is, at heart, an array. When we `push` an element onto the vector, if there isn't enough room in the underlying array, vector will allocate a new chunk of memory to hold a larger array and copy elements from the old array to the new one. This means that the reference to `first` is really a pointer to a part of that buffer. If `push` were to free this memory, then `first` would point to unallocated memory.
 
 ### Iterating over the Values in a Vector
 
@@ -131,19 +131,19 @@ A `String` represents a growable, mutable UTF-8 encoded string stored on the hea
 
 ### Creating a New String
 
-We can create a String with `new()`, just like a vector:
+We can create a String with `new`, just like a vector:
 
 ```rust
 let mut s = String::new();
 ```
 
-Any type that implements the `Display` trait has a `to_string()` method which can be used to create a string:
+Any type that implements the `Display` trait has a `to_string` method which can be used to create a string:
 
 ```rust
 let s = "Hello, world!".to_string();
 ```
 
-And as we've seen we can also use `String::from()` to copy a string literal into a String:
+And as we've seen we can also use `String::from` to copy a string literal into a String:
 
 ```rust
 let s = String::from("Hello, World!");
@@ -174,7 +174,7 @@ let s2 = String::from("World!");
 let s3 = s1 + &s2;
 ```
 
-The `+` operator here will take ownership of `s1`, so `s1` won't be valid after the `+` expression. The eagle eyed among you will notice we didn't write `s1 + s2`, but `s1 + &s2`. The `+` operator is actually implemented using the `add()` method on String. If you look up `add()`, you'll it is implemented using generics, but basically in this particular case the function signature boils down to:
+The `+` operator here will take ownership of `s1`, so `s1` won't be valid after the `+` expression. The eagle eyed among you will notice we didn't write `s1 + s2`, but `s1 + &s2`. The `+` operator is actually implemented using the `add` method on String. If you look up `add`, you'll it is implemented using generics, but basically in this particular case the function signature boils down to:
 
 ```rust
 fn add(self, s: &str) -> String
@@ -292,7 +292,7 @@ For types that implement the `Copy` trait, the values will be copied into the ha
 
 ### Updating a Hash Map
 
-When inserting into a Hash Map, the value we want to insert might already exist. If we just do a straight `insert()`, this will overwrite the value that's already there:
+When inserting into a Hash Map, the value we want to insert might already exist. If we just do a straight `insert`, this will overwrite the value that's already there:
 
 ```rust
 use std::collections::HashMap;
@@ -305,7 +305,7 @@ scores.insert(String::from("Blue"), 10);
 scores.insert(String::from("Blue"), 25);
 ```
 
-We can use the `entry()` method on a hash map to get information about an existing entry in the map. The `entry()` method returns an [`Entry` enum](https://doc.rust-lang.org/std/collections/hash_map/enum.Entry.html), which has methods defined on it that allow us to manipulate the map. For example, `Entry` has an `or_insert()` method which will return the existing entry or insert a new entry if there is nothing stored at that key:
+We can use the `entry` method on a hash map to get information about an existing entry in the map. The `entry` method returns an [`Entry` enum](https://doc.rust-lang.org/std/collections/hash_map/enum.Entry.html), which has methods defined on it that allow us to manipulate the map. For example, `Entry` has an `or_insert` method which will return the existing entry or insert a new entry if there is nothing stored at that key:
 
 ```rust
 use std::collections::HashMap;

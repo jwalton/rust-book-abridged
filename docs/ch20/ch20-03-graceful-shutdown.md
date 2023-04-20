@@ -4,6 +4,8 @@ Right now when we hit CTRL-C to send an interrupt signal to our web server, it s
 
 The basic strategy here is going to be to implement the `Drop` trait on `ThreadPool`. When the `ThreadPool` is dropped, we'll signal all the threads that they should stop accepting new requests and quit, and then we'll call `join` on each one to give them the time they need to finish up.
 
+If you're looking for the full source for this project, it's [in the GitHub repo](https://github.com/jwalton/rust-book-abridged/examples/ch20-graceful-shutdown)
+
 ## Implementing the `Drop` Trait on `ThreadPool`
 
 One problem we're going to run into is that, in order to call `thread.join()`, we're going to have to move the `thread` out of the `Worker`. We can't move _part_ of a struct, so we're going to have to use the same trick we did in [chapter 17][chap17] and store the thread in an `Option` so we can set it to `None`.
@@ -136,4 +138,4 @@ The original Rust book has some suggestions about places you could take this pro
 
 Another fun one might be to try to hook the SIGINT and SIGTERM signals so a CTRL-C will cause the server to shut down gracefully.
 
-[chap17]: ./ch17-object-oriented-features.md "Chapter 17: Object Oriented Features of Rust"
+[chap17]: ../ch17-object-oriented-features.md "Chapter 17: Object Oriented Features of Rust"

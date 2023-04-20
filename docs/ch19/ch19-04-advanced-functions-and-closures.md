@@ -57,4 +57,4 @@ fn returns_closure() -> Box<dyn Fn(i32) -> i32> {
 }
 ```
 
-[chap13]: ./ch13-functional-language-features.md "Chapter 13: Functional Language Features: Iterators and Closures"
+[chap13]: ../ch13-functional-language-features.md "Chapter 13: Functional Language Features: Iterators and Closures"

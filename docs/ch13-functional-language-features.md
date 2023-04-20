@@ -10,9 +10,9 @@ A closure is basically a function that can access variables in the enclosing sco
 
 Here's the scenario that we're going to use for this section, taken directly from the original "The Rust Programming Language": Every so often, our t-shirt company gives away an exclusive, limited-edition shirt to someone on our mailing list as a promotion. People on the mailing list can optionally add their favorite color to their profile. If the person chosen for a free shirt has their favorite color set, they get that color shirt. If the person hasn't specified a favorite color, they get whatever color the company currently has the most of.
 
-We'll implement this using an `enum ShirtColor` for the color of the shirt, and we'll use a `Vec<ShirtColor>` to represent stock. We'll define a `Inventory.giveaway()` function to figure out which shirt to give a customer:
+We'll implement this using an `enum ShirtColor` for the color of the shirt, and we'll use a `Vec<ShirtColor>` to represent stock. We'll define a `giveaway` method on `Inventory` to figure out which shirt to give a customer:
 
-```rust
+```rust title="src/main.rs"
 #[derive(Debug, PartialEq, Copy, Clone)]
 enum ShirtColor {
     Red,
@@ -73,7 +73,7 @@ Everything here should be familiar. The part we want to focus on is the `giveawa
 user_preference.unwrap_or_else(|| self.most_stocked())
 ```
 
-We're calling `unwrap_or_else()` on an `Option<ShirtColor>`. If the Option is the `Some` variant, this will unwrap the value and return it. If not, this will call into the closure we pass as the first parameter: `|| self.most_stocked()`. This closure is a tiny function that takes no parameters (if there were some, they'd appear between the `||`) and returns the result of `self.most_stocked()`.
+We're calling `unwrap_or_else` on an `Option<ShirtColor>`. If the Option is the `Some` variant, this will unwrap the value and return it. If not, this will call into the closure we pass as the first parameter: `|| self.most_stocked()`. This closure is a tiny function that takes no parameters (if there were some, they'd appear between the `||`) and returns the result of `self.most_stocked()`.
 
 Notice that the closure is using the `self` variable, which isn't being passed explicitly as a parameter to the closure. This parameter is _captured_ from the outer scope.
 
@@ -106,7 +106,7 @@ In JavaScript or Go, when a closure captures a value, this just counts as one mo
 
 In this example, `only_borrows` captures an immutable reference to `list`:
 
-```rust
+```rust title="src/main.rs"
 fn main() {
     let list = vec![1, 2, 3];
     println!("Before defining closure: {:?}", list);
@@ -119,9 +119,9 @@ fn main() {
 }
 ```
 
-This example captures a mutable reference, since it has to in order to call `push()`:
+This example captures a mutable reference, since it has to in order to call `push`:
 
-```rust
+```rust title="src/main.rs"
 fn main() {
     let mut list = vec![1, 2, 3];
     println!("Before defining closure: {:?}", list);
@@ -135,11 +135,11 @@ fn main() {
 
 First notice that we've declared the `borrows_mutably` variable as mutable itself! (TODO: Why?)
 
-Note here that we can't print the contents of `list` in between when we create `borrows_mutably()` and when we call it, since it has a mutable reference to `list` and if we have a mutable reference, we can't have any other references.
+Note here that we can't print the contents of `list` in between when we create `borrows_mutably` and when we call it, since it has a mutable reference to `list` and if we have a mutable reference, we can't have any other references.
 
 A closure will automatically take ownership of a value if it needs to. We can force a closure to take ownership of all captured values with the `move` keyword:
 
-```rust
+```rust title="src/main.rs"
 use std::thread;
 
 fn main() {
@@ -152,7 +152,7 @@ fn main() {
 }
 ```
 
-Here we're transferring ownership of `list` to a new thread. We haven't covered threads yet, but we will in [chapter 16][chap16]. Transferring ownership is required here, though, because our `main()` function might finish before the thread, or the thread might finish first. If the thread borrowed a mutable reference, then if `main()` finished first, the value would be dropped and the underlying memory would be freed, leaving the thread with a dangling reference.
+Here we're transferring ownership of `list` to a new thread. We haven't covered threads yet, but we will in [chapter 16][chap16]. Transferring ownership is required here, though, because our `main` function might finish before the thread, or the thread might finish first. If the thread borrowed a mutable reference, then if `main` finished first, the value would be dropped and the underlying memory would be freed, leaving the thread with a dangling reference.
 
 ### Moving Captured Values Out of Closures and the Fn Traits
 
@@ -162,7 +162,7 @@ Depending on what a closure does with the values it captures, the compiler will 
 - `FnMut` applies to any closure that doesn't move captured values out of its body. The closure may or may not mutate captured values. These closures can safely be called multiple times.
 - `Fn` applies to any closure that implements `FnMut` but that also doesn't mutate any captured values. Such a closure can safely be called multiple times concurrently.
 
-Let's take a look at the implementation of `Option<T>.unwrap_or_else()`:
+Let's take a look at the implementation of `Option<T>::unwrap_or_else`:
 
 ```rust
 impl<T> Option<T> {
@@ -178,13 +178,13 @@ impl<T> Option<T> {
 }
 ```
 
-Here `T` is the type of the `Option<T>` itself, and `F` is the type of the parameter we pass to `unwrap_or_else()`. `F` has a trait bound for `FnOnce() -> T`, which means F must be a closure that can be called at least once, takes no parameters, and must return a T. Since all closures implement `FnOnce`, this lets `unwrap_or_else()` accept any closure.
+Here `T` is the type of the `Option<T>` itself, and `F` is the type of the parameter we pass to `unwrap_or_else`. `F` has a trait bound for `FnOnce() -> T`, which means F must be a closure that can be called at least once, takes no parameters, and must return a T. Since all closures implement `FnOnce`, this lets `unwrap_or_else` accept any closure.
 
 A regular function can implement these traits as well! If what we are doing doesn't require capturing any values, we can use the name of a function in place of a closure when passing a closure to a function.
 
 Let's have a look at another standard library function, `sort_by_key` defined on slices:
 
-```rust
+```rust title="src/main.rs"
 #[derive(Debug)]
 struct Rectangle {
     width: u32,
@@ -272,7 +272,7 @@ fn iterator_demonstration() {
 
 Calling `next` on an iterator changes it's internal state, which is why the `self` parameter on `next` is marked `&mut`. This means we need to declare `v1_iter` as `mut` here as well. In the example above where we used a for loop, you might notice we didn't make `v1_iter` mutable. This is because the `for` loop took ownership of the value and made it mutable - sneaky Rust.
 
-Another thing to note is that iterator returned by `iter()` returns immutable references to the underlying collection. There's also an `into_iter()` which takes ownership of the receiver (`into` because it converts the underlying collection into an iterator, and you won't be able to access the underlying collection anymore) and returns owned values. Similarly, there's an `iter_mut()` that returns mutable references, if we want to modify some or all of the members of a collection.
+Another thing to note is that iterator returned by `iter` returns immutable references to the underlying collection. There's also an `into_iter` which takes ownership of the receiver (`into` because it converts the underlying collection into an iterator, and you won't be able to access the underlying collection anymore) and returns owned values. Similarly, there's an `iter_mut` that returns mutable references, if we want to modify some or all of the members of a collection.
 
 ### Methods that Consume the Iterator
 
@@ -296,7 +296,7 @@ We call `collect` here to transform the new iterator returned by `map` into a ve
 
 ### Using Closures that Capture Their Environment
 
-The `filter` method (another familiar method for the JavaScript folks) takes a closure that returns a boolean, and returns a new iterator. The closure is called for each item, and if it returns true the new iterator will include the item, if false the item will be discarded. You can use this to filter out items you don't wnat from a collection:
+The `filter` method (another familiar method for the JavaScript folks) takes a closure that returns a boolean, and returns a new iterator. The closure is called for each item, and if it returns true the new iterator will include the item, if false the item will be discarded. You can use this to filter out items you don't want from a collection:
 
 ```rust
 #[derive(PartialEq, Debug)]

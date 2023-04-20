@@ -29,7 +29,7 @@ At runtime, a trait object will be a pair of pointers in memory - one to the ins
 
 Let's see some code. Here's our library in _src/lib.rs_:
 
-```rust
+```rust title="src/lib.rs"
 pub trait Draw {
     fn draw(&self);
 }
@@ -61,7 +61,7 @@ impl Draw for Button {
 
 The `Draw` trait here should look familiar - if you skipped ahead in this book and this syntax looks unfamiliar, then see [chapter 10][chap10].
 
-The `Screen` struct here has a `components` which has some new synatx: it is a vector of `Box<dyn Draw>`, or in other words a vector of trait objects that implement the `Draw` trait. `Box<dyn Draw>` is a stand-in for any type inside a `Box` that implements `Draw`. `Screen` also has a `run` method which calls the draw method on each member of `components`.
+The `Screen` struct here has a `components` which has some new syntax: it is a vector of `Box<dyn Draw>`, or in other words a vector of trait objects that implement the `Draw` trait. `Box<dyn Draw>` is a stand-in for any type inside a `Box` that implements `Draw`. `Screen` also has a `run` method which calls the draw method on each member of `components`.
 
 It's important to note that a trait object is very different from a trait bound. If we'd implemented Screen as a generic type with a trait bound:
 
@@ -89,7 +89,7 @@ We also added a `Button` type to our library that implements the `Draw` trait. I
 
 Let's look at a crate that uses this library in _src/main.rs_:
 
-```rust
+```rust title="src/main.rs"
 use gui::{Button, Screen};
 
 struct SelectBox {
@@ -167,28 +167,32 @@ The advantage to using the state pattern here is that we can add new states with
 
 In _src/lib.rs_, let's write a quick unit test to walk through what our API and workflow will look like:
 
-```rust
-use blog::Post;
+```rust title="src/lib.rs"
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-fn main() {
-    let mut post = Post::new();
+    #[test]
+    fn post_workflow() {
+        let mut post = Post::new();
 
-    post.add_text("I ate a salad for lunch today");
-    assert_eq!("", post.content());
+        post.add_text("I ate a salad for lunch today");
+        assert_eq!("", post.content());
 
-    post.request_review();
-    assert_eq!("", post.content());
+        post.request_review();
+        assert_eq!("", post.content());
 
-    post.approve();
-    assert_eq!("I ate a salad for lunch today", post.content());
+        post.approve();
+        assert_eq!("I ate a salad for lunch today", post.content());
+    }
 }
 ```
 
-Notice that our public API doesn't event know anything about our state pattern. The basic idea here will be that `Post` has a `state` which will be a State object. There will be a `Draft` struct, a `PendingReview` struct, and a `Published` struct that represent our different states and all are going to implement the `State` trait. When you call into a method on `Post` like `post.request_review()`, this method will delegate to the current state by doing roughly the equivalent of `this.state = this.state.request_review()`, so the state can control what the next state will be.
+Notice that our public API doesn't event know anything about our state pattern. The idea here will be that `Post` has a `state` which will be a State object. There will be a `Draft` struct, a `PendingReview` struct, and a `Published` struct that represent our different states and all are going to implement the `State` trait. When you call into a method on `Post` like `post.request_review()`, this method will delegate to the current state by doing roughly the equivalent of `this.state = this.state.request_review()`, so the state can control what the next state will be.
 
 Here's the implementation of `Post`, also in _src/lib.rs_:
 
-```rust
+```rust title="src/lib.rs"
 pub struct Post {
     state: Option<Box<dyn State>>,
     content: String,
@@ -262,7 +266,7 @@ The `content` method also needs to deal with the fact that `self.state` is an `O
 
 Let's have a look at the `Draft` state:
 
-```rust
+```rust title="src/lib.rs"
 struct Draft {}
 
 impl State for Draft {
@@ -280,7 +284,7 @@ Calling `request_review` returns a new `PendingReview` state, effectively advanc
 
 Here are our final two states:
 
-```rust
+```rust title="src/lib.rs"
 struct PendingReview {}
 
 impl State for PendingReview {
@@ -352,7 +356,7 @@ I encourage you to give this a try, but you may find ownership rules will make t
 
 Let's take a look at another way of implementing the same behavior, but we're not going to implement it in exactly the same way we would in a traditional OO language. We're going to instead try to encode our state and associated behavior as explicit types. You can find the finished code for this example on [this book's github page](https://github.com/jwalton/rust-book-abridged/examples/ch17-post-state-types]. First let's create a `Post` and a `DraftPost`:
 
-```rust
+```rust title="src/lib.rs"
 pub struct Post {
     content: String,
 }
@@ -380,9 +384,9 @@ impl DraftPost {
 }
 ```
 
-We can still call `Post::new()`, but this now returns a new `DraftPost` type. `DraftPost` doesn't even implement `content`, so we can't even ask for the content of a `DraftPost` without creating a compile time error. This is an example of "making invalid state unrepresentable" - we don't want to let you get the content of a draft post, and now it's impossible to even write the code that would do such a thing. We want to be able to request a review on our `DraftPost`, so let's add a method for that:
+We can still call `Post::new`, but this now returns a new `DraftPost` type. `DraftPost` doesn't even implement `content`, so we can't even ask for the content of a `DraftPost` without creating a compile time error. This is an example of "making invalid state unrepresentable" - we don't want to let you get the content of a draft post, and now it's impossible to even write the code that would do such a thing. We want to be able to request a review on our `DraftPost`, so let's add a method for that:
 
-```rust
+```rust title="src/lib.rs"
 // --snip--
 
 impl DraftPost {
@@ -412,7 +416,7 @@ Now we have our three states - `DraftPost`, `PendingReviewPost`, and `Post` - en
 
 We can write a test case to see this in action:
 
-```rust
+```rust title="src/lib.rs"
 #[cfg(test)]
 mod tests {
     use super::*;

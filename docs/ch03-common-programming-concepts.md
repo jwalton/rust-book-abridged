@@ -118,7 +118,7 @@ There are two floating point types, `f64` (the default) and `f32`. Floating-poin
 
 ### Number Operators
 
-Rust has the operators you'd expect: `+`, `-`, `*`, `/`, and `%` for modulus. See [the Rust Book Appendix B](https://doc.rust-lang.org/stable/book/appendix-02-operators.html) for a complete list of all the operators in Rust.
+Rust has the operators you'd expect: `+`, `-`, `*`, `/`, and `%` for modulus. See [the Rust Book Appendix B][appb] for a complete list of all the operators in Rust.
 
 ### Boolean type
 
@@ -326,3 +326,4 @@ Continue to [chapter 4][chap4].
 [chap9]: ./ch09-error-handling.md "Chapter 9: Error Handling"
 [chap10]: ./ch10/ch10-01-generic-data-types.md "Chapter 10: Generic Types, Traits, and Lifetimes"
 [chap13]: ./ch13-functional-language-features.md "Chapter 13: Functional Language Features: Iterators and Closures"
+[appb]: ./zz-appendix/appendix-02-operators.md

@@ -95,7 +95,7 @@ If you're coming from some other language, and you try to just pass values aroun
 
 If you think about this at the memory level, when we create `s1`, we allocate some memory on the heap. When we say `let s2 = s1;`, we're not allocating any new memory on the heap - s1 and s2 would have to point to the same memory. When we reach the end of the function, let's say we returned s2 but not s1. If s1 and s2 both owned this data, then here s1 would go out of scope so we should drop the underlying String, but s2 points to that same memory so we can't. Rust's answer to this problem is to never let this happen - only one owner at a time.
 
-If we wanted to deep-copy the data in the String, we could use the `clone()` method to allocate more memory on the heap:
+If we wanted to deep-copy the data in the String, we could use the `clone` method to allocate more memory on the heap:
 
 ```rust
 fn strings() {
@@ -132,7 +132,7 @@ fn integers() {
 
 This looks just like the string example above, but it compiles. This is because here `i1` is an i32, which takes up four bytes of memory. Since Rust knows this at compile time, it can allocate it on the stack, and making a copy of a four byte value on the stack to another four bytes of the stack is so cheap it is essentially free. So here, `let i2 = i1;` doesn't move anything, it just makes a copy of the variable for you.
 
-What types get copied like this? Any type that has the `Copy` trait (see [chapter 10][chap10] for more information about traits). In general this is any basic type (integers, booleans, chars, etc...) and any tuple made up of basic types. You can also implement it on your own data structures if they are made entirely of copyable types, or get Rust to _derive_ it for you:
+What types get copied like this? Any type that has the `Copy` trait (see [chapter 10][chap10] for more information about traits). In general this is any basic type (integers, booleans, chars, etc...) and any tuple made up of basic types. You can also implement it on your own data structures if they are made entirely of copyable types, or get Rust to _derive_ it for you, which means Rust will generate this code:
 
 ```rust
 #[derive(Copy, Clone)]
@@ -150,7 +150,7 @@ fn main() {
     let s = String::from("hello");
     takes_ownership(s);
 
-    // Ownership of `s` was moved to `takes_ownership()`'s
+    // Ownership of `s` was moved to `takes_ownership`'s
     // `some_string`, so s is no longer valid here.
 }
 
@@ -300,7 +300,7 @@ fn main() {
 }
 ```
 
-Inside main(), `word` is a String slice from the String, and therefore a reference to the memory the String uses. The call to `s.clear()` will fail to compile because to clear the string, we'd need to mutate it (`clear()` is a method with a mutable reference to `self`). Since we can't create a mutable reference while `word` is in scope, this fails to compile.
+Inside main(), `word` is a String slice from the String, and therefore a reference to the memory the String uses. The call to `s.clear()` will fail to compile because to clear the string, we'd need to mutate it (`clear` is a method with a mutable reference to `self`). Since we can't create a mutable reference while `word` is in scope, this fails to compile.
 
 ### String Literals as Slices
 
@@ -322,7 +322,7 @@ fn first_word_str(s: &str) -> &str {...}
 
 The first takes a reference to a String, the second takes a string slice. The second one, though, is generally preferred. It's trivial to convert a string to a slice, so you can call the second with any String, string slice, or string literal, or even a reference to a String (see [chapter 15][chap15] for more on type coercion).
 
-In the reverse directoy, it's a bit tedious to convert a string slice into a String so the first version, `first_word_string()`, is much less flexible.
+In the reverse directory, it's a bit tedious to convert a string slice into a String so the first version, `first_word_string`, is much less flexible.
 
 ### Other Slices
 
