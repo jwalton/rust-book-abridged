@@ -2,9 +2,9 @@
 
 ## 5.1 - Defining and Instantiating Structs
 
-If you're coming from Go, then a struct in Rust is very similar to a struct in Go. It has public and private fields and you can define methods on a struct. If you're coming from JavaScript or Java, then a struct in Rust is similar to a class, except that a struct can't inherit from another struct. In any of these cases, a trait is very similar to an `interface`.
+If you're coming from Go, then a struct in Rust is very similar to a struct in Go. It has public and private fields and you can define methods on a struct. If you're coming from JavaScript or Java, then a struct in Rust is similar to a class, except that a struct can't inherit from another struct. In any of these languages, a trait is very similar to an `interface`.
 
-If you're coming from C/C++, then a struct is sort of like a struct except you can add methods to it like a class. If you're coming from some other language, I'm going to assume the concept of a `struct` isn't totally foreign to you.
+If you're coming from C/C++, then a Rust struct is sort of like a C struct except you can add methods to it like a C++ class. If you're coming from some other language, I'm going to assume the concept of a `struct` or "object" isn't totally foreign to you.
 
 Here's what a struct looks like in Rust:
 
@@ -17,6 +17,7 @@ struct User {
 }
 
 fn main() {
+    // Create an instance of User
     let mut myUser = User {
         active: true,
         username: String::from("jwalton"),
@@ -24,11 +25,12 @@ fn main() {
         sign_in_count: 1,
     };
 
+    // Access fields with `.`
+    println!("Name: {}", myUser.username);
+
     // Variable must be declared as `mut` if we want to be
     // able to modify the structure.
     myUser.email = String::from("other_email@example,com");
-
-    println!("Name: {}", myUser.username);
 }
 ```
 
@@ -40,7 +42,7 @@ If you're curious about how Rust structures are laid out in memory, check [the R
 
 ### Using the Field Init Shorthand
 
-Much like in modern JavaScript, we can initialize fields with a shorthand:
+Much like in JavaScript, we can initialize fields with a shorthand:
 
 ```rust
 fn build_user(email: String, username: String) -> User {
@@ -65,7 +67,9 @@ let user2 = User {
 }
 ```
 
-When you store a field in a structure, or use the struct update syntax as in this example, from an ownership perspective you are moving that field. In this example, once we create user2, we can no longer use user1 because its username field has been moved. If we had given user2 an email and a username, then all the remaining fields we assigned from user1 would be basic data types that implement the Copy trait. In this case, nothing would move, so user1 would still be valid.
+When you store a field in a structure, or use the struct update syntax as in this example, from an ownership perspective you are moving that field. In this example, once we create `user2`, we can no longer use `user1` because its username field has been moved. If we had given `user2` an `email` and a `username`, then all the remaining fields we assigned from `user1` would be basic data types that implement the `Copy` trait. In this case, nothing would move, so `user1` would still be valid.
+
+The key thing to take away here is that you can't move part of a struct. You can't move `username` from `user1` and then try to access `user1.email`. Ownership is about owning memory, and you can't take ownership of part of the memory another struct is using - it's all or nothing.
 
 ### Using Tuple Structs Without Named Fields to Create Different Types
 
@@ -81,7 +85,7 @@ fn main() {
 }
 ```
 
-Note here that `Color` and `Point` are two different types, even though they have the same structure. If you have a function that accepted a Color, the compiler will complain if you try to pass in a Point.
+Note here that `Color` and `Point` are two different types, even though they have the same structure. If you have a function that accepted a `Color`, the compiler will complain if you try to pass in a `Point`.
 
 ### Unit-Like Structs Without Any Fields
 
@@ -95,9 +99,11 @@ fn main() {
 }
 ```
 
+You don't even need the `{}` to create an instance of `AlwaysEqual`.
+
 ### Ownership of Struct Data
 
-In the `User` struct above, we used a String type owned by the struct. We could instead have used an &str, in which case the struct would store a reference to the string, and wouldn't own the string directly. To do this, we need something called a _lifetime_, which we'll talk about in [chapter 10][chap10].
+In the `User` struct above, we used a `String` type in the struct for the `username` and `email`. This means that the struct owns that `String`. When the struct is dropped, those two strings will be dropped too. We could instead have used an `&String` or `&str`, in which case the struct would store a reference to the string, and wouldn't own the string directly. The struct would be borrowing the string. We're not going to show an example of this though, because to do this we need something called a _lifetime annotation_, which we'll talk about in [chapter 10][chap10].
 
 ## 5.2 - An Example Program Using Structs
 
@@ -126,7 +132,7 @@ fn area(rectangle: &Rectangle) -> u32 {
 }
 ```
 
-`area` takes an immutable reference to the Rectangle struct. We know when we call area(), it won't modify our struct (even if `rect1` was declared as mutable in the caller). Passing a reference means the caller will retain ownership. Also, accessing fields on the borrowed struct doesn't move them.
+`area` takes an immutable reference to the `Rectangle` struct. We know when we call `area`, it won't modify our struct (even if `rect1` was declared as mutable in the caller). Passing a reference means the caller will retain ownership. Also, accessing fields on the borrowed struct doesn't move them.
 
 ### Adding Useful Functionality with Derived Traits
 
@@ -168,9 +174,9 @@ If you run this, it will print:
 A rectangle: Rectangle { width: 30, height: 50 }
 ```
 
-The placeholder in `println!` has changed from `{}` to `{:?}`, which lets println!() know we want the debug output format. We could also use `{:#?}` to "pretty print" the output.
+The placeholder in `println!` has changed from `{}` to `{:?}`, which lets `println!` know we want the debug output format. We could also use `{:#?}` to "pretty print" the output.
 
-There's also a handy macro called `dbg!` which will pretty-print the value, and the file name and source line. `dbg!(&rect1);` would print something line:
+There's also a handy macro called `dbg!` which will pretty-print the value, and the file name and source line. `dbg!(&rect1);` would print something like:
 
 ```txt
 [src/main.rs:13] &rect1 = Rectangle {
@@ -179,7 +185,7 @@ There's also a handy macro called `dbg!` which will pretty-print the value, and 
 }
 ```
 
-Note that dbg!() takes ownership of the value passed in, so we pass a reference to rect1 instead of passing rect1 directly to prevent this. There are a number of other derivable traits - see [Appendix C][appc]. And, again, to learn more about traits see [chapter 10][chap10].
+Note that unlike `println!`, `dbg!` takes ownership of the value passed in, so we pass a reference to `rect1` instead of passing `rect1` directly to prevent this. There are a number of other derivable traits - see [Appendix C][appc]. And, again, to learn more about traits see [chapter 10][chap10].
 
 ## 5.3 - Method Syntax
 
@@ -216,9 +222,9 @@ fn main() {
 }
 ```
 
-The `impl` (implementation) block defines methods on the Rectangle type. `area` takes a reference to `self`. `&self` is actually a short form for `self: &Self`. If this were not a reference this method would take ownership of the Rectangle, so we wouldn't be able to use a Rectangle instance after calling area(). Methods that take ownership of self are quite rare, but useful in cases where a method destroys `self` or transforms it into some other structure and moves data out of it. If a method wants to modify `self`, it needs to declare it as `& mut self`, as `self` is immutable by default, just like any other function parameter.
+The `impl` (implementation) block defines methods and associated functions on the Rectangle type. `area` takes a reference to `self`. `&self` is actually a short form for `self: &Self`. If this were not a reference this method would take ownership of the `Rectangle`, so we wouldn't be able to use a `Rectangle` instance after calling `area`. Methods that take ownership of `self` are quite rare, but useful in cases where a method destroys `self` or transforms it into some other structure and moves data out of it. If a method wants to modify `self`, it needs to declare it as `& mut self`, as `self` is immutable by default, just like any other function parameter.
 
-You can have a method on a struct with the same name as one of the fields. This is most commonly used to add a _getter_ method to a struct. You can make it so a rectangle has a private `width: u32` field, and a public `width(): u32` field, which effectively makes `width` read-only. What are public and private fields and methods? You'll have to wait for [chapter 7][chap7].
+You can have a method on a struct with the same name as one of the fields. This is most commonly used to add a _getter_ method to a struct. You can make it so a rectangle has a private `width: u32` field, and a public `width(): u32` method, which effectively makes `width` read-only. (What are public and private fields and methods? You'll have to wait for [chapter 7][chap7].)
 
 ### Automatic Referencing and Dereferencing
 

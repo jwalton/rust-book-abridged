@@ -147,7 +147,7 @@ This is also very similar to our single threaded version because if you try relo
 
 That `await` will cause the main loop to suspend until `handle_connection` completes. If you're an experienced JavaScript programmer, you might think you can just remove the `await`. This would work in JavaScript, but not in Rust. Rust futures are _lazy_, meaning they won't make any progress if no one is `await`ing them.
 
-:::note
+:::info
 
 If you have a look at the definition of the `Future` trait, you'll see that `Future` has only one method:
 

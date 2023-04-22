@@ -89,21 +89,36 @@ fn main() {
 
 Here `x` is of type `i32`, but `y` is of type `&i32`. `y` is essentially a pointer to `x`. We can assert that x is equal to 5, but in order to get to the value of `y` we have to _dereference_ it to get to the value that `y` points to.
 
-If you're coming from a language like C or Go, this is probably second nature to you. If you're coming from JavaScript, this might be a new concept, so let me rewrite the above in Typescript, borrowing React's `Ref` type:
+:::info
 
-```ts title="src/main.rs"
+If you're coming from a language like C or Go, this is probably second nature to you. If you're coming from JavaScript, this might be a new concept. `y` here points to the memory that stores the `x` value, so `*y` is basically an alias for `x`. If `x` and `y` were mutable, we could use `*y` to change x:
+
+```rust title="src/main.rs"
+fn main() {
+    let mut x = 5;
+    let y = &mut x;
+    *y = 10;
+    assert_eq!(10, x);
+}
+```
+
+A reference in Rust is a little bit like a `Ref` from React that points to an object, if that helps:
+
+```ts title="typescript.ts"
 interface Ref<T> {
   current: T;
 }
 
 function main() {
-  const x = 5;
+  const x = { value: 5 };
   const y = { current: x };
 
-  assert.equal(x, 5);
-  assert.equal(y.current, 5);
+  assert.equal(x.value, 5);
+  assert.equal(y.current.value, 5);
 }
 ```
+
+:::
 
 In our Rust example, the `*y` is basically doing the same thing as `y.current` in our TypeScript example. Rust will automatically dereference a value for you in many places, so the `*` operator doesn't get much use in Rust, but there are places (like in this example) where it is required.
 
@@ -203,11 +218,11 @@ Rust does deref coercion when it finds types and trait implementations in three 
 
 ## 15.3 - Running Code on Cleanup with the `Drop` trait
 
-The `Drop` trait allows us to specify some code that must be run whenever a struct is dropped (when it goes out of scope).  The `Drop` trait is almost always used when implementing a smart pointer.  `Box<T>` implements `Drop` so it can clean up the memory it is using on the heap.  The `Rc<T>` type (which will talk about in the [next section](#154---rct-the-reference-counted-smart-pointer)) implements `Drop` so it can decrement the reference count.
+The `Drop` trait allows us to specify some code that must be run whenever a struct is dropped (when it goes out of scope). The `Drop` trait is almost always used when implementing a smart pointer. `Box<T>` implements `Drop` so it can clean up the memory it is using on the heap. The `Rc<T>` type (which will talk about in the [next section](#154---rct-the-reference-counted-smart-pointer)) implements `Drop` so it can decrement the reference count.
 
-`Drop` can also be used like [RAII in C++](https://en.cppreference.com/w/cpp/language/raii).  If you have a struct that opens a network connection in its constructor, you can implement the `Drop` trait to ensure the network connection is closed when the struct is dropped, ensuring you won't leak any resources.
+`Drop` can also be used like [RAII in C++](https://en.cppreference.com/w/cpp/language/raii). If you have a struct that opens a network connection in its constructor, you can implement the `Drop` trait to ensure the network connection is closed when the struct is dropped, ensuring you won't leak any resources.
 
-The `Drop` trait is included in the prelude, and has only one required method named `drop`.  Let's see an example:
+The `Drop` trait is included in the prelude, and has only one required method named `drop`. Let's see an example:
 
 ```rust title="src/main.rs"
 struct CustomSmartPointer {
@@ -235,9 +250,9 @@ If you run this, you'll see the `drop` method gets called automatically for `c` 
 
 ### Dropping a Value Early with `std::mem::drop`
 
-Sometimes we may want to drop a value earlier than it would normally get dropped at the end of the scope.  For example, if we're using RAII to acquire some resource like a lock or a network connection, we may want to drop a value to release that resource before we reach the end of the function.
+Sometimes we may want to drop a value earlier than it would normally get dropped at the end of the scope. For example, if we're using RAII to acquire some resource like a lock or a network connection, we may want to drop a value to release that resource before we reach the end of the function.
 
-We cannot simply call the `drop` method on a type, however, as the Rust compiler is going to call it for us, and we don't want to _double free_ any memory or resources by calling `drop` twice.  Instead we can call `std::mem::drop`, passing in the value we want to drop:
+We cannot simply call the `drop` method on a type, however, as the Rust compiler is going to call it for us, and we don't want to _double free_ any memory or resources by calling `drop` twice. Instead we can call `std::mem::drop`, passing in the value we want to drop:
 
 ```rust
 fn main() {

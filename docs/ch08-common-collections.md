@@ -3,7 +3,7 @@
 Rust's standard library includes a number of _collections_ which store data on the heap:
 
 - _`Vec<T>`_ (short for Vector) is essentially a variable length array.
-- _String_ is a collection of characters.
+- _String_ is a variable length collection of characters - like a special vector just for characters.
 - _HashMap_ allows you to associate values with keys, and implements the [`Map` trait](https://doc.rust-lang.org/std/iter/struct.Map.html).
 
 These are the most common collections, but if you check [the collections documentation](https://doc.rust-lang.org/stable/std/collections/index.html) you'll see there are many others.
@@ -55,7 +55,7 @@ let third = &v[2]; // This is an &i32.
 let fourth = v.get(3); // This is an Option<&i32>
 ```
 
-`get` returns an `Option`; if we try to `get` an index outside the bounds of the vector, then `get` will return `None`. Since the `[]` syntax doesn't return an Option then, as you might expect, it will cause a panic if you try to retrieve an index which is out-of-bounds.
+`get` returns an `Option`; if we try to `get` an index outside the bounds of the vector, then `get` will return `None`. Since the `[]` syntax doesn't return an `Option` then, as you might expect, it will cause a panic if you try to retrieve an index which is out-of-bounds.
 
 Here's a quick example that looks at first glance like it ought to work, but will fail to compile:
 
@@ -84,7 +84,7 @@ for i in &v {
 }
 ```
 
-We can also make each element mutable as we iterate:
+If our vector is mutable, we can mutate it as we iterate:
 
 ```rust
 let mut v = vec![100, 32, 57];
@@ -93,7 +93,7 @@ for mut i in &mut v {
 }
 ```
 
-Note the explicit '\*` dereference operator here. We'll talk more about that in [chapter 15][chap15] (TODO: Link to "Following the Pointer to the Value" section).
+Note the explicit '\*` dereference operator here. We'll talk more about the dereference operator in [chapter 15](./ch15-smart-pointers.md#following-the-pointer-to-the-value).
 
 ### Using an Enum to Store Multiple Types
 
@@ -121,7 +121,7 @@ Once a vector goes out-of-scope, like any other struct it gets dropped and the m
 
 ## 8.2 - Storing UTF-8 Encoded Text with Strings
 
-We're going to talk about strings here in the chapter on collections, because a string is basically a vector of characters. In fact, the underlying implementation of `String` is a `Vec<u8>`.
+We're going to talk about strings here in the chapter on collections, because a string is basically a vector of characters. In fact, the underlying implementation of `String` is a `Vec<u8>`. Strings can seem a bit more finicky in Rust than in other languages, but in actual fact most other languages let you do very unsafe things with Strings and the real difference is that Rust tries to protect you from this.
 
 ### What Is a String?
 
@@ -148,6 +148,8 @@ And as we've seen we can also use `String::from` to copy a string literal into a
 ```rust
 let s = String::from("Hello, World!");
 ```
+
+`to_string` and `String::from` do exactly the same thing here. Which you choose is a matter of style and readability.
 
 ### Updating a String
 
@@ -182,7 +184,7 @@ fn add(self, s: &str) -> String
 
 And so the second parameter needs to be a reference. Those readers who are especially alert might also notice that we're passing an `&String` to the add operator here and not an `&str` for that second parameter, but this is okay because Rust can _coerce_ the type of `&s2` to `&str`. We'll talk more about this in [chapter 15][chap15].
 
-If we want to concatenate multiple strings, we can use the `format!` macro, which is a bit like `println!` except it evaluates to a String instead of printing the result to the screen:
+If we want to concatenate multiple strings, we can use the `format!` macro, which is a bit like `println!` except it evaluates to a `String` instead of printing the result to the screen:
 
 ```rust
 let s1 = String::from("tic");
@@ -192,7 +194,7 @@ let s3 = String::from("toe");
 let s = format!("{s1}-{s2}-{s3}");
 ```
 
-`format!` doesn't take ownership of any of these values, which is a nice bonus.
+`format!` doesn't take ownership of any of these values.
 
 ### Indexing into Strings
 
@@ -208,7 +210,7 @@ The word "Hello" contains five bytes, five letters, and five grapheme clusters. 
 
 The Ukrainian word for "rust" is "іржа", which contains 8 bytes: `[209, 150, 209, 128, 208, 182, 208, 176]`. Each of pair of bytes encodes a single unicode scalar value, so there are four `char`s in this, and there are also four grapheme clusters. If you replaced the first byte with a 74 you'd transform it into an invalid unicode string.
 
-This is a female astronaut emoji: "🧑‍🚀". She's actually two other emoji joined together with a [zero-width-joiner](https://www.unicode.org/emoji/charts/emoji-zwj-sequences.html). Our astronaut emoji contains a total of eleven bytes: `[240, 159, 167, 145, 226, 128, 141, 240, 159, 154, 128]`. These bytes are the encoding of only three `char`s : `['🧑', '\u{200D}', '🚀']`. And, this string contains only a single grapheme cluster - it displays as a single "character" in the text.
+This is a female astronaut emoji: "🧑‍🚀". She's actually two other emoji joined together with a [zero-width-joiner](https://www.unicode.org/emoji/charts/emoji-zwj-sequences.html). Our astronaut emoji contains a total of eleven bytes: `[240, 159, 167, 145, 226, 128, 141, 240, 159, 154, 128]`. These bytes are the encoding of only three `char`s : `['🧑', '\u{200D}', '🚀']`. And, this string contains only a single grapheme cluster - it displays as a single "letter" in the text of this book.
 
 ### Slicing Strings
 
@@ -220,7 +222,7 @@ let hello = "Здравствуйте";
 let s = &hello[0..4];
 ```
 
-Here `s` ends up being a `&str` that contains the first four bytes of the string, which will be the string "Зд". If you tried to get `&hello[0..1]`, this would return the first byte, but since this would result in an invalid UTF-8 string, this will cause your a panic. You need to be extremely careful when slicing strings that you are slicing at valid char boundaries.
+Here `s` ends up being a `&str` that contains the first four bytes of the string, which will be the string "Зд". If you tried to get `&hello[0..1]`, this would return the first byte, but since this would result in an invalid UTF-8 string, this will cause a panic. You need to be extremely careful when slicing strings that you are slicing at valid char boundaries.
 
 ### Methods for Iterating Over Strings
 
@@ -238,7 +240,7 @@ for b in "Зд".bytes() {
 }
 ```
 
-Getting Grapheme clusters from a String is not a trivial problem, so Rust doesn't provide a function to do it in the standard library. If you need this functionality, you'll have to look to [a third party crate](https://crates.io).
+Getting Grapheme clusters from a String is a surprisingly non-trivial problem (it's called ["Unicode text segmentation"](https://unicode.org/reports/tr29/) if you're interested), so Rust doesn't provide a function to do it in the standard library. If you need this functionality, you'll have to look to [a third party crate](https://crates.io). If you're not careful about this, though, it's easy to insert a "-" into the middle of "🧑‍🚀" and accidentally turn it into "🧑-🚀" on-screen.
 
 ## 8.3 - Storing Keys with Associated Values in Hash Maps
 
@@ -248,29 +250,28 @@ Getting Grapheme clusters from a String is not a trivial problem, so Rust doesn'
 
 Since `HashMap` isn't in the prelude, we have to `use` it:
 
-```rust
+```rust title="src/main.rs"
 use std::collections::HashMap;
 
-let mut scores = HashMap::new();
+fn main() {
+    let mut scores = HashMap::new();
 
-// Insert some values into the map
-scores.insert(String::from("Blue"), 10);
-scores.insert(String::from("Yellow"), 50);
+    // Insert some values into the map
+    scores.insert(String::from("Blue"), 10);
+    scores.insert(String::from("Yellow"), 50);
 
-// Access values with `get`
-let team_name = String::from("Blue");
-let score = scores.get(&team_name).copied().unwrap_or(0);
-```
+    // Access values with `get`
+    let team_name = String::from("Blue");
+    let score = scores.get(&team_name).copied().unwrap_or(0);
 
-We can iterate over keys in a Hash Map with a for loop:
-
-```rust
-for (key, value) in &scores {
-    println!("{key}: {value}");
+    // Iterate over the keys with a for loop:
+    for (key, value) in &scores {
+        println!("{key}: {value}");
+    }
 }
 ```
 
-One important thing to note here especially if you're coming from JavaScript is that, when iterating over members of a Hash Map, you are not guaranteed to get them back in the same order you inserted them in. The ordering is arbitrary.
+Note that `.get()` here will return an `Option<&v>`. If there's no value in the map we'll get back a `None`. We call `copied` to convert the `Option<&i32>` into an `Option<i32>`, and then call `unwrap_or` to provide a default for the `None` case. One important thing to note here especially if you're coming from JavaScript is that, when iterating over members of a Hash Map, you are not guaranteed to get them back in the same order you inserted them in. The ordering is arbitrary.
 
 ### Hash Maps and Ownership
 
@@ -310,12 +311,14 @@ We can use the `entry` method on a hash map to get information about an existing
 ```rust
 use std::collections::HashMap;
 
-let mut scores = HashMap::new();
+fn main() {
+    let mut scores = HashMap::new();
 
-scores.insert(String::from("Blue"), 10);
+    scores.insert(String::from("Blue"), 10);
 
-// Set a value only if it doesn't exist
-scores.entry(String::from("Blue")).or_insert(50);
+    // Set a value only if it doesn't exist
+    let new_score = scores.entry(String::from("Blue")).or_insert(50);
+}
 ```
 
 One interesting thing about `or_insert` is that it returns a mutable reference to the existing or inserted value, which means we can use the return value from `or_insert` to update the value in the hash map. This example counts how many times each word appears in a string. It works by dereferencing the `count` in the map with the `*` operator to let us increment the value for each word:
@@ -323,17 +326,21 @@ One interesting thing about `or_insert` is that it returns a mutable reference t
 ```rust
 use std::collections::HashMap;
 
-let text = "hello world wonderful world";
+fn main() {
+    let text = "hello world wonderful world";
 
-let mut map = HashMap::new();
+    let mut map = HashMap::new();
 
-for word in text.split_whitespace() {
-    let count = map.entry(word).or_insert(0);
-    *count += 1;
+    for word in text.split_whitespace() {
+        let count = map.entry(word).or_insert(0);
+        *count += 1;
+    }
+
+    println!("{:?}", map);
 }
-
-println!("{:?}", map);
 ```
+
+If you're a JavaScript programmer this is maybe going to look like magic. What's going on here is that `count` is a reference - essentially a pointer - to memory inside the hash map. We can use that pointer to modify the data in the hash map.
 
 ### Hashing Functions
 
@@ -344,3 +351,5 @@ You can replace the default hash function by creating a custom _hasher_. You nee
 Continue to [chapter 9][chap9].
 
 [chap9]: ./ch09-error-handling.md "Chapter 9: Error Handling"
+[chap15]: ./ch15-smart-pointers.md "Chapter 15: Smart Pointers"
+[chap17]: ./ch17-object-oriented-features.md "Chapter 17: Object Oriented Features of Rust"

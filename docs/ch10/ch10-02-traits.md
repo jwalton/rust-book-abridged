@@ -69,11 +69,11 @@ fn main() {
 
 Other crates can use the `Summary` trait and implement it on their own types, just like you can implement traits from the standard library on your own types. One thing to note is that if you want to implement a trait on a type, then either the trait or the type (or both) must be local to your crate. You can't use a trait from one external crate, a type from another, and then implement the external trait on the external type in your crate.
 
-This restriction is in place because of something called the _orphan rule_. Basically the problem is that if you did this in your library crate, and I did the same thing for the same two types in my library crate, then if a project tried to use both our library crates there would be two different implementations for the same trait and type, and Rust would have no way of knowing which was correct.
+This restriction is in place because of something called the _orphan rule_. Let's suppose there's a `color` crate out there. You implement a library crate that uses `color`, but you notice one of the types in `color` doesn't implement the `Display` trait and you want to `println!` a color, so you implement the `Display` trait on that type. Now suppose I'm writing a separate library crate, and I do the same thing. Now suppose someone adds your crate and my crate to their application. At this point, the Rust compiler has two competing implementations for `Display` on this type, so which one does it use? Since Rust has no way to know which is the "correct" one, Rust just stops this from ever happening by forcing the crate to own at least one of the type or trait.
 
 ## Default Implementations
 
-Remember how we said a trait just had signatures and no implementations? Well, sometimes it's handy to be able to define default behavior for a method:
+Remember how we said a trait just had signatures and no implementations? Well, we lied a little. Sometimes it's handy to be able to define default behavior for a method:
 
 ```rust
 pub trait Summary {
@@ -88,7 +88,7 @@ pub trait Summary {
 impl Summary for NewsArticle {}
 ```
 
-Default implementations are allowed to call other methods on the trait. This allows a trait to provide a lot of functionality while only requiring implementers to implement part of the trait:
+Default implementations are allowed to call other methods on the same trait. This allows a trait to provide a lot of functionality while only requiring implementers to implement part of the trait:
 
 ```rust
 pub trait Summary {
@@ -161,9 +161,9 @@ fn returns_summarizable() -> impl Summary {
 }
 ```
 
-Specifying a trait as a return type can also be very handy when using closures and iterators. Sometimes when using an iterator, the type inferred by the compiler can be quite long, and writing the full type out by hand would be a lot of work without much benefit. Being able to supply a trait here is much more concise.
+Specifying a trait as a return type can be very handy when using closures and iterators. Sometimes when using an iterator, the type inferred by the compiler can be quite long, and writing the full type out by hand would be a lot of work without much benefit. Being able to supply a trait here is much more concise.
 
-If you're coming from another language, you might think that `returns_summarizable()` would be able to return a `Tweet` in one branch and a `NewsArticle` in another, but it can't. This restriction is imposed by how this is implemented in the compiler. We'll see how to overcome this in [chapter 17](../ch17-object-oriented-features.md#172---using-trait-objects-that-allow-for-values-of-different-types).
+If you're coming from another language, you might think that `returns_summarizable()` would be able to return a `Tweet` in one branch and a `NewsArticle` in another, but it can't. This restriction is imposed by how this is implemented in the compiler. We'll see how to overcome this with trait objects in [chapter 17](../ch17-object-oriented-features.md#172---using-trait-objects-that-allow-for-values-of-different-types).
 
 ## Using Trait Bounds to Conditionally Implement Methods
 
@@ -204,4 +204,6 @@ impl<T: Display> ToString for T {
 }
 ```
 
-Because of this, we can call `to_string()` on any type that implements the `Display` trait.
+The implements the `ToString` trait on any type that implements the `Display` trait. Because of this, we can call `to_string()` on any type that implements `Display`.
+
+Continue to [10.3 - Lifetimes](./ch10-03-lifetimes.md).

@@ -2,7 +2,7 @@
 
 ## In Function Definitions
 
-We can use generics to define a function that can accept different data types. This is just like generics in TypeScript, Java, and Go, or like template functions in C++.
+We can use generics to define a function that can accept different data types. This is similar to generics in TypeScript, Java, and Go, and just like template functions in C++.
 
 Here's an example of a function to find the largest number in a list:
 
@@ -28,7 +28,7 @@ fn main() {
 }
 ```
 
-The problem with this function is that it can only accept a list of `i32`. If we wanted to write a version of this for `char` or for `u64`, the function signature would change, but the code in body would be identical. We can use generics here to write the function to accept any number by changing the function signature to:
+The problem with this function is that it can only accept a list of `i32`. If we wanted to write a version of this for `char` or for `u64`, the function signature would change, but the code in body would be identical. We can use generics here to write the function to accept any type by changing the function signature to:
 
 ```rust
 // This doesn't QUITE work...
@@ -37,13 +37,15 @@ fn largest<T>(list: &[T]) -> &T {
 
 The `<T>` after the function name tells the compiler this is a generic function, so anywhere inside the function body where there's a `T`, we'll replace it with some concrete type when the function is actually called. (Or actually, when it's compiled. We'll compile one version of this function for each type it is used with.)
 
-If you actually try to compile the above though, `rustc` will complain. The problem is that `T` here could be an `i32` or a `u64`... but it could also be a `struct` or some other arbitrary type. Inside the function we do `item > largest` - how would we decide if one struct was larger than another? We need to restrict what kinds of types can be used in place of T with a _trait bound_. In this case we only want to allow T to be a type that implements the `str::cmp::PartialOrd` trait. Types that implement this trait can be compared to each other:
+If you actually try to compile the above though, `rustc` will complain. The problem is that `T` here could be an `i32` or a `u64`... but it could also be a `struct` or an `enum`. Inside the function we do `item > largest` - how would we decide if one struct was larger than another? We need to restrict what kinds of types can be used in place of T with a _trait bound_. In this case we only want to allow T to be a type that implements the `str::cmp::PartialOrd` trait. Types that implement this trait can be compared to each other:
 
 ```rust
 fn largest<T: PartialOrd>(list: &[T]) -> &T {
 ```
 
+:::info
 Why a single letter `T` for the generic type? It doesn't have to be; you can use `fn largest<Number>...` instead, and it will work. But in almost every language that supports something like generics, the convention is to use a single character.
+:::
 
 ## In Struct Definitions
 
@@ -101,7 +103,7 @@ impl Point<f32> {
 }
 ```
 
-We can also add generics to a method that are not related to the generics on the struct:
+We can also add generics to a method that are unrelated to the generics from the struct. Here we have a `Point` with two generic parameters called `X1` and `Y1`, and a generic method with two more `X2` and `Y2`:
 
 ```rust
 struct Point<X1, Y1> {
@@ -126,6 +128,7 @@ fn main() {
 
     let p3 = p1.mixup(p2);
 
+    // Prints "p3.x = 5, p3.y = c".
     println!("p3.x = {}, p3.y = {}", p3.x, p3.y);
 }
 ```
@@ -148,7 +151,7 @@ enum Result<T, E> {
 
 ## Performance of Code Using Generics
 
-Much like C++ template functions, Rust generics are implemented using _monomorphization_, which is a fancy way of saying it generates a copy of each generic type at compile time, one copy for each type it was used with.
+Above we said that a you can use generics to define a function that can accept different data types, but it's perhaps more accurate to say that you can use them to easily create a whole bunch of functions, one for each data type. Much like C++ template functions, Rust generics are implemented using _monomorphization_, which is a fancy way of saying it generates a copy of your function for each generic type it was used with at compile time.
 
 In other words, if we go back to the `fn largest<T>(list: &[T]) -> &T` we started this section with, if you were to call:
 
@@ -160,4 +163,6 @@ In other words, if we go back to the `fn largest<T>(list: &[T]) -> &T` we starte
     let result = largest(&char_list);
 ```
 
-then internally Rust would actually compile two different functions, a `largest<i32>` and a `largest<char>`. This means generic have no runtime performance impact, but they do make your executable larger.
+then internally Rust would actually compile two different functions, a `largest<i32>` and a `largest<char>`. This means generic have no runtime performance impact (but they do make your executable slightly larger).
+
+Continue to [10.02 - Traits](./ch10-02-traits.md).

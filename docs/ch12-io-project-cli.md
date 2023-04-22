@@ -6,7 +6,7 @@ We know enough Rust now that we can actually write a useful program. We're going
 $ grep [pattern] [filename]
 ```
 
-We run grep and give it a pattern and a filename. grep will read the file, and print out any lines that match the pattern. We'll walk through building this project step-by-step, but if you're the sort of person who likes to read the last page of a book first, you can find the example for this project in [the GitHub repo for this book](https://github.com/jwalton/rust-book-abridged/blob/master/examples/ch12-minigrep).
+We run `grep` and give it a pattern and a filename. `grep` will read the file, and print out any lines that match the pattern. We'll walk through building this project step-by-step, but if you're the sort of person who likes to read the last page of a book first, you can find the example for this project in [the GitHub repo for this book](https://github.com/jwalton/rust-book-abridged/blob/master/examples/ch12-minigrep).
 
 ## 12.1 - Accepting Command Line Arguments
 
@@ -25,6 +25,8 @@ use std::env;
 fn main() {
     let args: Vec<String> = env::args().collect();
 
+    // &args[0] is the name of the binary
+    // e.g. target/debug/minigrep
     let query = &args[1];
     let file_path = &args[2];
 
@@ -35,10 +37,9 @@ fn main() {
 
 We call `env::args()` to get an iterator of command line arguments. We `use std::env` instead of `use std::env::args`, because the convention in rust is to include the name of the the module when calling functions.
 
-`args` returns an iterator, which we're going to gloss over a bit for now (see [chapter 13][chap13]). Right now what you need to know is that `env::args().collect()` is going to return a collection of all the command line arguments. We have to annotate `args` with the `Vec<String>` type, because `collect` here is actually capable of returning different types of collections, and we specify which one we want by annotating the receiving variable!
+`args` returns an iterator, which we're going to gloss over a bit for now (see [chapter 13][chap13]). Right now what you need to know is that `env::args().collect()` is going to return a collection of all the command line arguments. We have to annotate `args` with the `Vec<String>` type, because `collect` here is actually capable of returning different types of collections, and we specify which one we want by annotating the receiving variable! As is standard in most languages, the zeroth `arg` is the name of the executable so we skip it.
 
-:::note
-
+:::tip
 We could also tell `collect` what type to return with the _turbofish_ operator: `::<>`:
 
 ```rust
@@ -64,13 +65,15 @@ In file file.txt
 
 Just like with `cargo test`, everything before the `--` is options for cargo itself, and everything afterwards gets passed through to our executable.
 
-If you were to print out the contents of the `args` variable, you'd find they contain something like `["target/debug/minigrep", "query", "file.tx"]`. The first command line argument is always the name of the executable being run (this is a convention used by many programming languages, and Rust uses it too). This is why we copy out the `query` and `file_path` from index 1 and 2, instead of from index 0 and 1.
+Since we don't check the length of `args` here, if you try to run this with less than two command line arguments, it will panic. We'll add some error handling in a minute.
 
-Since we don't check the length of `args` here, if you try to run this with less than two command line arguments, it will panic. We'll add some error handling in a minute. `env::args()` will also panic if any of the arguments contain invalid unicode. If you're writing a program that needs to accept invalid unicode on the command line, check out `std::env::args_os()`.
+:::info
+`env::args()` will also panic if any of the arguments contain invalid unicode. If you find yourself writing a program that needs to accept invalid unicode on the command line, check out `std::env::args_os()`.
+:::
 
 ## 12.2 - Reading a File
 
-In order to read in a file, first we need a file. Create a file called _poem.txt_ in the root of your project (next to _cargo.toml_) and paste in this text from Emily Dickinson:
+In order to read in a file, first we need a file. Create a file called _poem.txt_ in the root of your project (next to _Cargo.toml_) and paste in this text from Emily Dickinson:
 
 ```txt title="poem.txt"
 I'm nobody! Who are you?
@@ -107,19 +110,17 @@ If we run this with `cargo run -- test poem.txt`, it should print out the conten
 
 ### Separation of Concerns for Binary Projects
 
-We've said this before, but the best way to organize an application is to have a binary crate and a library crate, and make the binary crate call into the library crate. If your command line parsing is fairly simple, it can be in the binary crate, but otherwise best practice is to move it into the library crate.
+We've said this before, but the best way to organize an application is to have a binary crate and a library crate, and make the binary crate call into the library crate. We want as much code as possible in the library crate. This does two things; first it makes it so a third party who wants to use our code could do so without having to call the binary, and second it's much easier to test code in a library crate. We try to keep the binary crate as small as possible so it's obvious that it is correct just from reading it.
 
-The binary crate should:
+Our binary crate will:
 
 - Call the command line parsing logic.
 - Set up any configuration (read config files, environment variables).
 - Call a `run` function in _lib.rs_ and handle any error that `run` returns.
 
-We want as much code as possible in the library crate. This does two things; first it makes it so a third party who wants to use our code could do so without having to call the binary, and second it's much easier to test code in a library crate. We try to keep the binary crate as small as possible so it's obvious that it is correct just from reading it.
-
 ### Extracting the Argument Parser
 
-Let's move all the code for parsing arguments into _lib.rs_. First, we'll create a `Config` struct for holding our configuration. We'll also provide a constructor which builds the config from command line arguments:
+Let's move all the code for parsing arguments into _src/lib.rs_. First, we'll create a `Config` struct for holding our configuration. We'll also provide a constructor which builds the config from command line arguments:
 
 ```rust title="src/lib.rs"
 pub struct Config {
@@ -141,15 +142,15 @@ impl Config {
 }
 ```
 
-Here we've defined `Config` in such a way that it owns the `query` and `file_path` strings. We can't directly take ownership of the strings in `args`, because we're only borrowing them. Here we're calling `clone` to make copies of the strings.
+Here we've defined `Config` in such a way that it owns the `query` and `file_path` strings. We can't directly take ownership of the strings in `args`, because the slice passed in owns them and we're only borrowing the slice. To fix this we're calling `clone` to make copies of the strings.
 
-Cloning the strings is slightly inefficient. In our case we know that `args` will stick around for the entire program, so we could probably use references to the strings in `args`, but there'd be some work to manage the lifetimes of the references. Since the length of the query and file_path are likely to be quite short, the tradeoff in efficiency is likely going to be small, so this is fine. We'll talk about how to deal with this situation a bit more in [chapter 13][chap13] when we talk about iterators.
+Cloning the strings is slightly inefficient. In our case we know that `args` will stick around for the entire program, so we could probably use references to the strings in `args`, but there'd be some work to manage the lifetimes of the references. Since the length of the `query` and `file_path` are likely to be quite short, the tradeoff in efficiency is likely going to be small, so this is fine. We'll talk about a better way to handle this situation a bit more in [chapter 13][chap13] (hint: we could pass in the iterator itself instead of the result of `collect`).
 
-You may have also noticed that all the constructors we've seen so far have been called `new`, but we called ours `build`. This is because `build` isn't quite a normal constructor - if you were using this library in some other program where you were providing the arguments directly, you wouldn't want to call `Config::new` and pass in an array of strings, where the first string is ignored. That's a weird interface. Also, by convention `new` should never fail.
+You may have also noticed that all the constructors we've seen so far have been called `new`, but we called ours `build`. This is because `build` isn't quite a normal constructor. First, by convention the `new` constructor should not be allowed to fail. Second, if you were using this library in some other program where you were providing the arguments directly, you wouldn't want to call `Config::new` and pass in an array of strings, where the first string is ignored. That's a weird interface.
 
 Speaking of failures, our `build` function returns a `Result<T, E>` so we can pass errors back to the caller. Since our errors are always constant strings, they'll have static lifetime, so our `E` is `&'static str`.
 
-Let's also add a `run` function to _lib.rs_:
+Let's also add a `run` function to _src/lib.rs_:
 
 ```rust title="src/lib.rs"
 use std::{error::Error, fs};
@@ -159,17 +160,15 @@ use std::{error::Error, fs};
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     let contents = fs::read_to_string(config.file_path)?;
 
-    println!("With text:\n{contents}");
+    // TODO: Implement me!
 
     Ok(())
 }
 ```
 
-We're returning a `Result<(), Box<dyn Error>>`. As we saw before `Box<dyn Error>` lets us return any kind of error (and as before, we'll put off covering trait objects in detail until [chapter 17][chap17]). This lets us use the `?` operator when calling `fs:read_to_string` to propagate any error it generates up the call stack.
+We're returning a `Result<(), Box<dyn Error>>`. As we saw before `Box<dyn Error>` lets us return any kind of error (and as before, we'll put off covering trait objects until [chapter 17][chap17]). Returning a `Result` lets us use the `?` operator when calling `fs:read_to_string` to propagate any error it generates up the call stack. Note at the end we're calling `Ok(())` to return the unit type wrapped inside a `Result`. We can't just not return anything, because then we'd implicitly be returning `()`, which doesn't match the declared `Result` type.
 
-Note at the end we're calling `Ok(())` to return the unit type wrapped inside a `Result`. We can't just not return anything, because then we'd implicitly be returning `()`, which doesn't match the declared `Result` type.
-
-Back in _main.rs_ we'll have to update our code to handle creating the `Config` data structure and calling our `run` function:
+Back in _src/main.rs_ we'll have to update our code to handle creating the `Config` data structure and calling our `run` function:
 
 ```rust title="src/main.rs"
 use minigrep::Config;
@@ -192,9 +191,9 @@ fn main() {
 
 First notice that we need to `use minigrep::Config` to bring `Config` from the library crate into the binary crate. We don't do this for `run`, because the convention is to use structs directly and use the crate or module name for functions. (If you're wondering why we don't have to `use minigrep`, it's because `minigrep` is a fully qualified top level path like `std`.)
 
-When we call into `Config::build`, we're calling `unwrap_or_else` to handle the error case. This function unwraps the `Ok` variant, "or else" calls into the provided closure, which we're using to print an error message and exit with an error code. (Again, we'll cover closures more in [chapter 13][chap13].) When calling `run` we could also have used `unwrap_or_else`, but `run` doesn't return a value we want to unwrap, so instead we use the `if let...` syntax.
+When we call into `Config::build`, we're calling `unwrap_or_else` to handle the error case. This function unwraps the `Ok` variant, "or else" calls into the provided closure (see [chapter 13][chap13]), which we're using to print an error message and exit with an error code. When calling `run` we could also have used `unwrap_or_else`, but `run` doesn't return a value we want to unwrap, so instead we use the `if let...` syntax.
 
-Finally, a subtle change but note that we're using `eprintln!` here instead of `println!`. This causes our errors to be printed to stderr instead of stdout. If you try running:
+Finally, note the subtle change from our usual `println!` macro. We're using `eprintln!` here instead, which causes our errors to be printed to stderr instead of stdout. If you try running:
 
 ```sh
 $ cargo run > output.txt
@@ -203,14 +202,21 @@ Problem parsing arguments: not enough arguments
 
 you should see the error in the terminal, instead of it being sent to `output.txt`.
 
-## 12.4 Developing the Library's Functionality with Test-Driven Development
+## 12.4 Developing the Library's Functionality
 
-Since this is the abridged version of this book, we'll skip defining test-driven development, and jump right into writing some tests. We want a test that makes sure, when we provide some file content and a query, we get back the correct output. To do this, we're going to create a function called `search` in _lib.rs_, and add a test case for it:
+We're going to create a function called `search` that takes a query and the contents of a file, and returns all the matching lines. We're also going to write a test case for this function:
 
 ```rust title="src/lib.rs"
 pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
-    // TODO: Do the thing!
-    vec![]
+    let mut results = Vec::new();
+
+    for line in contents.lines() {
+        if line.contains(query) {
+            results.push(line);
+        }
+    }
+
+    results
 }
 
 #[cfg(test)]
@@ -231,25 +237,9 @@ Duct tape.";
 }
 ```
 
-The `one_result` test calls our search function with a query and some text from a hypothetical file, and makes sure the result contains the only line that contains `duct`. The only thing we haven't seen before is the multi-line string starting with `"\`. Also, notice the lifetime annotations on `search`. We're telling Rust that the return value of `search` is only valid for as long as the `contents` passed in are valid.
+The `one_result` test calls our search function with a query and some text from a fake file, and makes sure the result contains the only line that contains `duct`. The only thing we haven't seen before is the multi-line string starting with `"\`.
 
-To actually implement our search function, we need to split the contents into lines, iterate over the lines, and add each line that matches into our result. We'll store the results in a vector and return it (passing ownership back up to the parent):
-
-```rust title="src/lib.rs"
-pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
-    let mut results = Vec::new();
-
-    for line in contents.lines() {
-        if line.contains(query) {
-            results.push(line);
-        }
-    }
-
-    results
-}
-```
-
-If we run our tests, we'll see they pass.
+In the implementation of our search function, we need to split the contents into lines, iterate over the lines, and add each line that matches into our result. We store the results in a vector and return it (passing ownership back up to the parent). Notice the lifetime annotations on `search`. We're telling Rust that the references in the returned vector are only valid for as long as the `contents` string passed in is valid.
 
 ### Using the `search` Function in the `run` Function
 
@@ -271,7 +261,7 @@ We can now try `cargo run -- frog poem.txt` and it should print out the single l
 
 ## 12.5 - Working with Environment Variables
 
-We'll add a feature to minigrep to allow it to do case-insensitive matches if the `IGNORE_CASE` environment variable is set. Why an environment variable instead of a command line switch like `-i`? Mainly because we want to demonstrate the use of environment variables.
+We'll add a feature to minigrep to allow it to do case-insensitive matches if the `IGNORE_CASE` environment variable is set. Why an environment variable instead of a command line switch like `-i`? Because this section is about environment variables.
 
 We'll start this out by defining a new function called `search_case_insensitive` in _src/lib.rs_:
 
@@ -295,7 +285,7 @@ pub fn search_case_insensitive<'a>(
 }
 ```
 
-This looks a lot like `search` with a few `to_lowercase` added in to handle case sensitivity. Note that `query` is now a `String` instead of a string slice, because `to_lowercase` creates a copy of the string when modifying it. It's worth noting here that `to_lowercase` will handle some basic Unicode - certainly anything in English - but it's not perfect, so if you were implementing this for real you'd probably pull in a crate to handle this.
+This looks a lot like `search` with a few `to_lowercase` added in to handle case sensitivity. Note that `to_lowercase` returns a copy of the string rather than editing the original, so after the first line of this function `query` is a `String` instead of a `&str`. It's worth noting here that `to_lowercase` will handle some basic Unicode - certainly anything in English - but it's not perfect, so if you were implementing this for real you'd probably pull in a crate to handle this.
 
 No function is complete without a matching test:
 

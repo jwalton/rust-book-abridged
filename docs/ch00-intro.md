@@ -40,7 +40,7 @@ This book is a work-in-progress. I wrote this while I was reading "The Rust Prog
 
 :::
 
-If you emjoy this book, please [give it a star on GitHub](https://github.com/jwalton/rust-book-abridged), or [buy me a coffee](https://github.com/sponsors/jwalton).
+If you enjoy this book, please [give it a star on GitHub](https://github.com/jwalton/rust-book-abridged), or [buy me a coffee](https://github.com/sponsors/jwalton).
 
 ## Table of Contents
 

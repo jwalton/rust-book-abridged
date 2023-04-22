@@ -1,16 +1,16 @@
 # 13 - Functional Language Features: Iterators and Closures
 
-In this chapter we will cover _closures_, which are a function-like construct you can store in a variable or pass as a parameter and _iterators_ which are used for iterating over a collection of items.
+In this chapter we will cover _closures_, which are a like functions you can assign to variables or pass around as parameters. We'll also learn about _iterators_ which are used for iterating over a collection of items.
 
 ## 13.1 - Closures: Anonymous Functions that Capture Their Environment
 
-A closure is basically a function that can access variables in the enclosing scope. If you're a JavaScript programmer, you use closures all the time even if you don't know them by that name. You can store a closure in a variable or pass it as a parameter.
+A closure is essentially a function that can access variables in the enclosing scope. You can store a closure in a variable or pass it as a parameter.If you're a JavaScript programmer, you're no doubt very familiar with closures.
 
 ### Capturing the Environment with Closures
 
 Here's the scenario that we're going to use for this section, taken directly from the original "The Rust Programming Language": Every so often, our t-shirt company gives away an exclusive, limited-edition shirt to someone on our mailing list as a promotion. People on the mailing list can optionally add their favorite color to their profile. If the person chosen for a free shirt has their favorite color set, they get that color shirt. If the person hasn't specified a favorite color, they get whatever color the company currently has the most of.
 
-We'll implement this using an `enum ShirtColor` for the color of the shirt, and we'll use a `Vec<ShirtColor>` to represent stock. We'll define a `giveaway` method on `Inventory` to figure out which shirt to give a customer:
+We'll implement this using an `enum ShirtColor` for the color of the shirt, and we'll use a `Vec<ShirtColor>` to represent stock - each item in the vector represents a t-shirt. We'll define a `giveaway` method on `Inventory` to figure out which shirt to give a customer:
 
 ```rust title="src/main.rs"
 #[derive(Debug, PartialEq, Copy, Clone)]
@@ -20,14 +20,17 @@ enum ShirtColor {
 }
 
 struct Inventory {
+    // A vector of shirt colors, one for each shirt we have in stock.
     shirts: Vec<ShirtColor>,
 }
 
 impl Inventory {
+    /// Figure out what color of shirt to give away.
     fn giveaway(&self, user_preference: Option<ShirtColor>) -> ShirtColor {
         user_preference.unwrap_or_else(|| self.most_stocked())
     }
 
+    // Figure out what shirt color we have the most of in inventory.
     fn most_stocked(&self) -> ShirtColor {
         let mut num_red = 0;
         let mut num_blue = 0;
@@ -73,13 +76,11 @@ Everything here should be familiar. The part we want to focus on is the `giveawa
 user_preference.unwrap_or_else(|| self.most_stocked())
 ```
 
-We're calling `unwrap_or_else` on an `Option<ShirtColor>`. If the Option is the `Some` variant, this will unwrap the value and return it. If not, this will call into the closure we pass as the first parameter: `|| self.most_stocked()`. This closure is a tiny function that takes no parameters (if there were some, they'd appear between the `||`) and returns the result of `self.most_stocked()`.
-
-Notice that the closure is using the `self` variable, which isn't being passed explicitly as a parameter to the closure. This parameter is _captured_ from the outer scope.
+We're calling `unwrap_or_else` on an `Option<ShirtColor>`. If the `Option` is the `Some` variant, this will unwrap the value and return it, just like `unwrap`. But if it's `None`, this will call into the closure we pass as the first parameter: `|| self.most_stocked()`. This closure is a tiny function that takes no parameters (if there were some, they'd appear between the `||`) and returns the result of `self.most_stocked()`. Notice that the closure is using the `self` variable, which isn't being passed explicitly as a parameter to the closure. This parameter is _captured_ from the outer scope.
 
 ### Closure Type Inference and Annotation
 
-With functions, we always have to annotate the type of the function. With closures, generally we don't have to annotate the types, as Rust can usually infer the correct types based on the function we're passing the closure to. For example:
+With functions, we always have to annotate the type of the function. With closures, generally we don't have to annotate the types, as Rust can usually infer the correct types from the function we're passing the closure to. We can annotate them the same way we do functions though:
 
 ```rust
 let expensive_closure = |num: u32| -> u32 {
@@ -89,7 +90,7 @@ let expensive_closure = |num: u32| -> u32 {
 };
 ```
 
-Never the less, closures do have concrete types. This example would fail to compile:
+Even if a closure is not annotated, it _does_ have concrete types. This example would fail to compile:
 
 ```rust
 let example_closure = |x| x;
@@ -98,34 +99,31 @@ let s = example_closure(String::from("hello"));
 let n = example_closure(5);
 ```
 
-If we were to call this with only a `String`, then rust would infer the type of `x` in the closure to be a `String`. Since we call it once with a `String` and once with an `i32`, Rust will generate a compiler error.
+If we were to call this with only a `String`, then rust would infer the type of `x` in the closure to be a `String`. Since we call it once with a `String` and once with an `i32`, Rust won't know which it should be and will generate a compiler error.
 
 ### Capturing References or Moving Ownership
 
-In JavaScript or Go, when a closure captures a value, this just counts as one more reference to the value for the garbage collector. Since Rust has no garbage collector, ownership rules apply to closures just like anywhere else. A closure can capture an immutable reference to a value, a mutable reference, or can take ownership of the value. Which one is done depends on what the closure tries to do with the value.
-
-In this example, `only_borrows` captures an immutable reference to `list`:
+In JavaScript or Go, when a closure captures a value, this just counts as one more reference to the value for the garbage collector. Since Rust has no garbage collector, ownership rules apply to closures just like anywhere else. A closure can capture an immutable reference to a value, a mutable reference, or can take ownership of the value. Generally which of these happens is inferred by the compiler depending on what the closure does with the value.
 
 ```rust title="src/main.rs"
-fn main() {
+fn immutable_example() {
     let list = vec![1, 2, 3];
     println!("Before defining closure: {:?}", list);
 
+    // Here `list` is captured as an immutable reference.
     let only_borrows = || println!("From closure: {:?}", list);
 
     println!("Before calling closure: {:?}", list);
     only_borrows();
     println!("After calling closure: {:?}", list);
 }
-```
 
-This example captures a mutable reference, since it has to in order to call `push`:
-
-```rust title="src/main.rs"
-fn main() {
+fn mutable_example() {
     let mut list = vec![1, 2, 3];
     println!("Before defining closure: {:?}", list);
 
+    // Here `list` is captured as a mutable reference,
+    // since we `push` a new item onto the list.
     let mut borrows_mutably = || list.push(7);
 
     borrows_mutably();
@@ -133,9 +131,7 @@ fn main() {
 }
 ```
 
-First notice that we've declared the `borrows_mutably` variable as mutable itself! (TODO: Why?)
-
-Note here that we can't print the contents of `list` in between when we create `borrows_mutably` and when we call it, since it has a mutable reference to `list` and if we have a mutable reference, we can't have any other references.
+In `mutable_example`, notice that we've declared the `borrows_mutably` variable as mutable itself! If you think about a closure as an implicit data structure, containing data captured from the environment, then in order to mutate any values held in that structure we have to declare the owning variable as `mut`. Second, notice that in `mutable_example` we can't print the contents of `list` in between when we create `borrows_mutably` and when we call it, since `borrows_mutably` has a mutable reference to `list` and if we have a mutable reference, we can't have any other references at the same time.
 
 A closure will automatically take ownership of a value if it needs to. We can force a closure to take ownership of all captured values with the `move` keyword:
 
@@ -152,14 +148,14 @@ fn main() {
 }
 ```
 
-Here we're transferring ownership of `list` to a new thread. We haven't covered threads yet, but we will in [chapter 16][chap16]. Transferring ownership is required here, though, because our `main` function might finish before the thread, or the thread might finish first. If the thread borrowed a mutable reference, then if `main` finished first, the value would be dropped and the underlying memory would be freed, leaving the thread with a dangling reference.
+Here we're transferring ownership of `list` to a new thread. We haven't covered threads yet, but we will in [chapter 16][chap16]. Transferring ownership is required here, because our `main` function might finish before the thread, or the thread might finish first. If the thread borrowed a mutable reference, and `main` finished first, the value would be dropped and the underlying memory would be freed, leaving the thread with a dangling reference.
 
 ### Moving Captured Values Out of Closures and the Fn Traits
 
 Depending on what a closure does with the values it captures, the compiler will automatically add some or all of these traits to the closure:
 
 - `FnOnce` applies to all closures. It represents a closure that can be called once. All closures can be called at least once, so all closures implement this trait. If a closure moves captured values out of it's body, then it will _only_ implement this trait. Such a closure can not safely be called twice, since it won't be able to move the captured values a second time.
-- `FnMut` applies to any closure that doesn't move captured values out of its body. The closure may or may not mutate captured values. These closures can safely be called multiple times.
+- `FnMut` applies to any closure that doesn't move captured values out of its body. Despite the name, the closure may or may not mutate captured values. These closures can safely be called multiple times.
 - `Fn` applies to any closure that implements `FnMut` but that also doesn't mutate any captured values. Such a closure can safely be called multiple times concurrently.
 
 Let's take a look at the implementation of `Option<T>::unwrap_or_else`:
@@ -203,7 +199,7 @@ fn main() {
 }
 ```
 
-As you would expect, this sorts the list in place, sorting by the `width` of each rectangle. `sort_by_key` takes a `FnMut` instead of a `FnOnce`. The closure passed to `sort_by_key` doesn't mutate any values, but it does need to be called more than once (at least once for each `Rectangle` if fact), so it can't be `FnOnce`.
+This sorts the list in place, sorting by the `width` of each rectangle. `sort_by_key` takes a `FnMut` instead of a `FnOnce`. The closure we passed to `sort_by_key` doesn't mutate any values, but it does need to be called more than once (at least once for each `Rectangle`), so it can't be `FnOnce`.
 
 If we tried to do something like:
 
@@ -218,9 +214,7 @@ list.sort_by_key(|r| {
 });
 ```
 
-this wouldn't work. The problem here is that the closure takes ownership of `value` from the enclosing scope when it is created, then gives away ownership when it calls `push`. This means this closure only implements `FnOnce`. It can't be called a second time, since it won't be able to transfer ownership of `value`, since it doesn't own it anymore.
-
-If we changed this closure to increment a counter in the enclosing scope, this would fix the issue, as the closure could borrow the counter as a mutable reference, and would be `FnMut`.
+this wouldn't work. The problem here is that the closure takes ownership of `value` from the enclosing scope when it is created, then gives away ownership to `sort_operations` when it calls `push`. This means this closure only implements `FnOnce`. It can't be called a second time, since it won't be able to transfer ownership of `value` a second time. If we changed this closure to increment a counter in the enclosing scope instead of pushing a value onto a vector, this would fix the issue, as the closure could borrow the counter as a mutable reference, and would be `FnMut`.
 
 ## 13.2 - Processing a Series of Items with Iterators
 
@@ -232,15 +226,16 @@ let v1 = vec![1, 2, 3];
 // Create an iterator
 let v1_iter = v1.iter();
 
-// Do something for each item the iterator returns
+// Do something for each item the iterator returns.
+// The iterator doesn't do anything until we use it.
 for val in v1_iter {
     println!("Got: {}", val);
 }
 ```
 
-### The `Iterator` Trait an the `next` Method
+### The `Iterator` Trait and the `next` Method
 
-All iterator implement a trait from the standard library called, unsurprisingly, `Iterator`:
+All iterators implement a trait from the standard library called, unsurprisingly, `Iterator`:
 
 ```rust
 pub trait Iterator {
@@ -270,15 +265,15 @@ fn iterator_demonstration() {
 }
 ```
 
-Calling `next` on an iterator changes it's internal state, which is why the `self` parameter on `next` is marked `&mut`. This means we need to declare `v1_iter` as `mut` here as well. In the example above where we used a for loop, you might notice we didn't make `v1_iter` mutable. This is because the `for` loop took ownership of the value and made it mutable - sneaky Rust.
+Calling `next` on an iterator changes it's internal state, which is why the `self` parameter on `next` is marked `&mut`. This means we need to declare `v1_iter` as `mut` here as well. In the example above where we used a for loop, you might notice we didn't make `v1_iter` mutable. This is because the `for` loop took ownership of the iterator and made it mutable - sneaky Rust.
 
-Another thing to note is that iterator returned by `iter` returns immutable references to the underlying collection. There's also an `into_iter` which takes ownership of the receiver (`into` because it converts the underlying collection into an iterator, and you won't be able to access the underlying collection anymore) and returns owned values. Similarly, there's an `iter_mut` that returns mutable references, if we want to modify some or all of the members of a collection.
+Another thing to note is that the iterator returned by `iter` returns immutable references to the underlying collection. There's an `iter_mut` that returns mutable references, if we want to modify some or all of the members of a collection. There's also an `into_iter` which takes ownership of the receiver (`into` because it converts the underlying collection into an iterator, and you won't be able to access the underlying collection anymore) and returns owned values. For example, if you called `v1.into_iter` above, you'd get back an iterator of owned values, and wouldn't be able to use `v1` anymore.
 
 ### Methods that Consume the Iterator
 
 If you have a look at [the documentation for `Iterator`](https://doc.rust-lang.org/std/iter/trait.Iterator.html#provided-methods) you'll see that it provides quite a few methods with default implementations. Many of these call into `next`, which is why you don't have to implement them all. Calling into `next` though means that these will consume some or all of the items in the iterator. We call these _consuming adaptors_.
 
-The [`sum` method](https://doc.rust-lang.org/std/iter/trait.Iterator.html#method.sum) for example will consume all items in the iterator and sum them together. We can't use an iterator after calling `sum` on it because `sum` takes ownership of the iterator.
+The [`sum` method](https://doc.rust-lang.org/std/iter/trait.Iterator.html#method.sum) for example will consume all items in the iterator and sum them together. In order to ensure we can't use an iterator after calling `sum`, `sum` takes ownership of the iterator.
 
 ### Methods that Produce Other Iterators
 
@@ -290,13 +285,13 @@ let v1: Vec<i32> = vec![1, 2, 3];
 let v2: Vec<_> = v1.iter().map(|x| x + 1).collect();
 ```
 
-Here `v2` will be `vec![2, 3, 4]`. `map` produces a new iterator that modified versions of items from the underlying vector.
+Here `v2` will be `vec![2, 3, 4]`. `map` produces a new iterator of modified items from the underlying vector.
 
-We call `collect` here to transform the new iterator returned by `map` into a vector. `map`, by itself, consumes no values so until we call `collect` the closure won't be called. This "lazy" behavior is a bit different from `map` in JavaScript.
+We call `collect` here to transform the new iterator returned by `map` into a vector. Note that `map`, by itself, consumes no values! Until we call `collect` the closure won't be called. This "lazy" behavior is a bit different from `map` in JavaScript.
 
 ### Using Closures that Capture Their Environment
 
-The `filter` method (another familiar method for the JavaScript folks) takes a closure that returns a boolean, and returns a new iterator. The closure is called for each item, and if it returns true the new iterator will include the item, if false the item will be discarded. You can use this to filter out items you don't want from a collection:
+The `filter` method (another familiar method for the JavaScript folks) is another iterator adaptor, which consumes the old iterator and returns a new one. It's parameter is a closure that returns a boolean, which is used to "filter out" some elements from the underlying iterator. The closure is called for each item, and if it returns true the new iterator will include the item, if false the item will be discarded:
 
 ```rust
 #[derive(PartialEq, Debug)]
@@ -310,7 +305,7 @@ fn shoes_in_size(shoes: Vec<Shoe>, shoe_size: u32) -> Vec<Shoe> {
 }
 ```
 
-Notice here that the closure takes `shoe_size` from the environment and uses it to decide whether a shoe should be included in the returned vector or not.
+Notice here that the closure captures `shoe_size` from the environment and uses it to decide whether a shoe should be included in the returned vector or not.
 
 ## 13.3 - Improving our I/O Project
 

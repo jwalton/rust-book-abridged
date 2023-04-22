@@ -55,10 +55,8 @@ macro_rules! vec {
 }
 ```
 
-:::note
-
+:::info
 This is actually a slightly simplified version of `vec!`, because the original tries to preallocate the correct amount of data in the new vector, and this would only serve to make this example even more confusing than it already is.
-
 :::
 
 First, notice we've added the `#[macro_export]` annotation. Without this annotation, this macro can't be used outside of the crate it is defined in.

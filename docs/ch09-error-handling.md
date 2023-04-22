@@ -30,11 +30,14 @@ There are two options for what happens when a panic occurs. By default, the prog
 You can switch to using the abort behavior by adding `panic = 'abort'` to your Cargo.toml file:
 
 ```toml
+[profile.dev]
+panic = 'abort'
+
 [profile.release]
 panic = 'abort'
 ```
 
-Aborting has the advantage that we don't need all the code for unwinding, so our compiled binary will be smaller. In many cases aborting will be faster than unwinding too. If you want to know more about the differences between aborting an unwinding, [see the Rustonomicon](https://doc.rust-lang.org/nomicon/unwinding.html).
+Aborting has the advantage that we don't need all the code for unwinding, so our compiled binary will be smaller. In many cases aborting will be faster than unwinding too. If you want to know more about the differences between aborting an unwinding, [see the Rustonomicon](https://doc.rust-lang.org/nomicon/unwinding.html). Panicking has the advantage that it only terminates a single thread instead of the whole application (although this is the same thing in a single threaded application, and a panic in a thread can cause all sorts of other exciting problems).
 
 ## 9.2 - Recoverable Errors with Result
 
@@ -96,7 +99,7 @@ fn main() {
 
 In the `Err` arm, we're calling `error.kind()` to find out what kind of error this is. This returns a `std::io::ErrorKind`, which is an enum of all the various reasons an `io` operation might fail. We match on the kind, and if it is `ErrorKind::NotFound` we'll try to create the file (which might also fail, so we'll have to deal with that error too!)
 
-If you're a JavaScript programmer who remembers the days before async and await, you might be looking at some of these examples and having flashbacks to the "pyramid of doom" frequently caused by many deeply nested callbacks. Don't worry just yet - we're going to explore some ways to make that code a little less verbose in the rest of this chapter.
+If you're a JavaScript programmer who remembers the days before async and await, you might be looking at some of these examples and having flashbacks to the "pyramid of doom" - the name JavaScript programmers use for having many deeply nested callbacks. Don't worry just yet - we're going to explore some ways to make that code a little less verbose in the rest of this chapter.
 
 ### Alternatives to Using match with `Result<T, E>`
 
@@ -119,7 +122,7 @@ fn main() {
 }
 ```
 
-This introduces a new concept called _closures_ which we'll talk more about in [chapter 13][chap13], but if languages you've used have arrow functions or lambdas, you can probably figure out what's going on in this example. (Hint: the `|error| { ... }` creates a function that takes an error as a parameter, similar to an `(err) => {...}` in JavaScript.) If you're having trouble with this example, don't worry - bookmark this and come back to it after you've read chapter 13.
+This introduces a new concept called _closures_ which we'll talk more about in [chapter 13][chap13], but if languages you've used have arrow functions or lambdas, you can probably figure out what's going on in this example. (Hint: the `|error| { ... }` creates a function that takes an error as a parameter, similar to an `(err) => {...}` in JavaScript.) If you're having trouble with this example, don't worry - bookmark this and come back to it after you've read [chapter 13][chap13].
 
 ### Shortcuts for Panic on Error: `unwrap` and `expect`
 
@@ -136,11 +139,11 @@ fn main() {
 }
 ```
 
-`expect` is generally preferred over `unwrap`, as it gives more information about what went wrong and the assumptions that were made for not dealing with this error.
+`expect` is generally preferred over `unwrap`, as it gives more information about what went wrong and gives you a chance to explicitly document the assumptions that were made when you decided to panic here.
 
 ### Propagating Errors
 
-Often if an error occurs in a function, we don't want to handle the error ourselves but propagate the error to the function's caller. If you're coming to Rust from Go, you've no doubt written `if err != nil { return err }` many times in your career.
+Often if an error occurs in a function, we don't want to handle the error ourselves but propagate the error to the function's caller. If you're coming to Rust from Go, you've no doubt written `if err != nil { return err }` many times in your career. In most other languages, when we throw an exception, we're used to it traveling up the stack to the closest `catch`.
 
 Here's a very verbose example of a function that reads a username from a file. If the file can't be read, we don't want `read_username_from_file` to panic, but we also don't know how to handle the error here. We want to return the error back to the caller so the caller can decide what to do about the fact that we can't find the username:
 
@@ -148,6 +151,7 @@ Here's a very verbose example of a function that reads a username from a file. I
 use std::fs::File;
 use std::io::{self, Read};
 
+// This function is so long!  We can make it shorter!
 fn read_username_from_file() -> Result<String, io::Error> {
     let username_file_result = File::open("hello.txt");
 
@@ -179,11 +183,13 @@ fn read_username_from_file() -> Result<String, io::Error> {
 }
 ```
 
-The `?` operator can be placed after any `Result`, and basically is the same as the `match` expression from the original example. The `?` says: "If `result` is an `Ok` variant, resolve this expression to the value of the `Ok`. If `result` is an `Err` then `return result`".
+The `?` operator can be placed after any `Result`, and basically is the same as the `match` expression from the original example. The `?` says: "If `result` is an `Ok` variant, resolve this expression to the value of the `Ok`. If `result` is an `Err` then `return result`". This makes errors abort early and return to the caller, very similar to how exceptions work.
 
+:::tip
 This works here because the `Result`s we're adding `?` to and our `read_username_from_file` both return a Result with the same error type, but they don't have to! The `?` operator will pass errors through the `from` function from the `From` trait on our return type to convert the error from one error type to another.
 
 For example, if we wanted to defined a custom error type named `OurError`, we could define `impl From<io::Error> for OurError` to tell Rust how to convert `io:Error`s to `OurError`s, without needing to add any more code to our example.
+:::
 
 We can shorten this method further by eliminating some variable names and using chaining:
 
@@ -232,7 +238,7 @@ fn main() {
 }
 ```
 
-This happens because the function signature for `main` implicitly declares that it returns `()`, not a `Result`. Up until now all our `main` functions have had this signature, but we can actually allow `main` to return an error:
+This happens because the function signature for `main` implicitly declares that it returns `()`, not a `Result`. Up until now all our `main` functions have had this signature, but Rust allows us to return a `Result` from `main`:
 
 ```rust
 use std::error::Error;
@@ -245,7 +251,11 @@ fn main() -> Result<(), Box<dyn Error>> {
 }
 ```
 
-Whoa! What's this `Box<dyn Error>`? This is a _trait object_, which we'll discuss in [chapter 17](./ch17-object-oriented-features.md#172---using-trait-objects-that-allow-for-values-of-different-types). For now, know that this means "any kind of error". When `main` returns a `Result<(), E>`, if it returns an `Ok` variant, the program will terminate and return 0 [exit code](https://en.wikipedia.org/wiki/Exit_status) to the shell, signalling the program terminated correctly. If it returns an `Err` variant, it print the error to stderr and return a 1 to signal an error. The `main` function can return other types too! It can return anything that implements the [`std::process::Termination` trait](https://doc.rust-lang.org/stable/std/process/trait.Termination.html).
+Whoa! What's this `Box<dyn Error>`? This is a _trait object_, which we'll discuss in [chapter 17](./ch17-object-oriented-features.md#172---using-trait-objects-that-allow-for-values-of-different-types). For now, know that this means "any kind of error". When `main` returns, if it returns an `Ok` variant, the program will terminate and return 0 [exit code](https://en.wikipedia.org/wiki/Exit_status) to the shell, signalling the program terminated correctly. If it returns an `Err` variant, the error will be printed to stderr and the program will return a 1 to the shell to signal an error.
+
+:::tip
+The `main` function can return other types too! It can return anything that implements the [`std::process::Termination` trait](https://doc.rust-lang.org/stable/std/process/trait.Termination.html).
+:::
 
 ## 9.3 - To `panic!` or Not to `panic!`
 
@@ -263,6 +273,10 @@ There are some places where it's a terrible idea to panic. A panic will halt the
 
 - When you encounter an error that is unlikely, but could happen in normal operation of the program.
 - When you're authoring a library. Callers to your library might like the opportunity to abort an operation or try again, instead of crashing the entire application.
+
+:::info
+We said that a program can't recover from a panic. This is not _strictly_ true, as there is a [`catch_unwind` function](https://doc.rust-lang.org/std/panic/fn.catch_unwind.html) in Rust. But this is not something intended to be used for day-to-day error handling.
+:::
 
 Continue to [chapter 10][chap10].
 

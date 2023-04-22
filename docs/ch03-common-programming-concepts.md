@@ -81,7 +81,7 @@ When shadowing a variable, the new variable does not have to have the same type 
 
 ## 3.2 - Data Types
 
-Keep in mind that Rust is a statically typed language, so the type of every variable (and how much space it will occupy in memory, if it is stored on the stack) must be known at compile time.  Rust's type inference is amazing, so frequently we don't have to tell Rust what type a variable is, but sometimes a variable's type is ambiguous in which case we need to _annotate_ it (e.g. `let guess: 32 = ...`).
+Keep in mind that Rust is a statically typed language, so the type of every variable (and how much space it will occupy in memory, if it is stored on the stack) must be known at compile time. Rust's type inference is amazing, so frequently we don't have to tell Rust what type a variable is, but sometimes a variable's type is ambiguous in which case we need to _annotate_ it (e.g. `let guess: 32 = ...`).
 
 A "scalar type" represents a single value. There are four kinds of scalar types in Rust: integers, floating-point numbers, Booleans, and characters.
 
@@ -142,13 +142,13 @@ let heart_eyed_cat = '😻';
 let space_woman_zwj = '👩🏻‍🚀'; // <== This doesn't work!
 ```
 
-That last example doesn't work.  Our female astronaut friend might look like a single character, but she's actually two emoji joined together with a zero-width-joiner (ZWJ).  We'll talk a lot more about UTF-8 and Unicode in [chapter 8][chap8].
+That last example doesn't work. Our female astronaut friend might look like a single character, but she's actually two emoji joined together with a zero-width-joiner (ZWJ). We'll talk a lot more about UTF-8 and Unicode in [chapter 8][chap8].
 
 ### `str` and String
 
-You'll see two different string types in Rust: `str` and `String`. `str` is a bit like an array - it's a list of characters with a fixed length known at compile time.  `String` is more like a `Vector` - it's a data type that stores a list of strings in a variable-length chunk of memory on the heap.  Any time you accept input from the user or read a string from a file, it's going to end up in a `String`.
+You'll see two different string types in Rust: `str` and `String`. `str` is a bit like an array - it's a list of characters with a fixed length known at compile time. `String` is more like a `Vector` - it's a data type that stores a list of strings in a variable-length chunk of memory on the heap. Any time you accept input from the user or read a string from a file, it's going to end up in a `String`.
 
-The type `&str` - a reference to a `str` - is also known as a _string slice_ (which we'll learn more about in [the next chapter][chap4]), and is both a pointer to the string's data and a length for the string.  Any string literal in Rust is a `&str`, since the actual string is stored somewhere in the executable and we just have an immutable reference to it.
+The type `&str` - a reference to a `str` - is also known as a _string slice_ (which we'll learn more about in [the next chapter][chap4]), and is both a pointer to the string's data and a length for the string. Any string literal in Rust is a `&str`, since the actual string is stored somewhere in the executable and we just have an immutable reference to it.
 
 ## Compound Types
 
@@ -238,7 +238,13 @@ fn no_return() {
 }
 ```
 
-Assignments are always statements (i.e. `let x = 6` does not evaluate to 6), as are function definitions (i.e. you can't do `let x = fn foo() {}` - although you can do this with closures - see [chapter 13][chap13]). Functions can be called before they are defined. See [chapter 10][chap10] to learn about generic functions.
+Assignments are always statements (i.e. `let x = 6` does not evaluate to 6), as are function definitions (i.e. you can't do `let x = fn foo() {}`). Functions can be called before they are defined. In [chapter 10][chap10] we'll learn about using generics with functions.
+
+Rust also has closures, which are inline functions that can be assigned to variables or passed as parameters. We'll learn about them in detail in [chapter 13][chap13], but the syntax is:
+
+```rust
+let my_closure = |param1, param2| { /* function body goes here */ };
+```
 
 ## 3.4 - Comments
 
