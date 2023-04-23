@@ -60,10 +60,10 @@ const config = {
       image: "img/docusaurus-social-card.jpg",
       navbar: {
         title: "The Rust Book (Abridged)",
-        // logo: {
-        //   alt: "Logo",
-        //   src: "img/logo.svg",
-        // },
+        logo: {
+          alt: "Logo",
+          src: "img/logo.svg",
+        },
         items: [
           {
             href: "https://thedreaming.org",

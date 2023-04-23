@@ -1,5 +1,7 @@
 # Licenses
 
+[Ferris the Crab](https://rustacean.net/) was created by Karen Rustad Tölva, and is used here under public domain.
+
 This book is an abridged edition of ["The Rust Programming Language"](https://doc.rust-lang.org/stable/book/), by Steve Klabnik and Carol Nichols, with contributions from the Rust Community. The source for the original book can be found in [https://github.com/rust-lang/book](https://github.com/rust-lang/book). This book contains many code samples that were copied directly from the original book, as well as several appendices which were copied verbatim, which requires us to reproduce the licenses from the original Rust book here:
 
 ```txt
