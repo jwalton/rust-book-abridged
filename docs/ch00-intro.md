@@ -9,7 +9,7 @@ hide_title: true
     <h1>The Rust Book (Abridged)</h1>
     <p>v0.1.0 - Draft</p>
     <p>By Jason Walton</p>
-    <p>Based on <a href="https://github.com/rust-lang/book/commit/c06006157b14b3d47b5c716fc392b77f3b2e21ce">"The Rust Programming Language"</a> by Steve Klabnik and Carol Nichols.</p>
+    <p>Based on <a href="https://doc.rust-lang.org/stable/book/">"The Rust Programming Language"</a> by Steve Klabnik and Carol Nichols.</p>
 </div>
 
 ## Why an Abridged Version?
@@ -87,3 +87,5 @@ If you enjoy this book, please [give it a star on GitHub](https://github.com/jwa
 [chap19]: ./ch19/ch19-01-unsafe.md "Chapter 19: Advanced Features"
 [chap20]: ./ch20/ch20-01-single-threaded-web-server.md "Chapter 20: Multithreaded Web Server"
 [chap21]: ./ch21-async.md "Chapter 21: Bonus Chapter: Async Programming"
+
+(This version of this book is based on [commit c06006](https://github.com/rust-lang/book/commit/c06006157b14b3d47b5c716fc392b77f3b2e21ce)).
