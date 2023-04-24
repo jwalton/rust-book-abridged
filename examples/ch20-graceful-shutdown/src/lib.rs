@@ -31,6 +31,7 @@ impl ThreadPool {
         // all of our threads.
         let mut workers = Vec::with_capacity(size);
 
+        // Create new workers and add them to the pool.
         for id in 0..size {
             workers.push(Worker::new(id, Arc::clone(&receiver)));
         }

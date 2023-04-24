@@ -33,7 +33,7 @@ fn handle_connection(mut stream: TcpStream) {
     let http_request: Vec<_> = buf_reader
         .lines()
         .map(|result| result.unwrap())
-        .take_while(|line| !line.is_empty()) // Blank line is end of request.
+        .take_while(|line| !line.is_empty()) // Blank line is end of headers.
         .collect();
 
     let request_line = &http_request[0];

@@ -18,7 +18,7 @@ match VALUE {
 
 The patterns in a `match` need to be _exhaustive_ - they need to cover every possibility.  The `_` pattern will match anything and not bind to a variable, so it will often be used as a catch-all at the end of a `match`.
 
-In this example, we extract a value from a `Some`.  Note that value we extract shadows the outer variable:
+In this example, we extract a value from a `Some`.  Note that value we extract in this example will shadow the outer variable:
 
 ```rust
 match i {
@@ -87,7 +87,7 @@ In a `for` loop, the bit immediately after the `for` keyword is actually a patte
 
 ### `let` statements
 
-Simple let statements actually use patterns too:
+Simple let statements use patterns too:
 
 ```rust
 let x = 5;
@@ -134,7 +134,7 @@ There are some places where we're only allowed to use irrefutable patterns.  For
 let Some(x) = value;
 ```
 
-Here if `value` is `Some(1)`, then we expect `x` to get the value 1.  But if `value` were `None`, what would `x` be here?  This statement makes no sense, and will result in a compiler error, because `let` needs an irrefutable pattern.  (Although we could fix this with an `if let` instead.)
+Here if `value` is `Some(1)`, then we expect `x` to get the value 1.  But if `value` were `None`, what would `x` be here?  This statement makes no sense, and will result in a compiler error, because an assignment needs an irrefutable pattern.  (Although we could fix this with an `if let` instead.)
 
 There are also places where an irrefutable parameter is allowed, but is somewhat pointless, which will generate compiler warnings, such as this:
 
@@ -432,7 +432,7 @@ One downside to match guards is that they generally require the match to have a 
 match x {
     Some(x) if y => println!("{x}"),
     Some(x) if !y => println!("{x}"),
-    None => println!("no"),
+    None => panic!("Silly compiler"),
 }
 ```
 
@@ -450,6 +450,7 @@ enum Message {
 let msg = Message::Hello { id: 5 };
 
 match msg {
+    // Match `id` and bind it to `id_variable`.
     Message::Hello {
         id: id_variable @ 3..=7,
     } => println!("Found an id in range: {}", id_variable),

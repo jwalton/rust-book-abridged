@@ -11,23 +11,21 @@ What makes an Object Oriented language? There are many different definitions, bu
 
 It's easy to see how Rust borrows from these concepts and can be used as an OO language. `struct`s in Rust have data and can have methods defined on them and so are similar to objects. Members and methods of a `struct` can be `pub` or private (privacy in Rust is a little different than in other OO languages, but that's something that can be said of many OO languages).
 
-Rust doesn't really have inheritance. But inheritance has fallen out of style in modern program design, often being replaced with composition instead, and traits allow us to provide default implementations for methods which allows a lot of the same sort of code reuse that inheritance traditionally gives us.
+Rust doesn't really have inheritance. But inheritance has fallen out of style in modern software design, often being replaced with composition instead, and traits allow us to provide default implementations for methods which allows a lot of the same sort of code reuse that inheritance traditionally gives us.
 
 Using traits we can easily implement polymorphism in Rust, and we've already seen some examples of this; the `Iterator` trait allows us to pass any number of different types of objects to a `for` loop, for example. _Trait objects_ let us take this a step further.
 
 ## 17.2 - Using Trait Objects That Allow for Values of Different Types
 
-In [chapter 8][chap8] we mentioned that a vector can only hold one type. We showed a workaround where we stored a `SpreadsheetCell` enum in a vector, and then used different variants of the enum to store different types. But let's suppose we were implementing a GUI library. We might want a vector of "components" we need to draw on the screen - buttons, select boxes, links, etc... We could use the `enum` trick here to represent all these different component types, but a common feature of GUI libraries is letting users define their own custom components. We can't possibly know all the custom component types ahead of time, so an enum here is going to let us down.
+In [chapter 8][chap8] we mentioned that a vector can only hold one type. We showed a workaround where we stored a `SpreadsheetCell` enum in a vector, and then used different variants of the enum to store different types. But let's suppose we were implementing a GUI library. We might want a vector of "components" we need to draw on the screen - buttons, select boxes, links, etc... We could use the `enum` trick here to represent all these different component types, but a common feature of GUI libraries is letting users define their own custom components. We can't possibly know all the custom component types ahead of time, so here an enum is going to let us down.
 
 To do this in a class based language we might define a `Component` abstract class with a `draw` method, and then various subclasses of `Component` could implement `draw` differently. In Rust we don't have inheritance, so to do this we'll have to use traits.
 
 ### Defining a Trait for Common Behavior
 
-What we'll do is create a `Draw` trait, with a single method called `draw`. Component implementations can implement the `Draw` trait, and we can have a vector which is a collection of _trait objects_.
-
 At runtime, a trait object will be a pair of pointers in memory - one to the instance of a specific type that implements our trait, and another to a table of methods defined on the trait to call at runtime (similar to a v-table in C++). We create a trait object by specifying a pointer (this could be a simple reference or a smart pointer like a `Box<T>`) and the `dyn` keyword (for "dynamic"). In [chapter 19][chap19] we'll talk about the `Sized` trait, and why a pointer is required here.
 
-Let's see some code. Here's our library in _src/lib.rs_:
+Fo our GUI library, we'll create a `Draw` trait, with a single method called `draw`. Instead of storing a vector of buttons or a vector of dialogs, we'll store a vector of _trait objects_:
 
 ```rust title="src/lib.rs"
 pub trait Draw {
@@ -59,9 +57,9 @@ impl Draw for Button {
 }
 ```
 
-The `Draw` trait here should look familiar - if you skipped ahead in this book and this syntax looks unfamiliar, then see [chapter 10][chap10].
+The `Draw` trait should look familiar - if you skipped ahead in this book and this syntax looks unfamiliar, then see [chapter 10][chap10].
 
-The `Screen` struct here has a `components` which has some new syntax: it is a vector of `Box<dyn Draw>`, or in other words a vector of trait objects that implement the `Draw` trait. `Box<dyn Draw>` is a stand-in for any type inside a `Box` that implements `Draw`. `Screen` also has a `run` method which calls the draw method on each member of `components`.
+The `Screen` struct has a `components` which has some new syntax: it is a vector of `Box<dyn Draw>`, or in other words a vector of trait objects that implement the `Draw` trait. `Box<dyn Draw>` is a stand-in for any type inside a `Box` that implements `Draw`. `Screen` also has a `run` method which calls the draw method on each member of `components`.
 
 It's important to note that a trait object is very different from a trait bound. If we'd implemented Screen as a generic type with a trait bound:
 
@@ -92,6 +90,8 @@ Let's look at a crate that uses this library in _src/main.rs_:
 ```rust title="src/main.rs"
 use gui::{Button, Screen};
 
+// Define a custom SelectBox component, not
+// in the gui library.
 struct SelectBox {
     width: u32,
     height: u32,
@@ -146,15 +146,15 @@ let button = Button {
 button.draw();
 ```
 
-Here, at compile time we know that `button` is of type `Button`, and we can work out which `draw` function to call at compile time. This is called _static dispatch_.
+Here, the compiler knows that `button` is of type `Button`, and can work out which `draw` function to call at compile time. This is called _static dispatch_.
 
 There's a small performance impact to dynamic dispatch, since we have this extra pointer to follow at runtime. Also, in the static dispatch case we can do performance optimizations like inlining which are not available in the dynamic dispatch case.
 
 ## 17.3 - Implementing an Object-Oriented Design Pattern
 
-In this chapter we're going to implement a simple blogging server. A post on the server can be in one of three states: when first created a post will be a "draft". Once the user is done creating the draft, they can ask for a review which will move the post to the "review" state. Finally once reviewer, the post will move to the "published" state. We want to make sure the text for a post isn't published to our blog site until the post is in the published state.
+In this section we're going to implement a simple blogging server. A post on the server can be in one of three states: when first created a post will be a "draft". Once the user is done creating the draft, they can ask for a review which will move the post to the "review" state. Finally once reviewed, the post will move to the "published" state. We want to make sure the text for a post isn't published to our blog site until the post is in the published state.
 
-This is a pretty simple example, and I'm sure you could easily imagine implementing this with a state enum and some methods on the Post, but since this is a chapter about OO design, we'll represent the state of the post using the [state pattern](https://en.wikipedia.org/wiki/State_pattern), one of the original twenty-three design patterns documented by the Gang of Four. (We're going to actually implement this twice - once using the OO pattern, and once in a way that's a bit more natural for Rust.) You can find the finished code for this example on [this book's github page](https://github.com/jwalton/rust-book-abridged/tree/master/examples/ch17-post-state-pattern].
+This is a pretty simple example, and I'm sure you could easily imagine implementing this with a state enum and some methods on the Post, but since this is a chapter about OO design, we'll represent the state of the post using the [state pattern](https://en.wikipedia.org/wiki/State_pattern), one of the original twenty-three design patterns documented by the [Gang of Four](https://en.wikipedia.org/wiki/Design_Patterns). (We're going to actually implement this twice - once using the OO pattern, and once in a way that's a bit more natural for Rust.) You can find the finished code for this example in [this book's github repo](https://github.com/jwalton/rust-book-abridged/tree/master/examples/ch17-post-state-pattern).
 
 As [Wikipedia](https://en.wikipedia.org/wiki/State_pattern) puts it:
 
@@ -162,8 +162,6 @@ As [Wikipedia](https://en.wikipedia.org/wiki/State_pattern) puts it:
 >
 > - An object should change its behavior when its internal state changes.
 > - State-specific behavior should be defined independently. That is, adding new states should not affect the behavior of existing states.
-
-The advantage to using the state pattern here is that we can add new states without affecting the existing states.
 
 In _src/lib.rs_, let's write a quick unit test to walk through what our API and workflow will look like:
 
@@ -188,7 +186,7 @@ mod tests {
 }
 ```
 
-Notice that our public API doesn't event know anything about our state pattern. The idea here will be that `Post` has a `state` which will be a State object. There will be a `Draft` struct, a `PendingReview` struct, and a `Published` struct that represent our different states and all are going to implement the `State` trait. When you call into a method on `Post` like `post.request_review()`, this method will delegate to the current state by doing roughly the equivalent of `this.state = this.state.request_review()`, so the state can control what the next state will be.
+Notice that our public API doesn't know anything about our state pattern. The idea here will be that `Post` has a `state` which will be a state object. There will be a `Draft` struct, a `PendingReview` struct, and a `Published` struct that represent our different states and all are going to implement the `State` trait. When you call into a method on `Post` like `post.request_review()`, this method will delegate to the current state by doing roughly the equivalent of `this.state = this.state.request_review()`, so the state can control what the next state will be.
 
 Here's the implementation of `Post`, also in _src/lib.rs_:
 
@@ -236,11 +234,11 @@ impl Post {
 }
 ```
 
-The `State` trait has `request_review`, `approve`, and `content` methods. State has a default implementation of `content`, so not all the implementors have to reimplement it, but the others will need to be implemented by each `State` individually. The `request_review` and `approve` methods on `State` take a `self: Box<Self>` as their first parameter. This means this method will only be available on a `Box<T>` holding the type. This also takes ownership of the `Box`, effectively invalidating the previous state.
+The `State` trait has `request_review`, `approve`, and `content` methods. State has a default implementation of `content`, so not all the implementors have to reimplement it, but the other methods will need to be implemented by each `State` individually. The `request_review` and `approve` methods on `State` take a `self: Box<Self>` as their first parameter. This means this method will only be available on a `Box<T>` holding the type. This also takes ownership of the `Box`, effectively invalidating the previous state.
 
 `Post` has some state and some content, both of which are private. We could have made `content` public, but we want to make the content of a `Post` hidden until the post is in the published state, so we created a `content` getter method which delegates to the current state.
 
-Post's constructor creates a new `Draft` state, since this is the state we want to start out in. Since the `state` field is private, can't create a Post in any other state. Post's state is an optional trait object of type `Option<Box<dyn State>>`. We'll talk about why it's an `Option` in just a second.
+Post's constructor creates a new `Draft` state, since this is the state we want to start out in. Since the `state` field is private, we can't create a Post in any other state. Post's state is an optional trait object of type `Option<Box<dyn State>>`. We'll talk about why it's an `Option` in just a second.
 
 The `add_text` method takes a mutable reference to self, since it modifies the content of the post. Notice it doesn't interact with the state at all, because no matter what state a post is in, we want to be able to add text. All the other methods on `Post` delegate to the current state. The `request_review` and `approve` methods look very similar - they call into the current state to get the new state, and set self.state. But... they're also a little wordy:
 
@@ -252,7 +250,7 @@ The `add_text` method takes a mutable reference to self, since it modifies the c
     }
 ```
 
-Why not just `self.state = self.state.request_review()` here? The problem here is that `self.state.request_review()` would try to take ownership of `self.state`, but you can't take ownership of a _part_ of a struct. Remember that ownership is about controlling some allocated memory, and a struct is allocated as a single block of memory. If we took ownership of `self.state` and didn't fill it back in, what would be there in memory? To get around this we make `self.state` an `Option`, and then `self.state.take()` will take ownership of the value in the `Option` and replace it with `None` temporarily. It's never `None` for more than a moment.
+Why not just `self.state = self.state.request_review()` here? The problem here is that `self.state.request_review()` would try to take ownership of `self.state`, but you can't take ownership of a _part_ of a struct. Remember that ownership is about controlling some allocated memory, and a struct is allocated as a single block of memory. If we took ownership of `self.state`, what would be there in memory inn its place? To get around this we make `self.state` an `Option`, and then `self.state.take()` will take ownership of the value in the `Option` and replace it with `None` temporarily. Since after the `take` we immediately reassign it, it's never `None` for more than an instant.
 
 The `content` method also needs to deal with the fact that `self.state` is an `Option`:
 
@@ -262,7 +260,7 @@ The `content` method also needs to deal with the fact that `self.state` is an `O
     }
 ```
 
-`as_ref` gives us back a reference to the contents of the `Option`. We call `as_ref` on the Option because we don't want to take ownership of the `Box<dyn state>` in the `Option`. Again, we can't here - `self.state` is an immutable reference, so we can't take ownership of the value inside the `Option` even if we wanted to, since `self`, and by extension `self.option` are both immutable in this context. We call `unwrap()` because we know that `self.state` will always contain a value. This is one of those examples of us knowing more than the compiler - we know `self.state` wil never be `None` here, so we can just panic instead of trying to deal with the case where it's `None`. After the `unwrap` we have a `&Box<dyn State>`, so deref coercion will take place until we ultimately call `content` on the current State's implementation.
+We call `as_ref` on the Option to convert the owned value into a ref, because we don't want to take ownership of the `Box<dyn state>` in the `Option`. (`self.state` is an immutable reference, so we can't take ownership of the value inside the `Option` even if we wanted to, since `self`, and by extension `self.option` are both immutable in this context.) We call `unwrap()` because we know that `self.state` will always contain a value. This is one of those examples of us knowing more than the compiler - we know `self.state` wil never be `None` here, so we can just panic instead of trying to deal with the case where it's `None`. After the `unwrap` we have a `&Box<dyn State>`, so deref coercion will take place until we ultimately call `content` on the current State's implementation.
 
 Let's have a look at the `Draft` state:
 
@@ -314,7 +312,7 @@ impl State for Published {
 }
 ```
 
-The only thing interesting there is that `Published` overrides the default implementation of the `content` method. We need lifetime annotations on this method, since the returned reference will only be valid as long as the passed in `Post`.
+The only thing interesting here is that `Published` overrides the default implementation of the `content` method. We need lifetime annotations on this method, since the returned reference will only be valid as long as the passed in `Post`.
 
 ### Trade-offs of the State Pattern
 
@@ -354,7 +352,7 @@ I encourage you to give this a try, but you may find ownership rules will make t
 
 ### Encoding States and Behavior as Types
 
-Let's take a look at another way of implementing the same behavior, but we're not going to implement it in exactly the same way we would in a traditional OO language. We're going to instead try to encode our state and associated behavior as explicit types. You can find the finished code for this example on [this book's github page](https://github.com/jwalton/rust-book-abridged/tree/master/examples/ch17-post-state-types]. First let's create a `Post` and a `DraftPost`:
+Let's take a look at another way of implementing the same behavior, but we're not going to implement it in exactly the same way we would in a traditional OO language. We're going to instead try to encode our state and associated behavior as explicit types. You can find the finished code for this example in [this book's github repo](https://github.com/jwalton/rust-book-abridged/tree/master/examples/ch17-post-state-types). First let's create a `Post` and a `DraftPost`:
 
 ```rust title="src/lib.rs"
 pub struct Post {
@@ -384,7 +382,7 @@ impl DraftPost {
 }
 ```
 
-We can still call `Post::new`, but this now returns a new `DraftPost` type. `DraftPost` doesn't even implement `content`, so we can't even ask for the content of a `DraftPost` without creating a compile time error. This is an example of "making invalid state unrepresentable" - we don't want to let you get the content of a draft post, and now it's impossible to even write the code that would do such a thing. We want to be able to request a review on our `DraftPost`, so let's add a method for that:
+We can still call `Post::new`, but this now returns a new `DraftPost` type. `DraftPost` doesn't even implement `content`, so we can't even ask for the content of a `DraftPost` without generating a compile time error. This is an example of "making invalid state unrepresentable" - we don't want to let you get the content of a draft post, and now it's impossible to even write the code that would do such a thing. We want to be able to request a review on our `DraftPost`, so let's add a method for that:
 
 ```rust title="src/lib.rs"
 // --snip--
@@ -435,7 +433,7 @@ mod tests {
 }
 ```
 
-This isn't completely better than the previous example, rather there are trade offs here that are different. In this test case, you can see that whenever a post changes state, we have used variable shadowing to create a new variable with a new type. If we change our internal implementation so that `add_text` transitioned to a new state, then this called would break, so our implementation is not nearly as encapsulated as it was before.  It's also a little more challenging in this model to create a vector of "posts" - we'd have to wrap these different post states in an enum or in some common trait and use a trait object to stuff them into a vector together, and both of those would "undo" some of the benefits we've just outlined in different ways.
+This isn't better in every way than the previous example, rather there are trade offs here that are different. In this test case, you can see that whenever a post changes state, we have used variable shadowing to create a new variable with a new type. If we change our internal implementation so that `add_text` transitioned to a new state, then the caller here would break, so our implementation is not nearly as encapsulated as it was before. It's also a little more challenging in this model to create a vector of "posts" - we'd have to wrap these different post states in an enum or in some common trait and use a trait object to store them in a vector together, and both of those would "undo" some of the benefits we've just outlined in different ways.
 
 Which of these tradeoffs you make are going to depend heavily on what you're trying to implement, but hopefully this chapter has given you some new tools to use to approach different problems.
 

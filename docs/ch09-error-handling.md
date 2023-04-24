@@ -23,6 +23,12 @@ fn main() {
 
 When a panic occurs in the main thread, it halts the program. If the `RUST_BACKTRACE=1` environment variable is set, then the program will also print a stack trace showing where the panic happened, although this only works if the binary contains debug symbols. (If a panic occurs in another thread, it will only halt that thread. See [chapter 16][chap16].)
 
+:::tip
+
+There's also a `todo!` macro which works just like the `panic!` macro, which can be used to mark places in your code where you have yet to fill in an implementation.
+
+:::
+
 ### Unwinding the Stack or Aborting in Response to a Panic
 
 There are two options for what happens when a panic occurs. By default, the program starts _unwinding_, which means it starts walking back up the stack, freeing memory and cleaning up data. The alternative is _aborting_ in which the program just immediately halts and lets the OS clean up everything (if you've ever written a C program, you've probably at some point seen the dreaded message "segmentation fault (core dumped)" - aborting is a bit like this).

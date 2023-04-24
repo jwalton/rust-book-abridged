@@ -10,7 +10,7 @@ If you're looking for the full source for this project, it's [in the GitHub repo
 
 One problem we're going to run into is that, in order to call `thread.join()`, we're going to have to move the `thread` out of the `Worker`. We can't move _part_ of a struct, so we're going to have to use the same trick we did in [chapter 17][chap17] and store the thread in an `Option` so we can set it to `None`.
 
-Calling `join` isn't enough though. This will wait until each thread quits, but right now the closure in each thread is an infinite loop! We need to somehow signal to the `Worker`'s thread that it should stop accepting new jobs. We can do this by dropping the `sender` half of the channel. This will cause the receiver to wake up and return an error. We'll have to pull the same trick we did with `thread` and store the `sender` in an `Option` to make this work. We'll also want to handle the error from `recv` correctly instead of just panicking.
+Calling `join` isn't enough though. This will wait until each thread quits, but right now the closure in each thread is an infinite loop! We need to somehow signal to the `Worker`'s thread that it should stop accepting new jobs. We can do this by dropping the `sender` half of the channel. This will cause the receiver to wake up and return an error. We'll have to pull the same trick we did with `thread` and store the `sender` in an `Option` to make this work, otherwise there's no way for us to drop the sender. We'll also want to handle the error from `recv` correctly instead of just panicking.
 
 Here's the updated library:
 
@@ -124,7 +124,7 @@ Now we just need some way to make the server shut down. A simple way to do this 
     // --snip--
 ```
 
-Now our server will shut down after two requests.
+Now our server will shut down after two requests. Not exactly something we'd want to do in production, but it will prove our shutdown code is working here.
 
 ## Next Steps
 
@@ -138,4 +138,7 @@ The original Rust book has some suggestions about places you could take this pro
 
 Another fun one might be to try to hook the SIGINT and SIGTERM signals so a CTRL-C will cause the server to shut down gracefully.
 
+This is as far as the original Rust book went, but you can continue on to our [special bonus chapter][chap21] to find out how we can rewrite this web server using async Rust!
+
 [chap17]: ../ch17-object-oriented-features.md "Chapter 17: Object Oriented Features of Rust"
+[chap21]: ../ch21-async.md "Chapter 21: Bonus Chapter: Async Programming"

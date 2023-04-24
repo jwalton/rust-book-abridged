@@ -35,9 +35,9 @@ We've switched from an `if` to a `match`, and added a "/sleep" route. We have to
 
 The important thing here is, if you open up your browser and try to load [http://localhost:7878/sleep](http://localhost:7878/sleep), it'll take about five seconds for the page to load. If you tap CTRL-R to reload the page twice in quick succession, it will take about 10 seconds! Your browser sent two requests, and is waiting for the second one to finish.
 
-## Spawning New Threads
+## Improving Throughput with a Thread Pool
 
-We could solve this problem by just creating a new thread for each incoming connection:
+We _could_ solve this problem by just creating a new thread for each incoming connection:
 
 ```rust
 for stream in listener.incoming() {
@@ -48,8 +48,6 @@ for stream in listener.incoming() {
     });
 }
 ```
-
-## Improving Throughput with a Thread Pool
 
 Starting up an OS level thread has some costs associated with it, and if we start up too many of them we may run out of system resources, so a common pattern for a situation like this is to use a _thread pool_. We pre-allocate a number of threads that will be sitting idle, and then whenever a request comes in we hand it off to an idle worker from the pool.
 
@@ -64,13 +62,11 @@ for stream in listener.incoming() {
 }
 ```
 
-That's all there is too it! Except... wait... Rust can't find the `ThreadPool` symbol. We'll have to bring it into scope to use it, but before that we'll have to build a ThreadPool!
+That's all there is too it! Except Rust can't find the `ThreadPool` symbol. We'll have to bring it into scope to use it, but before that we'll have to build a ThreadPool!
 
 ## Building a ThreadPool
 
-Before we show the code for a ThreadPool, let's take a moment to think through what it's going to look like.
-
-We want to store a collection of threads. We won't know the number of threads until runtime so a vector is a reasonable choice here, but what exactly is being stored in the vector? How do you store a thread? If we have a look at the signature for `thread::spawn`:
+Before we show the code for a ThreadPool, let's take a moment to think through what it's going to look like. We want to store a collection of threads. We won't know the number of threads until runtime so a vector is a reasonable choice here, but what exactly is being stored in the vector? How do you store a thread? If we have a look at the signature for `thread::spawn`:
 
 ```rust
 pub fn spawn<F, T>(f: F) -> JoinHandle<T>
@@ -97,7 +93,7 @@ impl Worker {
     /// Create a new Worker with the given id.
     pub fn new(id: usize) -> Worker {
         let thread = thread::spawn(|| {
-            // TODO: ???
+            todo!("Zhu Li, do the thing!");
         });
 
         Worker { id, thread }
@@ -105,13 +101,13 @@ impl Worker {
 }
 ```
 
-We're going to execute jobs on these threads, but what's a job? We already know they are closures. Since we want our API to be similar to `thread::spawn`, a job is going to be the same as type `F` above. It'll be `FnOnce()` since it's a function we want to call exactly once. It will also need to be `Send` so we can transfer it to our worker thread, and `'static` because we don't know how long the thread will take to run. So we'll define a `Job` as:
+We're going to execute jobs on these threads, but what's a job? We already know they are closures. Since we want our API to be similar to `thread::spawn`, a job is going to be the same type as `F` in `thread::spawn` above. It'll be `FnOnce()` since it's a function we want to call exactly once. It will also need to be `Send` so we can transfer it to our worker thread, and `'static` because we don't know how long the thread will take to run. So we'll define `Job` as an alias for:
 
 ```rust
 type Job = Box<dyn FnOnce() + Send + 'static>;
 ```
 
-Whenever we call `pool.execute` and pass in a job, we want that job to be run by a free thread from the pool. How does this happen? What happens inside the thread we spawn inside the Worker? We've conveniently left this out of our `Worker` above. There are many ways we could do this, but the approach we will use here is to send each job we want to execute to a worker over a channel.
+Whenever we call `pool.execute` and pass in a job, we want that job to be run by a free thread from the pool. How does this happen? What happens inside the thread we spawn inside the Worker? We've conveniently left this out of our `Worker` above. There are many ways we could do this, but the approach we will use here is to send each job over a channel.
 
 Each `Worker` will hang on to the receiver side of a channel. The thread inside a `Worker` can just iterate on the channel and execute each job it receives in series. But you may recall that the channels we've been using are from the `mpsc` library, which stands for "multiple producers, single consumer". If we're creating four threads, we could create four channels and give one receiver from each to each worker. In this case, though, we'd have to decide which sender to send a new job to. How do we know which threads are free to accept new jobs?
 
@@ -153,6 +149,7 @@ impl ThreadPool {
         // all of our threads.
         let mut workers = Vec::with_capacity(size);
 
+        // Create new workers and add them to the pool.
         for id in 0..size {
             workers.push(Worker::new(id, Arc::clone(&receiver)));
         }
@@ -220,10 +217,10 @@ If you give this a try, it will appear to work, but our "double-reload" example 
     });
 ```
 
-We'll end up with one of our threads doing all the work.
+One thread will take the mutex and then loop with it held, so one of our threads doing all the work.
 
 There are also a few things wrong with this code as it stands.  First, we're obviously glossing over some error handling, which is fine for this example.  Second, if you reload the "/sleep" route many times, you'll find eventually it will start taking a long time to load.  What's happening here is that we're queueing up jobs in the channel.
 
-Ideally if all the workers are busy, we'd return a 503 to let the client know we are too busy to handle the request.  We could do this in a few ways; we could use the `atomic` package to increment a counter when we start a job and decrement it when we finish one, so we know how many jobs are in progress.  There's also a `channel::sync_channel` which allows creating a channel with a bounded size. The sender in this case has a `try_send` which will return an error if the channel is full.
+Ideally if all the workers are busy, we'd return a 503 to let the client know we are too busy to handle the request.  We could do this in a few ways; we could use the `atomic` package to increment a counter when we start a job and decrement it when we finish one, so we know how many jobs are in progress.  There's also a `channel::sync_channel` which allows creating a channel with a bounded size. The sender in this case has a `try_send` which will return an error if the channel is full.  This is left as an exercise for the reader.
 
 Next we'll look at how to adapt our web server to [shut down gracefully](ch20-03-graceful-shutdown.md).

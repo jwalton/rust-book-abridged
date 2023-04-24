@@ -20,9 +20,9 @@ fn main() {
 }
 ```
 
-The `fn` type her is called a _function pointer_. You may recall [from chapter 13][chap13] that to declare a function that takes a closure as a parameter, we declared a generic function and used a trait bound on the generic type, just as `FnOnce()`. The difference between a closure and a function pointer is that the function pointer is a concrete type.
+The `fn` type her is called a _function pointer_. You may recall [from chapter 13][chap13] that to pass a closure as a parameter, we declared a generic function and used a trait bound on the generic type to `FnOnce`, `FnMut`, or `Fn`. The difference between a closure and a function pointer is that the function pointer is a concrete type.
 
-Function pointers implement all three generic traits (`FnOnce`, `FnMut`, and `Fn`) so you can always pass a function pointer to a function that expects a trait. For this reason, it's generally more flexible to write a function that takes a closure. If you're interacting with C code, you might have to use a function pointer however.
+Function pointers implement all three generic traits (`FnOnce`, `FnMut`, and `Fn`) so you can always pass a function pointer to a function that expects a trait. For this reason, it's generally more flexible to write a function that takes a closure. You'll likely have to use a function pointer instead If you're interacting with C code.
 
 Here's an example of using a function in place of a closure:
 

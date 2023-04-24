@@ -1,6 +1,6 @@
 # 20.1 - Building a Single-Threaded Web Server
 
-In this chapter we're going to build a simple HTTP server to put together a number of things we've learned so far. As usual, the code for this project is [available on the GitHub repo](https://github.com/jwalton/rust-book-abridged/tree/master/examples/ch20-single-threaded-web-server).
+In this chapter we're going to build a simple HTTP server to put together a number of things we've learned so far. As usual, the code for this project is [available in the GitHub repo](https://github.com/jwalton/rust-book-abridged/tree/master/examples/ch20-single-threaded-web-server).
 
 ## HTTP Requests
 
@@ -102,7 +102,7 @@ fn handle_connection(mut stream: TcpStream) {
     let http_request: Vec<_> = buf_reader
         .lines()
         .map(|result| result.unwrap())
-        .take_while(|line| !line.is_empty()) // Blank line is end of request.
+        .take_while(|line| !line.is_empty()) // Blank line is end of headers.
         .collect();
 
     let request_line = &http_request[0];
@@ -136,15 +136,13 @@ Note that we're using `io::prelude::*`. The `io` library has it's own "prelude" 
 
 ## Listening to the TCP Connection
 
-Let's start with the `main` function. We call `TcpListener::bind` to start listening on a port. This returns a `TcpListener` instance, so it's basically a constructor for `TcpListener`. Note that we're binding to "127.0.0.1", so you'll only be able to access this web server from the same machine you're running it on. `bind` can fail for a variety of reasons. For example, if we tried to bind to port 80 and we weren't root, this would fail because we don't have sufficient permissions. We're glossing over all the error handling with a call to `unwrap`.
+Let's start with the `main` function. We call `TcpListener::bind` to start listening on a port. This returns a `TcpListener` instance, so it's basically a constructor for `TcpListener`. Note that we're binding to "127.0.0.1", so you'll only be able to access this web server from the same machine you're running it on. We could bind to "0.0.0.0" - the [unspecified address](https://doc.rust-lang.org/std/net/struct.Ipv4Addr.html#method.is_unspecified) - to bind to all local interfaces. `bind` can fail for a variety of reasons. For example, if we tried to bind to port 80 and we weren't root, this would fail because we don't have sufficient permissions, or some other process might have already bound the port. We're glossing over all the error handling with a call to `unwrap`.
 
 Once we have out `TcpListener` we call `incoming` on it, which returns an iterator of `Result<TcpStream, Error>`. We'll get an item from this iterator every time a client tries to connect. Note this iterator will never return `None`! This loop is going to go on forever (or at least until we hit CTRL-C to terminate this program). A connection attempt can fail for a variety of reasons. In a production web server we'd want to handle these, but here we're once again just calling `unwrap`. Finally we hand of the connection to `handle_connection`.
 
 ## Parsing the Request
 
-Our `handle_connection` function creates a new buffered reader to read the incoming bytes from the stream. We user our reader to read in the request, split it into lines, then collect lines into a vector until we reach an empty line.
-
-As we've seen before, calling `collect` requires us to annotate the type of `http_request` so `collect` will know what kind of collection to return.
+Our `handle_connection` function creates a new buffered reader to read the incoming bytes from the stream. We user our reader to read in the request, split it into lines, then collect lines into a vector until we reach an empty line. As we've seen before, calling `collect` requires us to annotate the type of `http_request` so `collect` will know what kind of collection to return.
 
 Once we have our request, we call into `send_response` to generate an appropriate response back to the client.
 

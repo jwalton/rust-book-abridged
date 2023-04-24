@@ -160,7 +160,7 @@ use std::{error::Error, fs};
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     let contents = fs::read_to_string(config.file_path)?;
 
-    // TODO: Implement me!
+    todo!("Implement me!");
 
     Ok(())
 }

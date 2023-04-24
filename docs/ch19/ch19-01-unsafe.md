@@ -6,7 +6,7 @@ Imagine we have a vector with six elements in it. We could create a mutable slic
 
 _Unsafe_ code in Rust is code where we're allowed to ignore or bypass some of the restrictions Rust places on us, and tell the compiler "Don't worry, I got this." Of course, sometimes we only think we know better than the compiler when in fact what we're actually doing is creating a hard-to-diagnose problem that we won't fund until our code is running in production. So it's not a bad idea to keep unsafe code to a minimum.
 
-But it's important to realize that "unsafe" code isn't "dangerous" code, it's just code that hasn't been inspected by the eagle eye of the Rust compiler. If you could teach the Rust compiler to look at C code, then pretty much all C code would be considered unsafe, but there are plenty of C programs out there doing useful work every day.
+But it's important to note that "unsafe" doesn't necessarily mean incorrect, it's just code that hasn't been inspected by the eagle eye of the Rust compiler. There are plenty of C programs in the world performing useful tasks that are correct (or reasonably correct) and C doesn't even have a borrow checker, so all C code is unsafe as far as a Rust programmer is concerned.
 
 We can write code inside an unsafe block or inside an unsafe function:
 
@@ -64,7 +64,7 @@ let address = 0x012345usize;
 let r = address as *const i32;
 ```
 
-Note that we're actually allowed to create pointers outside of unsafe code. Creating a pointer never hurt anyone, it's dereferencing a pointer that gets us into trouble, so the dereference is only allowed to happen inside an `unsafe` block.
+We're allowed to create pointers outside of unsafe code. Creating a pointer never hurt anyone, it's dereferencing a pointer that gets us into trouble, so the dereference is only allowed to happen inside an `unsafe` block.
 
 Why would you want to use a raw pointer instead of a reference? One case is for calling into C code. Another is when you want to build a "safe" abstraction that the borrow checker won't understand, like our "two mutable slices" example above. We'll see examples of both of these.
 
@@ -97,9 +97,9 @@ assert_eq!(a, &mut [1, 2, 3]);
 assert_eq!(b, &mut [4, 5, 6]);
 ```
 
-Here `split_at_mut` is going to call unsafe code, but that doesn't mean that it also has to be unsafe. In fact, the above code works because vector has this method on it already!
+`split_at_mut` is going to call unsafe code, but that doesn't mean that it also has to be unsafe. In fact, the above code works because vector has this method on it already!
 
-What we're doing here is creating a "safe abstraction". This is a very common pattern - we hide away the unsafe stuff behind an API that's easy and safe to use. This makes it so we only have to reason about our small API. Here's the implementation:
+What `split_at_mut` is doing here is creating a "safe abstraction". This is a very common pattern - we hide away the unsafe stuff behind an API that's easy and safe to use. This makes it so we only have to reason about our small API. Here's the implementation of `split_at_mut`:
 
 ```rust
 use std::slice;
@@ -119,7 +119,7 @@ fn split_at_mut(values: &mut [i32], mid: usize) -> (&mut [i32], &mut [i32]) {
 }
 ```
 
-Here the `slice::from_raw_parts_mut` is unsafe (because it uses a raw pointer to the underlying slice) so we need to call this inside an `unsafe` block.
+`slice::from_raw_parts_mut` is unsafe (because it uses a raw pointer to the underlying slice) so we need to call this inside an `unsafe` block.
 
 ### Using `extern` Functions to Call External Code
 
@@ -164,7 +164,7 @@ fn main() {
 
 Static variables are similar to constants, but we name them in `SCREAMING_SNAKE_CASE`. These variables are always in the `'static` lifetime, and accessing an immutable static variable is considered safe.
 
-Constants can be duplicated in memory, but static variables are always guaranteed to occupy the exact same memory, no matter where they are referenced in code. Unlike constants, static variables can also be `mut`, but accessing or modifying a mutable static variable is always unsafe:
+When we use a constant in Rust, the compiler may duplicate the constant in multiple places in memory if they are referenced in multiple places. Static variables, on the other hand, are always guaranteed to occur once in memory, so no matter where they are referenced in code you'll get back the same instance. Unlike constants, static variables can also be `mut`, but accessing or modifying a mutable static variable is always unsafe:
 
 ```rust
 static mut COUNTER: u32 = 0;
@@ -204,7 +204,9 @@ unsafe impl Foo for i32 {
 
 ## Accessing Fields of a Union
 
-A `union` is like a `struct`, but each field in the union occupies the same memory. Only one of the fields is ever safe to access at a time, depending on what is stored in the union. This example, for instance, will be four bytes long and holds either a `u32` or an `f32`:
+Unions are included in Rust mainly for calling into C code that uses them. If you want to access a union, it has to be done from an `unsafe` block.
+
+For the non-C programmers reading this, a `union` is like a `struct`, but each field in the union occupies the same memory. Only one of the fields is ever correct to access at a time, depending on what is stored in the union. This example, for instance, will be four bytes long and holds either a `u32` or an `f32`:
 
 ```rust
 #[repr(C)]
@@ -215,5 +217,3 @@ union MyUnion {
 ```
 
 Rust has no idea what's stored in this union, and you'll get back a `u32` or an `f32` depending on which one you access, but odds are only one of them contains a meaningful value. You can learn more about unions in [the Rust Reference](https://doc.rust-lang.org/stable/reference/items/unions.html).
-
-Unions are included in Rust mainly for calling into C code that uses them. If you want to access a union, it has to be done from an `unsafe` block.

@@ -4,7 +4,7 @@
 
 In the [previous section](./ch19-02-advanced-traits.md#using-the-newtype-pattern-to-implement-external-traits-on-external-types), we discussed using the _newtype_ pattern to wrap an existing type in a tuple.
 
-The newtype pattern is useful in a few other scenarios too. If we create a `Millimeter` type:
+The newtype pattern is useful in a few other scenarios too. If we create a `Millisecond` type:
 
 ```rust
 struct Millisecond(u32);
@@ -14,7 +14,7 @@ fn sleep(duration: Millisecond) {
 }
 ```
 
-It makes it very clear that `sleep` expects a value in milliseconds. The newtype pattern can also be used to wrap a type and give it a different public API, or to give a nicer API to a data structure.
+This makes it very clear that `sleep` expects a value in milliseconds (although in this particular example you'd be better off using [`std::time::Duration`](https://doc.rust-lang.org/std/time/struct.Duration.html). The newtype pattern can also be used to wrap a type and give it a different public API.
 
 ## Creating Type Synonyms with Type Aliases
 
@@ -61,15 +61,13 @@ fn returns_long_type() -> Thunk {
 }
 ```
 
-A meaningful name for your alias can make your code much easier to read and write.
-
-Another example of this is in `std::io`. Many functions here return a `Result` with a `std::io::Error` as the error type, so `std:io` defines:
+A meaningful name for your alias can make your code much easier to read and write. Another example of this is in `std::io`. Many functions here return a `Result` with a `std::io::Error` as the error type, so `std:io` defines:
 
 ```rust
 type Result<T> = std::result::Result<T, std::io::Error>;
 ```
 
-which shortens up a lot of code in this module.
+which makes a lot of function signatures in this module much shorter and easier to read.
 
 ## The Never Type that Never Returns
 

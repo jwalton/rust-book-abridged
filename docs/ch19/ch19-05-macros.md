@@ -6,7 +6,7 @@ Macros are a kind of "metaprogramming". When we write a Macro, we're actually wr
 
 - Macros run at compile time, so they have no runtime performance impact (although they can generate code that runs at runtime, which might).
 - Macros can take a variable number of parameters (such as the `println!` marco does) which normal Rust functions cannot.
-- Macros must be brought into scope or defined before they are called.
+- Macros must be brought into scope or defined locally before they are called.
 
 ## Declarative Macros with `macro_rules!` for General Metaprogramming
 
@@ -26,7 +26,7 @@ fn main() {
 
 ```
 
-The `macro_rules! four` says we're going to declare a macro named `four!`. Inside the `{}`, the rest of this macro is a little similar to a `match` expression. Each rule in a `macro_rules!` is of the format `(MATCHER) => {EXPANSION};`. When we call a macro, we don't actually pass in parameters like `i32`s or `&str`s, instead we're passing in a snippet of Rust code. When the macro runs, it will try to match the passed in token tree to each matcher in turn. Once it finds a match, we'll replace the whole macro with whatever is in the expansion part.
+The `macro_rules! four` says we're going to declare a macro named `four!`. Inside the `{}`, the rest of this macro is similar to a `match` expression (in this example we only have one arm). Each rule in a `macro_rules!` is of the format `(MATCHER) => {EXPANSION};`. When we call a macro, we don't actually pass in parameters like `i32`s or `&str`s, instead we're passing in a snippet of Rust code. When the macro runs, it will try to match the passed in token tree to each matcher in turn. Once it finds a match, we'll replace the whole macro with whatever is in the expansion part.
 
 In the case of our macro above, we just have a single "empty matcher". If you were to try calling `let x = four!("hello");`, you'd get an error telling you `` no rules expected the token `"hello"` ``.
 
@@ -56,14 +56,12 @@ macro_rules! vec {
 ```
 
 :::info
-This is actually a slightly simplified version of `vec!`, because the original tries to preallocate the correct amount of data in the new vector, and this would only serve to make this example even more confusing than it already is.
+This is actually a slightly simplified version of `vec!`. The original tries to preallocate the correct amount of data in the new vector.
 :::
 
 First, notice we've added the `#[macro_export]` annotation. Without this annotation, this macro can't be used outside of the crate it is defined in.
 
-The `$(),*` part of the matcher here is called a _repetition_. These have the form `$ (...) sep rep`, where `( ... )` is the part that's being repeated, `sep` is an optional separator token, and `rep` defines how many times the pattern can repeat - `?` for zero or one, `*` for zero or more, and `+` for one or more (like in a regular expression).
-
-So `( $( $x:expr ),* )` matches zero or more expressions, separated by commas.
+The `$(),*` part of the matcher here is called a _repetition_. These have the form `$ (...) sep rep`, where `( ... )` is the part that's being repeated, `sep` is an optional separator token, and `rep` defines how many times the pattern can repeat - `?` for zero or one, `*` for zero or more, and `+` for one or more (like in a regular expression). So `( $( $x:expr ),* )` matches zero or more expressions, separated by commas, and each time through the repetition we assign the matched part to the `$x` metavariable.
 
 On the right hand side of the `=>` we have the code we're going to expand this to. Inside the `$()` is the repetition part - this code will be inserted once for each time the repetition matches on the matcher side.
 
@@ -81,9 +79,7 @@ So if we were to write `vec![1, 2, 3]`, at compile time this would get replaced 
 
 ## Procedural Macros for Generating Code from Attributes
 
-A _procedural macro_ is a Rust function that takes in a `TokenStream` of some input source code and produces `TokenStream` of some generated code. There are three kinds of procedural macros: custom derive, attribute-like, and function-like. When we `#[derive()]` a trait, it's going through a custom-derive macro.
-
-Right now procedural macros need to be defined in their own special crate for technical reasons we're going to hand wave away for this book.
+A _procedural macro_ is a Rust function that takes in a `TokenStream` of some input source code and produces a `TokenStream` of some generated code. There are three kinds of procedural macros: custom derive, attribute-like, and function-like. When we `#[derive()]` a trait, it's going through a custom-derive macro. Procedural macros need to be defined in their own special crate for technical reasons we're going to hand wave away for this book, although this will likely change in the future.
 
 ### How to Write a Custom `derive` Macro
 
@@ -203,7 +199,7 @@ fn impl_hello_macro(ast: &syn::DeriveInput) -> TokenStream {
 }
 ```
 
-The `quote!` macro here helps us define the code we want to generate. Note the `#name` template inside of `quote!`. `quote!` has other cool template tricks, so be sure to [check out its documentation](https://docs.rs/quote/latest/quote/). The `stringify!` macro is built into rust and here turns an expression like `1 + 2` into a string like `"1 + 2"`, or here `Pancakes` into `"Pancakes"`.
+The `quote!` macro here helps us define the code we want to generate. Note the `#name` template inside of `quote!`. `quote!` has other cool template tricks, so be sure to [check out its documentation](https://docs.rs/quote/latest/quote/). The `stringify!` macro is built into rust and turns an expression like `1 + 2` into a string like `"1 + 2"`, or here `Pancakes` into `"Pancakes"`.
 
 If you want to run this, there's just one thing left to do. In our _pancakes_ project, we need to add dependencies to _Cargo.toml_ so it can find our trait and macro:
 
