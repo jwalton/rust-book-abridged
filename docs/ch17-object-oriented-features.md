@@ -154,7 +154,7 @@ There's a small performance impact to dynamic dispatch, since we have this extra
 
 In this chapter we're going to implement a simple blogging server. A post on the server can be in one of three states: when first created a post will be a "draft". Once the user is done creating the draft, they can ask for a review which will move the post to the "review" state. Finally once reviewer, the post will move to the "published" state. We want to make sure the text for a post isn't published to our blog site until the post is in the published state.
 
-This is a pretty simple example, and I'm sure you could easily imagine implementing this with a state enum and some methods on the Post, but since this is a chapter about OO design, we'll represent the state of the post using the [state pattern](https://en.wikipedia.org/wiki/State_pattern), one of the original twenty-three design patterns documented by the Gang of Four. (We're going to actually implement this twice - once using the OO pattern, and once in a way that's a bit more natural for Rust.) You can find the finished code for this example on [this book's github page](https://github.com/jwalton/rust-book-abridged/examples/ch17-post-state-pattern].
+This is a pretty simple example, and I'm sure you could easily imagine implementing this with a state enum and some methods on the Post, but since this is a chapter about OO design, we'll represent the state of the post using the [state pattern](https://en.wikipedia.org/wiki/State_pattern), one of the original twenty-three design patterns documented by the Gang of Four. (We're going to actually implement this twice - once using the OO pattern, and once in a way that's a bit more natural for Rust.) You can find the finished code for this example on [this book's github page](https://github.com/jwalton/rust-book-abridged/tree/master/examples/ch17-post-state-pattern].
 
 As [Wikipedia](https://en.wikipedia.org/wiki/State_pattern) puts it:
 
@@ -354,7 +354,7 @@ I encourage you to give this a try, but you may find ownership rules will make t
 
 ### Encoding States and Behavior as Types
 
-Let's take a look at another way of implementing the same behavior, but we're not going to implement it in exactly the same way we would in a traditional OO language. We're going to instead try to encode our state and associated behavior as explicit types. You can find the finished code for this example on [this book's github page](https://github.com/jwalton/rust-book-abridged/examples/ch17-post-state-types]. First let's create a `Post` and a `DraftPost`:
+Let's take a look at another way of implementing the same behavior, but we're not going to implement it in exactly the same way we would in a traditional OO language. We're going to instead try to encode our state and associated behavior as explicit types. You can find the finished code for this example on [this book's github page](https://github.com/jwalton/rust-book-abridged/tree/master/examples/ch17-post-state-types]. First let's create a `Post` and a `DraftPost`:
 
 ```rust title="src/lib.rs"
 pub struct Post {

@@ -131,7 +131,7 @@ fn mutable_example() {
 }
 ```
 
-In `mutable_example`, notice that we've declared the `borrows_mutably` variable as mutable itself! If you think about a closure as an implicit data structure, containing data captured from the environment, then in order to mutate any values held in that structure we have to declare the owning variable as `mut`. Second, notice that in `mutable_example` we can't print the contents of `list` in between when we create `borrows_mutably` and when we call it, since `borrows_mutably` has a mutable reference to `list` and if we have a mutable reference, we can't have any other references at the same time.
+In `mutable_example`, notice that we've declared the `borrows_mutably` closure as mutable itself! If you think about a closure as an implicit data structure, containing data captured from the environment, then in order to mutate any values held in that structure we have to declare the owning variable as `mut`. Second, notice that in `mutable_example` we can't print the contents of `list` in between when we create `borrows_mutably` and when we call it, since `borrows_mutably` has a mutable reference to `list` and if we have a mutable reference, we can't have any other references at the same time.
 
 A closure will automatically take ownership of a value if it needs to. We can force a closure to take ownership of all captured values with the `move` keyword:
 
@@ -322,7 +322,7 @@ impl Config {
             return Err("not enough arguments");
         }
 
-        let query = args[1].clone();
+        let query = args[1].clone(); // <= Ugly clone! It hurts us!
         let file_path = args[2].clone();
 
         let ignore_case = env::var("IGNORE_CASE").is_ok();
@@ -336,7 +336,7 @@ impl Config {
 }
 ```
 
-and we promised that when we got to chapter 13, we'd talk more about that call to `clone`. Our problem here was that the `args` passed in here owns the strings we want to use, and we're only borrowing `args` so we can't take ownership of them. But, if we go look at where `build` is called:
+and we promised that when we got to chapter 13, we'd talk more about that call to `clone`. Our problem here was that the `args` vector passed in here owns the strings we want to use, and we're only borrowing `args` so we can't take ownership of them. But, if we go look at where `build` is called:
 
 ```rust
 let args: Vec<String> = env::args().collect();
@@ -347,7 +347,7 @@ let config = Config::build(&args).unwrap_or_else(|err| {
 });
 ```
 
-we're actually getting an iterator back from `env::args()` and converting the iterator into a vector. Instead of doing this, we could pass the iterator directly to `build`, then `build` can consume the iterator and take ownership of the strings. In the caller we change this to:
+we're actually getting an iterator back from `env::args()` and converting the iterator into a vector. Instead of doing this, we could pass the iterator directly to `build`, then `build` can consume the iterator and take ownership of the strings. In the caller we change the above to:
 
 ```rust
 let config = Config::build(env::args()).unwrap_or_else(|err| {
@@ -425,18 +425,16 @@ In general, the "functional" style with iterators is preferred by most Rust prog
 
 How well do iterators perform? The original "The Rust Programming Language" had this to say:
 
-> We ran a benchmark by loading the entire contents of The Adventures of Sherlock Holmes by Sir Arthur Conan Doyle into a `String` and looking for the word the in the contents. Here are the results of the benchmark on the version of `search` using the `for` loop and the version using iterators:
+> We ran a benchmark by loading the entire contents of The Adventures of Sherlock Holmes by Sir Arthur Conan Doyle into a `String` and looking for the word "the" in the contents. Here are the results of the benchmark on the version of `search` using the `for` loop and the version using iterators:
+>
+> ```txt
+> test bench_search_for ... bench: 19,620,300 ns/iter (+/- 915,700)
+> test bench_search_iter ... bench: 19,234,900 ns/iter (+/- 657,200)
+> ```
 
-```txt
-test bench_search_for  ... bench:  19,620,300 ns/iter (+/- 915,700)
-test bench_search_iter ... bench:  19,234,900 ns/iter (+/- 657,200)
-```
+We can see that for our implementation, the iterator implementation was ever so slightly faster. Understand the point here is not to say "iterators are faster" or "for loops are faster", the point is that in most situations, they're going to be pretty close. Rust calls iterators a _zero cost abstraction_ meaning that they don't add any extra overhead over "hand coding" a solution. If you try to use an iterator over a short fixed size array, in many cases Rust will "unroll the loop" and if you examine the underlying assembly, you'll find no loop at all, no bounds checks, and all your values stored in registers, exactly as if you'd hand coded it.
 
-The point here is not to say "iterators are faster" or "for loops are faster", the point this benchmark is trying to make is that in most situations, they're going to be pretty close. Rust calls iterators a _zero cost abstraction_ meaning that they don't add any extra overhead over "hand coding" a solution.
-
-If you really need to eek out every last bit of performance, you'll want to write some benchmark tests that exercise your code with a variety of different inputs. But in most cases, you can use which style you pick won't matter too much.
-
-If you try to use an iterator over a short fixed size array, in many cases Rust will "unroll the loop" and if you examine the underlying assembly, you'll find no loop at all, no bounds checks, and all your values stored in registers.
+If you really need to eek out every last bit of performance, you'll want to write some [benchmark tests](https://doc.rust-lang.org/unstable-book/library-features/test.html) that exercise your code with a variety of different inputs.
 
 Continue to [chapter 14][chap14].
 

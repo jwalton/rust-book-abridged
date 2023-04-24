@@ -316,35 +316,7 @@ Trust me.";
 }
 ```
 
-We'll also update our `Config` struct, and update `run` to call our new function:
-
-```rust title="src/lib.rs"
-pub struct Config {
-    pub query: String,
-    pub file_path: String,
-    pub ignore_case: bool,
-}
-
-// --snip--
-
-pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
-    let contents = fs::read_to_string(config.file_path)?;
-
-    let results = if config.ignore_case {
-        search_case_insensitive(&config.query, &contents)
-    } else {
-        search(&config.query, &contents)
-    };
-
-    for line in results {
-        println!("{line}");
-    }
-
-    Ok(())
-}
-```
-
-And now we get to the good bit - inside `Config::build` we'll check the environment variable and set our new `ignore_case` flag:
+We also need to update our `Config` struct to add an `ignore_case` boolean and update the `run` function to call our new `search_case_insensitive` function. We don't show these changes here - they're pretty easy to do yourself. If you run into trouble the complete code for this is in [the GitHub repo](https://github.com/jwalton/rust-book-abridged/blob/master/examples/ch12-minigrep). The interesting part is where we actually use the environment variable in `Config::build`:
 
 ```rust title="src/lib.rs"
 use std::{error::Error, fs, env};
@@ -360,6 +332,7 @@ impl Config {
         let query = args[1].clone();
         let file_path = args[2].clone();
 
+        // Read in the `IGNORE_CASE` environment variable.
         let ignore_case = env::var("IGNORE_CASE").is_ok();
 
         Ok(Config {
@@ -371,7 +344,7 @@ impl Config {
 }
 ```
 
-You can now give this a try. On Windows, it will be:
+`env::var` returns a `Result<String, VarError>`. If the variable is set (regardless of what it is set to), `env::var` will return an `Ok` variant, and `is_ok` will return true. To run this on Windows, you can use:
 
 ```powershell
 PS> $Env:IGNORE_CASE=1

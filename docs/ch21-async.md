@@ -2,7 +2,7 @@
 
 In this section we're going to re-implement our web server from [chapter 20][chap20] using async functions. We're just going to give you enough here to get your feet wet. For further reading, check out [Asynchronous Programming in Rust](https://rust-lang.github.io/async-book/), and the [Tokio Tutorial](https://tokio.rs/tokio/tutorial).
 
-If you're looking for the full source for this project, it's [in the GitHub repo](https://github.com/jwalton/rust-book-abridged/examples/ch21-async-web-server).
+If you're looking for the full source for this project, it's [in the GitHub repo](https://github.com/jwalton/rust-book-abridged/tree/master/examples/ch21-async-web-server).
 
 ## JavaScript
 

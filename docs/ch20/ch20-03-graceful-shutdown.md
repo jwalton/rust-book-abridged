@@ -4,7 +4,7 @@ Right now when we hit CTRL-C to send an interrupt signal to our web server, it s
 
 The basic strategy here is going to be to implement the `Drop` trait on `ThreadPool`. When the `ThreadPool` is dropped, we'll signal all the threads that they should stop accepting new requests and quit, and then we'll call `join` on each one to give them the time they need to finish up.
 
-If you're looking for the full source for this project, it's [in the GitHub repo](https://github.com/jwalton/rust-book-abridged/examples/ch20-graceful-shutdown)
+If you're looking for the full source for this project, it's [in the GitHub repo](https://github.com/jwalton/rust-book-abridged/tree/master/examples/ch20-graceful-shutdown)
 
 ## Implementing the `Drop` Trait on `ThreadPool`
 

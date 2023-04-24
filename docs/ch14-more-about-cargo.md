@@ -2,9 +2,7 @@
 
 ## 14.1 - Customizing Builds with Release Profiles
 
-By default, cargo has two release profiles called `dev` and `release`. `cargo build` will build in the `dev` profile, and `cargo build --release` in the `release` profile.
-
-Cargo has various settings for for these profiles, which you can override in _Cargo.toml_:
+Cargo has four built-in release profiles called `dev`, `release`, `test`, and `bench`. `cargo build` will build in the `dev` profile, and `cargo build --release` in the `release` profile, and the other two are used when running tests. Cargo has various settings for for these profiles, which you can override in _Cargo.toml_:
 
 ```toml
 [profile.dev]
@@ -32,7 +30,7 @@ Your API key will be stored in _~/.cargo/credentials_. This is secret so if anyo
 
 ### Making Useful Documentation Comments
 
-One thing we haven't done much of in our examples so far is to document our public structs and functions, but if you look at any package on [crates.io](https://crates.io) you'll see everything is usually pretty well documented. This documentation comes from _documentation comments_ which start with three slashes instead of two, and support markdown. Documentation comments should be placed immediately before the thing they are documenting:
+One thing we haven't done much of in our examples so far is to document our public structs and functions, but if you look at any package on [crates.io](https://crates.io) you'll see everything has automatically generated helpful documentation. This documentation comes from _documentation comments_ which start with three slashes instead of two, and support markdown. Documentation comments should be placed immediately before the thing they are documenting:
 
 ````rust
 /// Adds one to the number given.
@@ -50,7 +48,7 @@ pub fn add_one(x: i32) -> i32 {
 }
 ````
 
-If you run `cargo doc --open` in your project, you can see what the generated documentation for your project will look like. This will also include documentation for any crates that you use.
+If you run `cargo doc --open` in your project, you can see what the generated documentation for your project will look like. This will also include documentation for any crates that you depend on.
 
 ### Commonly Used Sections
 
@@ -60,9 +58,7 @@ We used the `# Examples` markdown heading above to make a section for our exampl
 - `# Errors` describes the kinds of conditions under which this function might return an error, and what kinds of errors are returned.
 - `# Safety` should be present for any function that is `unsafe` (see [chapter 19][chap19]).
 
-You don't need all of these on every function, though.
-
-Any examples you provide will automatically be run as tests when you `cargo test`, so you'll know your examples actually work.
+You don't need all of these on every function. Any examples you provide will automatically be run as tests when you `cargo test`, so you'll know your examples actually work.
 
 ### Commenting Contained Items
 
@@ -78,9 +74,9 @@ There's a second kind of documentation comment `//!` that, instead of documentin
 // --snip--
 ```
 
-### Exporting a Convenient Public API with pub use
+### Exporting a Convenient Public API with `pub use`
 
-Sometimes we might organize the internals of our library in such a way that makes it easier to implement, but is at odds with how someone would actually want to use our crate. If you have some struct or module that is frequently used by users of your crate, but is buried deep in the module hierarchy of your crate, this this is going to be a pain point for your users.
+We talked about this back in [chapter 7](./ch07-packages-crates-modules.md#re-exporting-names-with-pub-use), but sometimes we might organize the internals of our library in such a way that makes sense to use when we're developing it, but is at odds with how someone would actually want to use our crate. If you have some struct or module that is frequently used by users of your crate, but is buried deep in the module hierarchy, this is going to be a pain point for your users.
 
 Here's an example:
 
@@ -151,9 +147,9 @@ pub mod utils {
 
 ### Adding Metadata to a New Crate
 
-One last thing to do before we publish a crate, which is to come up with a name for it and add some other metadata that [crates.io](https://crates.io) needs. Open up _Cargo.toml_ and add your chosen name, description (the description will turn up in search results for your package), and a valid [license identifier](https://spdx.org/licenses/):
+In order to publish on [crates.io](https://crates.io), our crate needs a name, a description, and a valid [license identifier](https://spdx.org/licenses/):
 
-```toml
+```toml title="Cargo.toml"
 [package]
 name = "my_awesome_colors"
 version = "0.1.0"
@@ -162,17 +158,15 @@ description = "A fancy awesome crate for generating colored text in the terminal
 license = "MIT"
 ```
 
+### Publishing Your Crate
+
 To publish your package run:
 
 ```sh
 $ cargo publish
 ```
 
-If someone has already used your name on [crates.io](https://crates.io) then this will fail - names are handed out first-come-first-served.
-
-### Publishing a New Version of an Existing Crate
-
-If you make some changes to your crate, bump the version number (using [semantic versioning rules](https://semver.org/)) and then run `cargo publish` again.
+If someone has already used your name on [crates.io](https://crates.io) then this will fail - names are handed out first-come-first-served. If you make some changes to your crate, bump the version number (using [semantic versioning rules](https://semver.org/)) and then run `cargo publish` again.
 
 ### Deprecating Versions from Crates.io with `cargo yank`
 
@@ -190,15 +184,11 @@ $ cargo yank --vers 1.0.1 --undo
 
 ## 14.3 - Cargo Workspaces
 
-Sometimes a library crate gets so large that you want to split it up into multiple smaller crates. Cargo workspaces lets you do this while keeping all the crates together in the same git repo. It's a bit like the Rust version of a monorepo.
-
-You can build all packages in a workspace by running `cargo build` from the root folder of the workspace, and run tests in all workspaces with `cargo test`.
+Sometimes a library crate gets so large that you want to split it up into multiple smaller crates. Cargo workspaces lets you do this while keeping all the crates together in the same git repo. It's a bit like the Rust version of a monorepo. You can build all packages in a workspace by running `cargo build` from the root folder of the workspace, and run tests in all workspaces with `cargo test`.
 
 ### Creating a Workspace
 
-A workspace consists of multiple packages with their own individual _Cargo.yaml_ files, with a single _Cargo.lock_ file at the root of the workspace.
-
-We'll create a simple example here with a single binary crate and two library crates. If you want to see the code for this, check this book's [GitHub repo](https://github.com/jwalton/rust-book-abridged/blob/master/examples/ch14-workspace). First we'll create a new directory for our workspace and initialize it as a git repo:
+A workspace consists of multiple packages with their own individual _Cargo.yaml_ files, with a single _Cargo.lock_ file at the root of the workspace. We'll create a simple example here with a single binary crate and two library crates. If you want to see the code for this, check [this book's GitHub repo](https://github.com/jwalton/rust-book-abridged/blob/master/examples/ch14-workspace). First we'll create a new directory for our workspace and initialize it as a git repo:
 
 ```sh
 $ mkdir add
@@ -217,7 +207,7 @@ $ cargo new add_two --lib
 
 You may have noticed that we ran `git init` in the add directory - we did this because generally we want to commit the entire workspace as a single repo, and if we hadn't run `git init`, then `cargo new ...` would have "helpfully" initialized all three new packages as git repos for us.
 
-Now in _add_ we are going to create a _Cargo.toml_ for the entire workspace. This _Cargo.toml_ won't have any metadata or dependencies, it will simply list all the packages that make up the workspace:
+Now in the _add_ folder - the root folder of our workspace - we are going to create a _Cargo.toml_ for the entire workspace. This _Cargo.toml_ won't have any metadata or dependencies, it will simply list all the packages that make up the workspace:
 
 ```toml
 [workspace]
@@ -229,7 +219,9 @@ members = [
 ]
 ```
 
-(If you do these in the opposite order - create the top-level Cargo.toml first and then create the child packages - it will still work, but as you create each package you'll get warnings from cargo about not being able to find the packages you haven't created yet.)
+:::tip
+If you do these in the opposite order - create the top-level Cargo.toml first and then create the child packages - it will still work, but as you create each package you'll get warnings from cargo about not being able to find the packages you haven't created yet.
+:::
 
 We can build this workspace, to make sure we did everything right:
 
@@ -275,16 +267,16 @@ pub fn add_one(x: i32) -> i32 {
 }
 ```
 
-We want to use this library in our binary crate in the _adder_ folder. To do this, first we have to add the `add_one` package as a dependency of `adder`. In _adder/Cargo.toml_, we add:
+We want to use this library in our binary crate in the _adder_ folder. To do this, first we have to add the `add_one` package as a dependency of `adder`:
 
-```toml
+```toml title="adder/Cargo.toml"
 [dependencies]
 add_one = { path = "../add_one" }
 ```
 
-And then in _adder/src/main.rs_ we put:
+And then we can `use add_one` in the adder package, just as we would any other dependency:
 
-```rust
+```rust title="adder/src/main.rs"
 use add_one;
 
 fn main() {
@@ -308,30 +300,28 @@ If we had multiple packages with binary crates in the workspace, we'd have to sp
 
 We can depend on an external create in a workspace by adding it to the `[dependencies]` section of the appropriate package's _Cargo.toml_. For example, we can add the `rand` crate to `add_one` in _add_one/Cargo.toml_:
 
-```Cargo.toml
+```toml title="add_one/Cargo.toml"
 [dependencies]
 rand = "0.8.5"
 ```
 
-If we `use rand;` inside _add_one/src/lib.rs_, then `cargo build`, you'll see the `rand` package being downloaded. We'll also get a warning because we're `use`ing rand, but we never reference `rand` in the library. Oops!
+If we add `use rand;` inside _add_one/src/lib.rs_, then `cargo build`, we'll see the `rand` package being downloaded. We'll also get a warning because we're `use`ing rand, but we never reference it in the library. Oops!
 
-If we want to use `rand` in other packages in our workspace, we can by adding it to the appropriate _Cargo.yaml_.  Since there's only one _Cargo.lock_ file for the whole workspace, if `adder` and `add_one` both depend on `rand`, we know that they will both depend on the same version of `rand` thanks to the common lockfile (at least, assuming the have compatible semver versions in the dependencies section).
+If we want to use `rand` in other packages in our workspace, we have to add it again to the appropriate _Cargo.yaml_. Since there's only one _Cargo.lock_ file for the whole workspace, if `adder` and `add_one` both depend on `rand`, we know that they will both depend on the same version of `rand` thanks to the common lockfile (at least, assuming the have compatible semver versions in the different _Cargo.toml_ files).
 
 ## 14.4 - Installing Binaries with cargo install
 
-You can publish more than just library crates to crates.io - you can also publish binary crates!  Users can install your crates with `cargo install`.  (This is very similar to `npm install -g` if you're a node.js developer.)
+You can publish more than just library crates to crates.io - you can also publish binary crates! Users can install your crates with `cargo install`. (This is very similar to `npm install -g` if you're a node.js developer.) For example, `ripgrep` is a very fast alternative to the `grep` command:
 
 ```sh
 $ cargo install ripgrep
 ```
 
-Binaries you install this way get put in `~/.cargo/bin` (assuming you're running a default installation of cargo from rustup).  You'll probably want to put this folder in your shell's `$PATH`.
-
-The name of the installed binary is not necessarily the same as the name of the crate.  If you try installing `ripgrep` above, for example, it will install `~/.cargo/rg`.
+Binaries you install this way get put in `~/.cargo/bin` (assuming you're running a default installation of cargo from rustup). You'll probably want to put this folder in your shell's `$PATH`. The name of the installed binary is not necessarily the same as the name of the crate. If you try installing `ripgrep` above, for example, it will install `~/.cargo/rg`.
 
 ## 14.5 - Extending Cargo with Custom Commands
 
-Much like git, you can create your own custom cargo commands.  If there's an executable on your path called `cargo-something`, then you can run `cargo something` to run that executable.  These custom commands will also show up in `cargo --list`.
+Much like git, you can create your own custom cargo commands. If there's an executable on your path called `cargo-something`, then you can run `cargo something` to run that executable. These custom commands will also show up in `cargo --list`.
 
 Continue to [chapter 15][chap15].
 

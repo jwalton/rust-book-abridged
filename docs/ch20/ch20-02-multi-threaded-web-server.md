@@ -192,7 +192,7 @@ impl Worker {
 }
 ```
 
-If you give this a try, it should work (although you'll get some compiler warnings)! If you visit "/sleep", wait for it to load, and then double-tap "CTRL-R" to reload the page, the page should reload in about five seconds instead of ten. If you're running into problems, check out the [code in the GitHub repo](https://github.com/jwalton/rust-book-abridged/examples/ch20-multi-threaded-web-server).
+If you give this a try, it should work (although you'll get some compiler warnings)! If you visit "/sleep", wait for it to load, and then double-tap "CTRL-R" to reload the page, the page should reload in about five seconds instead of ten. If you're running into problems, check out the [code in the GitHub repo](https://github.com/jwalton/rust-book-abridged/tree/master/examples/ch20-multi-threaded-web-server).
 
 One thing you might have expected us to do in the worker was:
 
