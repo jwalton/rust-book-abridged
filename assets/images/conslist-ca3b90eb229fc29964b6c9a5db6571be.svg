@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="580"
+   height="174"
+   viewBox="0 0 153.45833 46.0375"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.2.2 (732a01da63, 2022-12-09)"
+   sodipodi:docname="conslist.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="3.3638608"
+     inkscape:cx="409.05378"
+     inkscape:cy="251.19945"
+     inkscape:window-width="3840"
+     inkscape:window-height="2054"
+     inkscape:window-x="-11"
+     inkscape:window-y="-11"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs2">
+    <marker
+       style="overflow:visible"
+       id="TriangleStart"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       inkscape:stockid="TriangleStart"
+       markerWidth="5.3244081"
+       markerHeight="6.155385"
+       viewBox="0 0 5.3244081 6.1553851"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         transform="scale(0.5)"
+         style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt"
+         d="M 5.77,0 -2.88,5 V -5 Z"
+         id="path135" />
+    </marker>
+    <rect
+       x="335.32898"
+       y="417.37753"
+       width="96.317886"
+       height="39.240627"
+       id="rect948" />
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <rect
+       style="fill:#ffffff;stroke:none;stroke-width:0.264583;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none"
+       id="rect1777"
+       width="153.45833"
+       height="46.037498"
+       x="0"
+       y="0" />
+    <g
+       id="g1697"
+       transform="matrix(1.1982211,0,0,1.1982211,-56.165706,-104.44329)">
+      <g
+         id="g1446"
+         transform="translate(58.597723,-2.2023305)">
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.9389px;line-height:125%;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;writing-mode:lr-tb;text-anchor:middle;fill:#000000;stroke:none;stroke-width:0.264583;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none"
+           x="64.930702"
+           y="104.78558"
+           id="text1116"><tspan
+             sodipodi:role="line"
+             id="tspan1114"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52778px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.264583"
+             x="64.930702"
+             y="104.78558">List::Cons</tspan></text>
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777px;line-height:125%;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;writing-mode:lr-tb;text-anchor:middle;fill:#000000;stroke:none;stroke-width:0.264583;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none"
+           x="63.566616"
+           y="112.90137"
+           id="text1120"><tspan
+             sodipodi:role="line"
+             id="tspan1118"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.93889px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.264583"
+             x="63.566616"
+             y="112.90137">10</tspan></text>
+        <rect
+           style="fill:none;stroke:#000000;stroke-width:0.264583;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none"
+           id="rect1122"
+           width="12.742054"
+           height="10.382416"
+           x="70.088371"
+           y="105.96539" />
+        <rect
+           style="fill:none;stroke:#000000;stroke-width:0.264583;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none"
+           id="rect1124"
+           width="12.742054"
+           height="10.382416"
+           x="57.346313"
+           y="105.96539" />
+        <path
+           style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.231775px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#TriangleStart)"
+           d="M 76.459398,111.1566 H 87.510383"
+           id="path1180" />
+      </g>
+      <rect
+         style="fill:none;stroke:#000000;stroke-width:0.264583;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none"
+         id="rect234"
+         width="25.48411"
+         height="10.382415"
+         x="147.32726"
+         y="103.76306" />
+      <text
+         xml:space="preserve"
+         transform="matrix(0.26458333,0,0,0.26458333,58.597723,-2.2023305)"
+         id="text946"
+         style="font-size:6.66667px;line-height:125%;font-family:Arial;-inkscape-font-specification:'Arial, Normal';text-align:center;writing-mode:lr-tb;white-space:pre;shape-inside:url(#rect948);display:inline;fill:none;stroke:#000000;stroke-width:1;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none"><tspan
+           x="352.88959"
+           y="426.69105"
+           id="tspan1876"><tspan
+             style="font-size:18.6667px;fill:#000000;stroke:none"
+             id="tspan1874">List::Nil</tspan></tspan></text>
+      <g
+         id="g1480"
+         transform="translate(26.82124,-2.2023305)">
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.9389px;line-height:125%;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;writing-mode:lr-tb;text-anchor:middle;fill:#000000;stroke:none;stroke-width:0.264583;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none"
+           x="64.930702"
+           y="104.78558"
+           id="text1468"><tspan
+             sodipodi:role="line"
+             id="tspan1466"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52778px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.264583"
+             x="64.930702"
+             y="104.78558">List::Cons</tspan></text>
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777px;line-height:125%;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;writing-mode:lr-tb;text-anchor:middle;fill:#000000;stroke:none;stroke-width:0.264583;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none"
+           x="63.566616"
+           y="112.90137"
+           id="text1472"><tspan
+             sodipodi:role="line"
+             id="tspan1470"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.93889px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.264583"
+             x="63.566616"
+             y="112.90137">5</tspan></text>
+        <rect
+           style="fill:none;stroke:#000000;stroke-width:0.264583;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none"
+           id="rect1474"
+           width="12.742054"
+           height="10.382416"
+           x="70.088371"
+           y="105.96539" />
+        <rect
+           style="fill:none;stroke:#000000;stroke-width:0.264583;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none"
+           id="rect1476"
+           width="12.742054"
+           height="10.382416"
+           x="57.346313"
+           y="105.96539" />
+        <path
+           style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.231775px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#TriangleStart)"
+           d="M 76.459398,111.1566 H 87.510383"
+           id="path1478" />
+      </g>
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.9389px;line-height:125%;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;writing-mode:lr-tb;text-anchor:middle;fill:#000000;stroke:none;stroke-width:0.264583;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none"
+         x="56.593307"
+         y="91.064095"
+         id="text1496"><tspan
+           sodipodi:role="line"
+           id="tspan1494"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52778px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.264583"
+           x="56.593307"
+           y="91.064095">List::Cons</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777px;line-height:125%;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;writing-mode:lr-tb;text-anchor:middle;fill:#000000;stroke:none;stroke-width:0.264583;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none"
+         x="55.229221"
+         y="99.179878"
+         id="text1500"><tspan
+           sodipodi:role="line"
+           id="tspan1498"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.93889px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.264583"
+           x="55.229221"
+           y="99.179878">3</tspan></text>
+      <rect
+         style="fill:none;stroke:#000000;stroke-width:0.264583;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none"
+         id="rect1502"
+         width="12.742054"
+         height="10.382416"
+         x="61.750977"
+         y="92.243904" />
+      <rect
+         style="fill:none;stroke:#000000;stroke-width:0.264583;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none"
+         id="rect1504"
+         width="12.742054"
+         height="10.382416"
+         x="49.008919"
+         y="92.243904" />
+      <path
+         style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.231775px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#TriangleStart)"
+         d="m 68.122004,97.435108 14.527063,9.714102"
+         id="path1506"
+         sodipodi:nodetypes="cc" />
+      <g
+         id="g1526"
+         transform="translate(-8.1283554,7.9085398)">
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.9389px;line-height:125%;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;writing-mode:lr-tb;text-anchor:middle;fill:#000000;stroke:none;stroke-width:0.264583;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none"
+           x="64.930702"
+           y="104.78558"
+           id="text1514"><tspan
+             sodipodi:role="line"
+             id="tspan1512"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52778px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.264583"
+             x="64.930702"
+             y="104.78558">List::Cons</tspan></text>
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777px;line-height:125%;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;writing-mode:lr-tb;text-anchor:middle;fill:#000000;stroke:none;stroke-width:0.264583;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none"
+           x="63.566616"
+           y="112.90137"
+           id="text1518"><tspan
+             sodipodi:role="line"
+             id="tspan1516"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.93889px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.264583"
+             x="63.566616"
+             y="112.90137">4</tspan></text>
+        <rect
+           style="fill:none;stroke:#000000;stroke-width:0.264583;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none"
+           id="rect1520"
+           width="12.742054"
+           height="10.382416"
+           x="70.088371"
+           y="105.96539" />
+        <rect
+           style="fill:none;stroke:#000000;stroke-width:0.264583;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none"
+           id="rect1522"
+           width="12.742054"
+           height="10.382416"
+           x="57.346313"
+           y="105.96539" />
+        <path
+           style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.231775px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#TriangleStart)"
+           d="m 76.459398,111.1566 14.318024,-9.14904"
+           id="path1524"
+           sodipodi:nodetypes="cc" />
+      </g>
+    </g>
+  </g>
+</svg>
