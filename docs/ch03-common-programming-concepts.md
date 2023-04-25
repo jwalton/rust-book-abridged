@@ -15,7 +15,7 @@ fn main() {
 }
 ```
 
-This is similar to `const` in JavaScript, or `final` in Java, although in Rust it also means the contents of the variable can't be modified either:
+This is similar to `const` in JavaScript, or `final` in Java. In Rust `mut` also has some ownership implications which we'll talk about in [chapter 4][chap4]. The value the reference points to also can't be modified... mostly:
 
 ```rust
 fn main() {
@@ -24,7 +24,15 @@ fn main() {
 }
 ```
 
-Here `clear` will try to empty the string, but will fail with the error `` cannot borrow `foo` as mutable, as it is not declared as mutable ``. This is ultimately because, if you go look at the source code for the `clear` method it is defined as requiring `self` to be mutable (`self` is a bit like `this` in other languages).
+Here `clear` will try to empty the string, but will fail with the error `` cannot borrow `foo` as mutable, as it is not declared as mutable ``. This is ultimately because, if you go look at the source code for the `clear` method it is defined as requiring `self` to be a mutable reference (`self` is a bit like `this` in other languages).
+
+::: info
+
+You may have noticed that we said the value can't be changed "mostly". On a simple value like `String`, the underlying value can't be changed unless it's declared `mut`, but on other structs the definition of `mut` depends on the particular struct. A Rust mutex is an example of an object that is immutable, but you're allowed to change the value in it if you own the lock.
+
+Later on in [chapter 15][chap15] we're going to find out how you can modify parts of immutable objects through a concept call _interior mutability_, and that we can share mutable objects across multiple places in the code with smart pointers.
+
+:::
 
 As we saw in the [previous chapter][chap2], we can declare a variable as mutable with the `mut` keyword:
 
@@ -49,7 +57,7 @@ Constants are stored directly in the program binary, and have a few restrictions
 
 The value of the constant has to be something that can be determined at compile time, not at runtime. The Rust Reference has a [section on constant evaluation](https://doc.rust-lang.org/stable/reference/const_eval.html) that lays out all the rules for what operators you're allowed to use and what you're not, but here the compiler can convert `60 * 60 * 3` into `10800` for us and store that in the executable.
 
-Rust does have a concept of a global or _static variable_, but they are not often used and we'll talk about them in [chapter 19](./ch19/ch19-01-unsafe.md#accessing-or-modifying-a-mutable-static-variable).
+Rust also has the a concept of a global or _static variable_. We'll talk about them in [chapter 19](./ch19/ch19-01-unsafe.md#accessing-or-modifying-a-mutable-static-variable).
 
 ### Shadowing
 
@@ -110,9 +118,15 @@ Integer literals can be written using any of the methods below. Integer literals
 | Binary          | 0b1111_0000 |
 | Byte (u8)       | b'A'        |
 
-If you try to overflow an integer (e.g. you try to store 256 in a u8), what happens depends on whether you compiled your program with `--release` or not. In debug mode Rust adds runtime checks to ensure you don't overflow a value, so your program will panic and crash (see [chapter 9][chap9] for more about panics). With the --release flag, the integer will overflow as you would expect it to in another language like C or Java (the largest value a u8 can hold is 255, so 256 wraps to 0).
+If you try to overflow an integer (e.g. you try to store 256 in a u8), what happens (by default) depends on whether you compiled your program with `--release` or not. In debug mode Rust adds runtime checks to ensure you don't overflow a value, so your program will panic and crash (see [chapter 9][chap9] for more about panics). With the --release flag, the integer will overflow as you would expect it to in another language like C or Java (the largest value a u8 can hold is 255, so 256 wraps to 0).
 
 The standard library has functions that let you explicitly define how you want to handle overflows if you don't want to panic. For example [`wrapping_add`](https://doc.rust-lang.org/std/intrinsics/fn.wrapping_add.html) will add two numbers and let them wrap around. There are `wrapping_*`, `checked_*`, `overflowing_*`, and `saturating_*` functions for integer arithmetic.
+
+::: tip
+
+We can change how overflows are handled at runtime for development and release through [release profiles](./ch14-more-about-cargo.md#141---customizing-builds-with-release-profiles).
+
+:::
 
 ### Floating-Point Types
 
@@ -133,7 +147,7 @@ let f: bool = false;
 
 ### Character Type
 
-A `char` in Rust is a four-byte unicode code point.
+A `char` in Rust is a four-byte unicode scalar value.
 
 ```rust
 let c = 'z';
@@ -144,11 +158,11 @@ let space_woman_zwj = '👩🏻‍🚀'; // <== This doesn't work!
 
 That last example doesn't work. Our female astronaut friend might look like a single character, but she's actually two emoji joined together with a zero-width-joiner (ZWJ). We'll talk a lot more about UTF-8 and Unicode in [chapter 8][chap8].
 
-### `str` and String
+### `&str` and `String`
 
-You'll see two different string types in Rust: `str` and `String`. `str` is a bit like an array - it's a list of characters with a fixed length known at compile time. `String` is more like a `Vector` - it's a data type that stores a list of strings in a variable-length chunk of memory on the heap. Any time you accept input from the user or read a string from a file, it's going to end up in a `String`.
+You'll see two different string types in Rust: `str` and `String`. `String` is similar to a `Vector` - it's a data type that stores a list of characters in a variable-length chunk of memory on the heap. Any time you accept input from the user or read a string from a file, it's going to end up in a `String`.
 
-The type `&str` - a reference to a `str` - is also known as a _string slice_ (which we'll learn more about in [the next chapter][chap4]), and is both a pointer to the string's data and a length for the string. Any string literal in Rust is a `&str`, since the actual string is stored somewhere in the executable and we just have an immutable reference to it.
+The type `&str` (almost always seen in it's borrowed form) is also known as a _string slice_ (which we'll learn more about in [the next chapter][chap4]), and is both a pointer to the string's data and a length for the string. Any string literal in Rust is a `&str`, since the actual string is stored somewhere in the executable and we just have an immutable reference to it. A string slice can be used as a view into a `String`.
 
 ## Compound Types
 
@@ -172,7 +186,7 @@ An empty tuple is written `()` and is called a "unit". This represents an empty 
 
 ### Array Type
 
-Every element in an array must be the same type, and arrays must be fixed length. If you're looking for a "variable length" array, you want a vector from the standard library (see [Chapter 8][chap8]). Note that arrays end up on the stack, where vectors store their contents on the heap.
+Every element in an array must be the same type, and arrays must be fixed length. If you're looking for a "variable length" array, you want a vector from the standard library (see [Chapter 8][chap8]). If you declare a variable as an array in a function, then the contents of that variable will end up on the stack, while for a vector contents will end up on the heap. (Although you can put the contents of an array on the heap by using a smart pointer like a `Box<T>` - see [chapter 15][chap15]).
 
 ```rust
 let a = [1, 2, 3, 4, 5];
@@ -349,4 +363,5 @@ Now that we know some basics, it's time to learn about [ownership][chap4].
 [chap9]: ./ch09-error-handling.md "Chapter 9: Error Handling"
 [chap10]: ./ch10/ch10-01-generic-data-types.md "Chapter 10: Generic Types, Traits, and Lifetimes"
 [chap13]: ./ch13-functional-language-features.md "Chapter 13: Functional Language Features: Iterators and Closures"
+[chap15]: ./ch15-smart-pointers.md "Chapter 15: Smart Pointers"
 [appb]: ./zz-appendix/appendix-02-operators.md

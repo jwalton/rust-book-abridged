@@ -7,12 +7,16 @@ Cargo has four built-in release profiles called `dev`, `release`, `test`, and `b
 ```toml
 [profile.dev]
 opt-level = 0
+overflow-checks = true
 
 [profile.release]
 opt-level = 3
+overflow-checks = false
 ```
 
-In this example `opt-level` controls how much Rust tries to optimize your code and can be set from 0 to 3 (these are also the defaults - 0 for dev because you want the build to be fast, 3 for release because you want your program to be fast). For a full list of options see [the cargo documentation](https://doc.rust-lang.org/cargo/reference/profiles.html).
+In this example `opt-level` controls how much Rust tries to optimize your code and can be set from 0 to 3 (these are also the defaults - 0 for dev because you want the build to be fast, 3 for release because you want your program to be fast). `overflow-checks` is used to determine whether or not Rust will add in runtime checks to see if integer arithmetic overflows any values.
+
+For a full list of options see [the cargo documentation](https://doc.rust-lang.org/cargo/reference/profiles.html).
 
 ## 14.2 - Publishing a Crate to Crates.io
 

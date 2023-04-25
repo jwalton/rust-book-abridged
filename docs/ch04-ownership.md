@@ -22,6 +22,12 @@ From the original Rust Book:
 
 The _scope_ of a variable in Rust works much like it does in most other languages - inside a set of curly braces, any variables you declare can be accessed only after their declaration, and they go "out of scope" once we hit the closing brace. The key thing about Rust is that once a variable goes out of scope, if that variable currently owns some memory, then that memory will be freed.
 
+::: info
+
+A variable can only have one owner at a time, but in [chapter 15][chap15] we'll talk about smart pointers like `Rc<T>` that let us get around this restriction.
+
+:::
+
 ### Memory and Allocation
 
 This is a trivial example demonstrating some memory being allocated on the heap and then freed:
@@ -184,6 +190,12 @@ fn calculate_length(s: &String) -> usize {
 
 Two things to note here - when we call `calculate_length` instead of passing `s1` we're passing `&s1`, and in the signature for `calculate_length` we take a `&String` instead of a `String`. What we're passing here is a "reference to a string". Essentially `&s1` contains a pointer to the String held in `s1`, and we're passing that pointer to `calculate_length`. `calculate_length` doesn't take ownership of the `String`, it merely borrows it, so the `String` won't be dropped when `s` goes out of scope.
 
+:::info
+
+The syntax for getting a reference to a value - `&x` - is exactly the same as getting a pointer to a value in C or Go, and references in Rust behave a lot like pointers. More so than C++ references.  [This Stack Overflow answer](https://stackoverflow.com/questions/64167637/is-the-concept-of-reference-different-in-c-and-rust) talks about ways that Rust references compare to C/C++ pointers.
+
+:::
+
 ### Mutable References
 
 As with variables, we can have both immutable references (the default) and mutable references:
@@ -259,7 +271,7 @@ fn dangle() -> &String {
 
 Here `s` goes out of scope at the end of the function, so the String will be dropped. That means if Rust let us return a reference to the String, it would be a reference to memory that had already been reclaimed.
 
-There's no `null` or `nil` in Rust. You can't have a nil reference like you could in Go. (Instead there's something called an `Option` which we'll talk about in [chapter 6][chap6].)
+There's no `null` or `nil` in Rust. You can't have a nil pointer like you could in Go. (Instead there's something called an `Option` which we'll talk about in [chapter 6][chap6].)
 
 ### The Rules of References
 

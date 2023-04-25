@@ -112,7 +112,13 @@ fn longest<'a>(x: &'a str, y: &'a str) -> &'a str {
 
 Think about this a bit like a generic function (the syntax is similar for a good reason). We're saying here there exists some lifetime which we're going to call `'a`, and the variables `x` and `y` both life at least as long as this hypothetical `'a`'. They don't have to both be the same lifetime, they just both have to be valid at the start and end of `'a`. Then in the case of this function we're making the claim that the value we return is going to be valid for this same lifetime. At compile time, the compiler will see how long the passed in `x` lives, how long the passed in `y` lives, and then it will verify that the result of this function isn't used anywhere outside of that lifetime.
 
-Putting this a bit more succinctly, we're telling the compiler that the return value of `longest()` will live at least as long as the shorter lifetime of `x` and `y`. When the rust compiler analyzes a call to `longest()` it can now mark it as an error if the two parameters passed in don't adhere to this constraint. It's important to note that these annotations don't actually change the lifetime of the references passed in, it only gives the borrow checker enough information to work out whether a call is valid.
+Putting this a bit more succinctly, we're telling the compiler that the return value of `longest()` will live at least as long as the shorter lifetime of `x` and `y`. When the rust compiler analyzes a call to `longest()` it can now mark it as an error if the two parameters passed in don't adhere to this constraint.
+
+:::info
+
+Lifetime annotations don't actually change the lifetime of the references passed in, it only gives the borrow checker enough information to work out whether a call is valid.
+
+:::
 
 Returning to this example:
 
@@ -159,13 +165,18 @@ struct ImportantExcerpt<'a> {
 fn main() {
     let novel = String::from("Call me Ishmael. Some years ago...");
     let first_sentence = novel.split('.').next().expect("Could not find a '.'");
-    let i = ImportantExcerpt {
-        part: first_sentence,
-    };
+
+    {
+        let i = ImportantExcerpt {
+            part: first_sentence,
+        };
+    }
 }
 ```
 
 Again, it's helpful to think about this like we would any other generic declaration. When we write `ImportantExcerpt<'a>` we are saying "there exists some lifetime which we'll call `'a`" - we don't know what that lifetime is yet, and we won't know until someone creates an actual instance of this struct. When we write `part: &'a str`, we are saying "when someone reads this ref, it has the lifetime `'a`" (and if someone later writes a new value to this ref, it must have a lifetime of at least `'a`). At compile time, the compiler will fill in the generic lifetimes with real lifetimes from your program, and then verify that the constraints hold.
+
+In this particular example, take careful note that when we create our `ImportantExcerpt` in `main`, the lifetime annotation `'a` takes on the lifetime of `first_sentence`, which is longer than the lifetime of the `ImportantExcerpt`!
 
 Here this struct has only a single reference, and so it might seem odd that we have to give an explicit lifetime for it. You might think the compiler could automatically figure out the lifetime here (and perhaps one day in this trivial example it will - Rust is evolving pretty rapidly).
 

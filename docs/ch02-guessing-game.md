@@ -47,11 +47,13 @@ This creates new String and binds it to a mutable variable called `guess`. By de
         .expect("Failed to read line");
 ```
 
-`read_line` reads some input from stdin, and stores it in `guess`. We pass in `&mut guess` instead of just `guess`. The `&` means we pass a reference to the object that the `guess` variable points to, and `mut` means that `read_line` is allowed to mutate that variable. Passing by reference works very similar to passing by reference in C++ or Go, or passing an object in Java or JavaScript - the called function/method can modify the passed in object, and those changes will be visible in the caller's scope. References also have a lot of implications for ownership. We'll go into references in much greater detail in [chapter 4][chap4].
+`read_line` reads some input from stdin, and stores it in `guess`. We pass in `&mut guess` instead of just `guess`. The `&` means we pass a reference to the object that the `guess` variable points to, and `mut` means that `read_line` is allowed to mutate that variable.
+
+Passing by reference here works very similar to passing by pointer in Go or C, or passing an object in Java or JavaScript - the called function/method can modify the passed in object, and those changes will be visible in the caller's scope. References also have a lot of implications for ownership. We'll go into references in much greater detail in [chapter 4][chap4].
 
 :::info
 
-If you're coming to Rust from a C++ background, you might assume that without the `&` Rust would pass a copy of `guess`, but this isn't true. When we pass a value without using a reference in Rust, we actually transfer ownership of the value to the called function. This is getting way ahead of ourselves though - again, we'll get there in [chapter 4][chap4].
+If you're coming from a C/C++ background, Rust references are a little bit like C++ references, and a little bit like C pointers.  We'll go into this in more detail in chapter 4. You might also assume that without the `&` Rust would pass a copy of `guess`, but this isn't true. When we pass a value without using a reference in Rust, we actually transfer ownership of the value to the called function. This is getting way ahead of ourselves though - again, we'll get there in [chapter 4][chap4].
 
 :::
 
@@ -81,7 +83,13 @@ The `{}` is a placeholder. You can place a single variable directly in the place
 
 ## Generating a Secret Number
 
-We now have a program that asks you to guess a number, but we're not yet generating a secret number to guess. Since Rust has no random number generator in the standard library, we'll rely on the "rand" _crate_ from [crates.io](https://crates.io/). Open up _Cargo.toml_, and add "rand" as a dependency:
+We now have a program that asks you to guess a number, but we're not yet generating a secret number to guess. Since Rust has no random number generator in the standard library, we'll rely on the "rand" _crate_ from [crates.io](https://crates.io/). To add `rand` to our project we can run:
+
+```sh
+$ cargo add rand
+```
+
+Once you do this, if you open up _Cargo.toml_, you'll see rand listed as one of our dependencies:
 
 ```toml
 [dependencies]
