@@ -7,40 +7,30 @@ hide_title: true
 
 <div align="center">
     <h1>The Rust Book (Abridged)</h1>
-    <p>v0.1.1 - Draft</p>
+    <p>v0.1.2 - Draft</p>
     <p>By Jason Walton</p>
     <p>Based on <a href="https://doc.rust-lang.org/stable/book/">"The Rust Programming Language"</a> by Steve Klabnik and Carol Nichols.</p>
 </div>
 
-## Why an Abridged Version?
+## What is this?
 
-["The Rust Programming Language"](https://doc.rust-lang.org/stable/book/title-page.html) (AKA "the Rust Book") is a great resource for learning Rust, especially if you're new to programming. If you fall into this category, then I strongly suggest you put this book down and go read it instead.
+This is an abridged - or perhaps a better word would be condensed - version of ["The Rust Programming Language"](https://doc.rust-lang.org/stable/book/title-page.html) (AKA "the Rust Book"). This is not an original work - all the chapter names and examples in this book have been copied verbatim from the original, but all of the prose has been rewritten from scratch, leaving out anything that's not about learning Rust. This book is about 1/2 the length of the original, but I don't think it is missing anything that an experienced software developer wouldn't already know.
 
-But... the Rust Book is a bit wordy. It's an excellent introduction to Rust, but (fortunately or unfortunately, depending on your viewpoint) it's also an excellent introduction to many computer programming concepts. If you're already familiar with one or more other programming languages, then you are no doubt familiar with these concepts already.
+The Rust Book is a great resource for learning Rust, especially if you're new to programming. If you fall into this category, then I strongly suggest you put this book down and go read it instead. But... the Rust Book is a bit wordy. If you're already familiar with one or more other programming languages, then you are likely already familiar with a lot of the concepts the book covers, and you might benefit from this shorter version. If you area already familiar with ideas like the stack and the heap, with test driven development, with the [DRY principal](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself), then this might be a better read.
 
-Take, for example, this excerpt from the section on functions:
-
-> We define a function in Rust by entering `fn` followed by a function name and a set of parentheses. The curly brackets tell the compiler where the function body begins and ends. We can call any function we've defined by entering its name followed by a set of parentheses.
-
-If you're a veteran programmer, this paragraph is probably something you didn't need to read. The [start of chapter 10](https://doc.rust-lang.org/stable/book/ch10-00-generics.html#removing-duplication-by-extracting-a-function) essentially explains [DRY principal](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself) at great length. [Chapter 12](https://doc.rust-lang.org/stable/book/ch12-04-testing-the-librarys-functionality.html) spends quite a few paragraphs devoted to learning about test driven development (TDD). This is all stuff you already know.
-
-This isn't meant to be a criticism of the Rust Book. It's excellent and well written, and there's a reason I chose it as the basis for this book. The problem here is not with the original book, but more a mismatch when it comes to intended audience.
+This isn't meant to be a criticism of the Rust Book. It's excellent and well written, and there's a reason why it's highly recommended. The problem here is not with the original book, but more a mismatch when it comes to intended audience.
 
 ## What's different about this book?
 
-This book is a rewrite of the Rust book, trying to make it less loquacious. The chapter names are all the same, and in many cases the subsections in each chapter are the same. In most cases examples have been copied directly from the original. This book tries to present information in the same order as the original Rust Book, but leaves out all the things an experienced developer would already know and focuses more on the parts that make Rust unique. (There's also an extra chapter about async Rust!)
+As mentioned above, the chapter names in this book are all the same as in the original, and in many cases the subsections in each chapter are the same. In most cases examples have been copied directly from the original. Keeping the original structure and examples hopefully makes it easy to jump back and forth between this book and the original, in case there are places where this book is unclear or covers concepts you are not familiar with.
 
 Where the original would build up a code example piece by piece, in most cases this version presents the finished code so you can read through it, and then points out some interesting parts. Where possible I've tried to add in material I think an advanced reader would find interesting. In places where I found the original book confusing I've tried to explain things in a different way.
 
-By using the same example code and keeping things in more or less the same order, the hope is that you can read this book, and if you come across something new or unclear, you can switch over to the original version of the Rust book and read the same section, with the exact same examples, and hopefully it will clear things up for you. (If this happens, please [raise an issue](https://github.com/jwalton/rust-book-abridged/issues) to let me know where you got lost so I can improve this version!)
+This also adds an extra bonus chapter about async programming!
 
-:::caution
+I have a great deal of experience in TypeScript, Java, C/C++, Go, and a few other languages. I spent about two weeks putting this book together, reading the original, condensing it, and researching parts that weren't clear. Hopefully someone finds this useful! But I am a new to Rust so if you find something that doesn't make sense, please feel free to [raise an issue](https://github.com/jwalton/rust-book-abridged).
 
-This book is a work-in-progress. I wrote this while I was reading "The Rust Programming Language" and learning Rust, so if there are things you find in here that you think are wrong, it's entirely possible that this is because they _are_ wrong! Again, please feel free to raise an issue, or a PR and let me know!
-
-:::
-
-If you enjoy this book, please [give it a star on GitHub](https://github.com/jwalton/rust-book-abridged), or [buy me a coffee](https://github.com/sponsors/jwalton).
+If you enjoy this book, please [give it a star on GitHub](https://github.com/jwalton/rust-book-abridged).
 
 ## Table of Contents
 
