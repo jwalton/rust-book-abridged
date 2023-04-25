@@ -250,7 +250,7 @@ The `add_text` method takes a mutable reference to self, since it modifies the c
     }
 ```
 
-Why not just `self.state = self.state.request_review()` here? The problem here is that `self.state.request_review()` would try to take ownership of `self.state`, but you can't take ownership of a _part_ of a struct. Remember that ownership is about controlling some allocated memory, and a struct is allocated as a single block of memory. If we took ownership of `self.state`, what would be there in memory inn its place? To get around this we make `self.state` an `Option`, and then `self.state.take()` will take ownership of the value in the `Option` and replace it with `None` temporarily. Since after the `take` we immediately reassign it, it's never `None` for more than an instant.
+Why not just `self.state = self.state.request_review()` here? The problem here is that `self.state.request_review()` would try to take ownership of `self.state`, but you can't take ownership of a _part_ of a struct (at least, not without invalidating the struct). To get around this we make `self.state` an `Option`, and then `self.state.take()` will take ownership of the value in the `Option` and replace it with `None` temporarily. Since after the `take` we immediately reassign it, it's never `None` for more than an instant.
 
 The `content` method also needs to deal with the fact that `self.state` is an `Option`:
 

@@ -4,18 +4,19 @@ In which we learn about variables, basic types, functions, comments, and control
 
 ## 3.1 - Variables and Mutability
 
-By default, variables are immutable. This program will fail to compile with the error `` cannot assign twice to immutable variable `x`  ``:
+Variables are declared with the `let` keyword. By default, variables are immutable unless they are declared `mut`. This program will fail to compile with the error `` cannot assign twice to immutable variable `x`  ``:
 
 ```rust
 fn main() {
     let x = 5;
-    println!("The value of x is: {x}");
     x = 6; // This will error!
-    println!("The value of x is: {x}");
+
+    let mut y = 5;
+    y = 6; // This is okay.
 }
 ```
 
-This is similar to `const` in JavaScript, or `final` in Java. In Rust `mut` also has some ownership implications which we'll talk about in [chapter 4][chap4]. The value the reference points to also can't be modified... mostly:
+Immutability in Rust is similar to `const` in JavaScript, or `final` in Java. The value the reference points to can't be modified (mostly):
 
 ```rust
 fn main() {
@@ -24,26 +25,15 @@ fn main() {
 }
 ```
 
-Here `clear` will try to empty the string, but will fail with the error `` cannot borrow `foo` as mutable, as it is not declared as mutable ``. This is ultimately because, if you go look at the source code for the `clear` method it is defined as requiring `self` to be a mutable reference (`self` is a bit like `this` in other languages).
+Here `clear` will try to empty the string, but will fail with the error `` cannot borrow `foo` as mutable, as it is not declared as mutable ``. If you go look at the source code for the `clear` method it is defined as requiring `self` to be a mutable reference (`self` is a bit like `this` in other languages).
+
+Variables cannot be declared at the global scope [unless they are `static`](#static-variables).
 
 ::: info
 
-You may have noticed that we said the value can't be changed "mostly". On a simple value like `String`, the underlying value can't be changed unless it's declared `mut`, but on other structs the definition of `mut` depends on the particular struct. A Rust mutex is an example of an object that is immutable, but you're allowed to change the value in it if you own the lock.
-
-Later on in [chapter 15][chap15] we're going to find out how you can modify parts of immutable objects through a concept call _interior mutability_, and that we can share mutable objects across multiple places in the code with smart pointers.
+You may have noticed that that "mostly" above when we were talking about immutable variables. Immutability prevents us from directly modifying members of a struct, however in [chapter 15][chap15] we're going to find out how you can modify parts of immutable objects through a concept call _interior mutability_, and that we can share mutable objects across multiple places in the code with smart pointers like `Rc<T>` and `Arc<T>`. A Rust mutex is an example of an object that is immutable, but you're allowed to change the value in it if you own the lock.
 
 :::
-
-As we saw in the [previous chapter][chap2], we can declare a variable as mutable with the `mut` keyword:
-
-```rust
-fn main() {
-    let mut x = 5;
-    println!("The value of x is: {x}");
-    x = 6; // This works!
-    println!("The value of x is: {x}");
-}
-```
 
 ### Constants
 
@@ -53,11 +43,23 @@ Rust also has the concept of a _constant_ which at first sounds a lot like an im
 const THREE_HOURS_IN_SECONDS: u32 = 60 * 60 * 3;
 ```
 
-Constants are stored directly in the program binary, and have a few restrictions placed on them. First, constants can't be declared `mut` for hopefully obvious reasons. Second, the type of the constant must always be annotated (here we declare that this const is a u32). Third, constants can be declared in the global scope, where normal variables cannot be, which is the main reason you want to use them.
+Constants are subtly different from immutable variables. They are stored directly in the program binary, so they cannot be `mut` and the value of the constant has to be something that can be determined at compile time. The Rust Reference has a [section on constant evaluation](https://doc.rust-lang.org/stable/reference/const_eval.html) that lays out all the rules for what operators you're allowed to use and what you're not, but here the compiler can convert `60 * 60 * 3` into `10800` for us and store that in the executable.
 
-The value of the constant has to be something that can be determined at compile time, not at runtime. The Rust Reference has a [section on constant evaluation](https://doc.rust-lang.org/stable/reference/const_eval.html) that lays out all the rules for what operators you're allowed to use and what you're not, but here the compiler can convert `60 * 60 * 3` into `10800` for us and store that in the executable.
+Constants must always be annotated, and can be declared in the global scope.
 
-Rust also has the a concept of a global or _static variable_. We'll talk about them in [chapter 19](./ch19/ch19-01-unsafe.md#accessing-or-modifying-a-mutable-static-variable).
+### Static Variables
+
+_Static variables_ or global variables are declared with the static keyword and are named in `SCREAMING_SNAKE_CASE`:
+
+```rust
+static HELLO_WORLD: &str = "Hello, world!";
+
+fn main() {
+    println!("name is: {}", HELLO_WORLD);
+}
+```
+
+Static variables can be mutable, but to access or modify them we need to talk about `unsafe` code, [which we'll do later](./ch19/ch19-01-unsafe.md#accessing-or-modifying-a-mutable-static-variable).
 
 ### Shadowing
 

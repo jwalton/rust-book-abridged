@@ -25,7 +25,7 @@ When a panic occurs in the main thread, it halts the program. If the `RUST_BACKT
 
 :::tip
 
-There's also a `todo!` macro which works just like the `panic!` macro, which can be used to mark places in your code where you have yet to fill in an implementation.
+There's also a `todo!` macro, an `unimplemented!` macro, and an `unreachable!` macro which each work just like the `panic!` macro. These macros differ from `panic!` only in semantics. If you have a function you haven't implemented yet, you might add in `todo!("Need to implement this!")` as a reminder to yourself. If you have a method you need to define to satisfy a trait but you know you will never call it, you could call `unimplemented!` instead of filling in an implementation.
 
 :::
 
@@ -192,9 +192,13 @@ fn read_username_from_file() -> Result<String, io::Error> {
 The `?` operator can be placed after any `Result`, and basically is the same as the `match` expression from the original example. The `?` says: "If `result` is an `Ok` variant, resolve this expression to the value of the `Ok`. If `result` is an `Err` then `return result`". This makes errors abort early and return to the caller, very similar to how exceptions work.
 
 :::tip
-This works here because the `Result`s we're adding `?` to and our `read_username_from_file` both return a Result with the same error type, but they don't have to! The `?` operator will pass errors through the `from` function from the `From` trait on our return type to convert the error from one error type to another.
+
+Here we're adding a `?` to a `Result<*, io:Error>` and we're returning a `Result<*, io:Error>` - since the error types are the same, we can use `?`, but note that the error types don't have to be the same! The `?` operator will pass errors through the `from` function from the `From` trait on our return type to convert the error from one error type to another.
 
 For example, if we wanted to defined a custom error type named `OurError`, we could define `impl From<io::Error> for OurError` to tell Rust how to convert `io:Error`s to `OurError`s, without needing to add any more code to our example.
+
+See [chapter 10](./ch10/ch10-02-traits.md#from-and-into) for more information about the `From` and `Into` traits.
+
 :::
 
 We can shorten this method further by eliminating some variable names and using chaining:
@@ -275,7 +279,7 @@ If you're still here: A panic halts the entire program, so should be used sparin
 - If your function has a _contract_ and the values passed in violate that contract, it might make sense to panic. If your function's documentation clearly states that it requires a value between 0 and 1, and someone passes in a 7, then if you believe this clearly represents an error somewhere in the caller's code, a panic is appropriate. If an illegal value could create some kind of security risk or correctness risk, then a panic is definitely warranted. If your function is already returning a `Result` anyways, it might make sense to just add an error though.
 - If you're writing a book about Rust and you want your examples to be short and concise, and a lot of error handling code would obscure the points you are trying to make, then a panic is fine.
 
-There are some places where it's a terrible idea to panic. A panic will halt the whole program, and the program (or if you are writing a library, then the program that is using your library) has no way to recover. These are places where it's better to return an error:
+There are some places where it's a terrible idea to panic. When you panic inside a function, callers of that function have no easy way to recover from the panic. These are places where it's better to return an error:
 
 - When you encounter an error that is unlikely, but could happen in normal operation of the program.
 - When you're authoring a library. Callers to your library might like the opportunity to abort an operation or try again, instead of crashing the entire application.

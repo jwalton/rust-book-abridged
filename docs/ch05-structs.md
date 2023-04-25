@@ -69,8 +69,6 @@ let user2 = User {
 
 When you store a field in a structure, or use the struct update syntax as in this example, from an ownership perspective you are moving that field. In this example, once we create `user2`, we can no longer use `user1` because its username field has been moved. If we had given `user2` an `email` and a `username`, then all the remaining fields we assigned from `user1` would be basic data types that implement the `Copy` trait. In this case, nothing would move, so `user1` would still be valid.
 
-The key thing to take away here is that you can't move part of a struct. You can't move `username` from `user1` and then try to access `user1.email`. Ownership is about owning memory, and you can't take ownership of part of the memory another struct is using - it's all or nothing.
-
 ### Using Tuple Structs Without Named Fields to Create Different Types
 
 _Tuple structs_ are basically named tuples:
@@ -222,7 +220,13 @@ fn main() {
 }
 ```
 
-The `impl` (implementation) block defines methods and associated functions on the Rectangle type. `area` takes a reference to `self`. `&self` is actually a short form for `self: &Self`. If this were not a reference this method would take ownership of the `Rectangle`, so we wouldn't be able to use a `Rectangle` instance after calling `area`. Methods that take ownership of `self` are quite rare, but useful in cases where a method destroys `self` or transforms it into some other structure and moves data out of it. If a method wants to modify `self`, it needs to declare it as `& mut self`, as `self` is immutable by default, just like any other function parameter.
+The `impl` (implementation) block defines methods and associated functions on the Rectangle type. `area` takes a reference to `&self`, which is actually a short form for `self: &Self`.
+
+A method will generally have one of three different parameters for `self`:
+
+- `fn method(&self)` is a method with an immutable borrow of self.  Like any other parameter, it is immutable by default.
+- `fn method(& mut self)` is a method with a mutable borrow of self, which means this method can change fields on `self`.
+- `fn method(mut self)` is a method that takes ownership of self. These methods you won't see as often, because once you call such a method the receiver is no longer valid, but these methods are often used to transform a value into some other structure.  An example is the `map` method on iterator, which destroys the original iterator and returns a new one.
 
 You can have a method on a struct with the same name as one of the fields. This is most commonly used to add a _getter_ method to a struct. You can make it so a rectangle has a private `width: u32` field, and a public `width(): u32` method, which effectively makes `width` read-only. (What are public and private fields and methods? You'll have to wait for [chapter 7][chap7].)
 

@@ -128,12 +128,6 @@ fn send_response(mut stream: TcpStream, code: u16, reason: &str, filename: &str)
 
 If we `cargo run` this and point a browser at [http://localhost:7878/](http://localhost:7878/), we should see our web page!
 
-:::info
-
-Note that we're using `io::prelude::*`. The `io` library has it's own "prelude" which brings a number of io-related symbols into scope for us.
-
-:::
-
 ## Listening to the TCP Connection
 
 Let's start with the `main` function. We call `TcpListener::bind` to start listening on a port. This returns a `TcpListener` instance, so it's basically a constructor for `TcpListener`. Note that we're binding to "127.0.0.1", so you'll only be able to access this web server from the same machine you're running it on. We could bind to "0.0.0.0" - the [unspecified address](https://doc.rust-lang.org/std/net/struct.Ipv4Addr.html#method.is_unspecified) - to bind to all local interfaces. `bind` can fail for a variety of reasons. For example, if we tried to bind to port 80 and we weren't root, this would fail because we don't have sufficient permissions, or some other process might have already bound the port. We're glossing over all the error handling with a call to `unwrap`.

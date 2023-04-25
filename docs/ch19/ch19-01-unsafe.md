@@ -152,7 +152,7 @@ pub extern "C" fn call_from_c() {
 
 ## Accessing or Modifying a Mutable Static Variable
 
-Rust has global variables, called _static variables_:
+As mentioned in [chapter 3][chap3], Rust has global variables, called _static variables_:
 
 ```rust
 static HELLO_WORLD: &str = "Hello, world!";
@@ -162,9 +162,7 @@ fn main() {
 }
 ```
 
-Static variables are similar to constants, but we name them in `SCREAMING_SNAKE_CASE`. These variables are always in the `'static` lifetime, and accessing an immutable static variable is considered safe.
-
-When we use a constant in Rust, the compiler may duplicate the constant in multiple places in memory if they are referenced in multiple places. Static variables, on the other hand, are always guaranteed to occur once in memory, so no matter where they are referenced in code you'll get back the same instance. Unlike constants, static variables can also be `mut`, but accessing or modifying a mutable static variable is always unsafe:
+When we use a constant in Rust, the compiler may duplicate the constant in multiple places in memory if they are referenced in multiple places. Static variables, on the other hand, are always guaranteed to occur only once in memory, so no matter where they are referenced in code you'll get back the same instance. Unlike constants, static variables can also be `mut`, but accessing or modifying a mutable static variable is always unsafe:
 
 ```rust
 static mut COUNTER: u32 = 0;
@@ -217,3 +215,5 @@ union MyUnion {
 ```
 
 Rust has no idea what's stored in this union, and you'll get back a `u32` or an `f32` depending on which one you access, but odds are only one of them contains a meaningful value. You can learn more about unions in [the Rust Reference](https://doc.rust-lang.org/stable/reference/items/unions.html).
+
+[chap3]: ./ch03-common-programming-concepts.md "Chapter 3: Common Programming Concepts"

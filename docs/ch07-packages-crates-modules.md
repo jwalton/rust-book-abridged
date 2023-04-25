@@ -28,7 +28,7 @@ A _module_ is quite similar to a package in Go, and is somewhat similar to a pac
 
 - Inline (e.g. `mod garden { /* code goes here */ }`)
 - In _src/garden.rs_.
-- In _src/garden/mod.rs_ (older style, frowned upon, but still needed in some cases)
+- In _src/garden/mod.rs_ (older style)
 
 Similarly modules can defined submodules. _src/garden.rs_ can have a `mod vegetables` that might be defined in _src/garden/vegetables.rs_ (note that garden's submodules go in a folder named "garden", not in the same folder).
 
@@ -355,13 +355,13 @@ use std::io::{self, Write};
 
 ### The Glob Operator
 
-This will do exactly what you think it will:
+This brings all public symbols in the `io::prelude` module into scope:
 
 ```rust
-use std::collections::*;
+use io::prelude::*;
 ```
 
-This brings all public symbols in the `std::collections` module into scope. We generally write tests for a given module in a child module called "tests", so we very frequently `use super::*;` to bring everything in the module we're testing down into the tests module. We'll talk more about testing in [chapter 11][chap11].
+This is generally something you'd only do in two cases. The first is this example, where a crate has defined a custom prelude that brings a lot commonly used symbols into scope. The second involves unit tests; we generally write tests for a given module in a child module called "tests", so we very frequently `use super::*;` to bring everything in the module we're testing down into the tests module. We'll talk more about testing in [chapter 11][chap11].
 
 ## Separating Modules into Different Files
 

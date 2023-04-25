@@ -206,4 +206,37 @@ impl<T: Display> ToString for T {
 
 The implements the `ToString` trait on any type that implements the `Display` trait. Because of this, we can call `to_string()` on any type that implements `Display`.
 
+## `From` and `Into`
+
+`From` and `Into` are two related traits in rust. These are used to convert a type from one type to another. If you implement `From`, you get `Into` for free. We already mentioned [using the `From` trait to convert Errors](../ch09-error-handling.md#propagating-errors) from one type to another. Let's see another example:
+
+```rust
+struct Millimeters(u32);
+struct Meters(u32);
+
+impl From<Meters> for Millimeters {
+    fn from(value: Meters) -> Self {
+        return Millimeters(value.0 * 1000);
+    }
+}
+
+impl From<Millimeters> for Meters {
+    fn from(value: Millimeters) -> Self {
+        return Meters(value.0 / 1000);
+    }
+}
+
+fn main() {
+    let one_meter = Meters(1);
+    let millis = Millimeters::from(one_meter);
+    println!("1 meter is {} millimeters", millis.0);
+
+    let one_meter = Meters(1);
+    let into_millis: Millimeters = one_meter.into();
+    println!("1 meter is {} millimeters", into_millis.0);
+}
+```
+
+Here `Millimeters::from(one_meter)` and `one_meter.into()` both convert meters into millimeters. When we call `into` the type the meter is converted to is inferred from the annotation on `into_millis`.
+
 Continue to [10.3 - Lifetimes](./ch10-03-lifetimes.md).

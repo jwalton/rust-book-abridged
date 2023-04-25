@@ -121,7 +121,7 @@ Once a vector goes out-of-scope, like any other struct it gets dropped and the m
 
 ## 8.2 - Storing UTF-8 Encoded Text with Strings
 
-We're going to talk about strings here in the chapter on collections, because a string is basically a vector of characters. In fact, the underlying implementation of `String` is a `Vec<u8>`. Strings can seem a bit more finicky in Rust than in other languages, but in actual fact most other languages let you do very unsafe things with Strings and the real difference is that Rust tries to protect you from this.
+We're going to talk about strings here in the chapter on collections, because a string is basically a vector of UTF8 bytes. Strings can seem a bit more finicky in Rust than in other languages, but in actual fact most other languages let you do very unsafe things with Strings and the real difference is that Rust tries to protect you from this.
 
 ### What Is a String?
 
@@ -200,7 +200,7 @@ let s = format!("{s1}-{s2}-{s3}");
 
 Unlike with a vector, you can't index into a string with `[]`.
 
-Many languages treat indexing into a string as getting the nth byte from a string, but mainly this is a throwback to the days when we used encodings like 8-bit ASCII, where a single byte was a single character on the screen. In Rust, Strings are stored using UTF-8 encoding, and it's not entirely clear what the index operator should do here. Should `s[0]` return the first byte? The first char? Since this answer isn't clear, Rust errs on the side of safety and just doesn't let you do this. You can however convert a String into the underlying bytes with the `s.bytes()` method or to an array of chars with `s.chars()`.
+Many languages treat indexing into a string as getting the nth byte from a string, but mainly this is a throwback to the days when we used encodings like 8-bit ASCII, where a single byte was a single character on the screen. Rust doesn't allow you to index into a String like this. You can use the `s.bytes()` method to get an iterator over the underlying bytes, or `s.chars()` to get at the underlying unicode scalar values.
 
 ### Bytes and Scalar Values and Grapheme Clusters! Oh My!
 
@@ -271,7 +271,7 @@ fn main() {
 }
 ```
 
-Note that `.get()` here will return an `Option<&v>`. If there's no value in the map we'll get back a `None`. We call `copied` to convert the `Option<&i32>` into an `Option<i32>`, and then call `unwrap_or` to provide a default for the `None` case. One important thing to note here especially if you're coming from JavaScript is that, when iterating over members of a Hash Map, you are not guaranteed to get them back in the same order you inserted them in. The ordering is arbitrary.
+Note that `.get()` here will return an `Option<&v>`. If there's no value in the map we'll get back a `None`. We call `copied` to convert the `Option<&i32>` into an `Option<i32>`, and then call `unwrap_or` to provide a default for the `None` case. One important thing to note here especially if you're coming from JavaScript is that, when iterating over members of a Hash Map, you are not guaranteed to get them back in the same order you inserted them in. The ordering is arbitrary. (If you need predictable iteration order, a [`BTreeMap`](https://doc.rust-lang.org/std/collections/struct.BTreeMap.html) will iterate in sorted order over the keys.)
 
 ### Hash Maps and Ownership
 
@@ -344,9 +344,7 @@ If you're a JavaScript programmer this is maybe going to look like magic. What's
 
 ### Hashing Functions
 
-An exploration of the inner workings of the Hash Map and the hash table data structure that underlies it are beyond the scope of this chapter, but one important fact about a hash map is that each key must be reduced to a single number by means of something called a _hash function_. In Rust the default hash function is [SipHash](https://en.wikipedia.org/wiki/SipHash) which was chosen because, even though it isn't the fastest hash function, it does protect against certain denial-of-service attacks you can perform against a hash table.
-
-You can replace the default hash function by creating a custom _hasher_. You need to implements the `BuildHasher` trait, or find a crate on [crates.io](https://crates.io) that implements it.
+Each entry in a hash map is stored using a "hash" of the key, computed by a _hash function_. In Rust the default hash function is unspecified and may change in future versions, but at the time of this writing the default is [SipHash](https://en.wikipedia.org/wiki/SipHash). You can replace the default hash function by creating a custom _hasher_. You need to implement the `BuildHasher` trait, or find a crate on [crates.io](https://crates.io) that implements it.
 
 Continue to [chapter 9][chap9].
 

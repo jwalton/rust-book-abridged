@@ -166,17 +166,13 @@ fn main() {
     let novel = String::from("Call me Ishmael. Some years ago...");
     let first_sentence = novel.split('.').next().expect("Could not find a '.'");
 
-    {
-        let i = ImportantExcerpt {
-            part: first_sentence,
-        };
-    }
+    let i = ImportantExcerpt {
+        part: first_sentence,
+    };
 }
 ```
 
 Again, it's helpful to think about this like we would any other generic declaration. When we write `ImportantExcerpt<'a>` we are saying "there exists some lifetime which we'll call `'a`" - we don't know what that lifetime is yet, and we won't know until someone creates an actual instance of this struct. When we write `part: &'a str`, we are saying "when someone reads this ref, it has the lifetime `'a`" (and if someone later writes a new value to this ref, it must have a lifetime of at least `'a`). At compile time, the compiler will fill in the generic lifetimes with real lifetimes from your program, and then verify that the constraints hold.
-
-In this particular example, take careful note that when we create our `ImportantExcerpt` in `main`, the lifetime annotation `'a` takes on the lifetime of `first_sentence`, which is longer than the lifetime of the `ImportantExcerpt`!
 
 Here this struct has only a single reference, and so it might seem odd that we have to give an explicit lifetime for it. You might think the compiler could automatically figure out the lifetime here (and perhaps one day in this trivial example it will - Rust is evolving pretty rapidly).
 
@@ -189,7 +185,7 @@ The original ["The Rust Programming Language"](https://doc.rust-lang.org/stable/
 Here's an example where a struct requires two different lifetime annotations (borrowed from [this Stack Overflow discussion](https://stackoverflow.com/questions/29861388/when-is-it-useful-to-define-multiple-lifetimes-in-a-struct/66791361#66791361) which has some other good examples too):
 
 ```rust
-struct Foo<'a, 'b> {
+struct Point<'a, 'b> {
     x: &'a i32,
     y: &'b i32,
 }
@@ -199,14 +195,14 @@ fn main() {
     let v;
     {
         let y = 2;
-        let f = Foo { x: &x, y: &y };
+        let f = Point { x: &x, y: &y };
         v = f.x;
     }
     println!("{}", *v);
 }
 ```
 
-The interesting thing here is that we're copying a reference out of a struct and then using it after the struct has been dropped. This is okay because in this case the lifetime of the reference is longer than that of the struct. There's no way the compiler could know this without lifetime annotations, though. If you tried to give both `x` and `y` the same lifetime annotation, this would fail to compile.
+The interesting thing here is that we're copying a reference out of a struct and then using it after the struct has been dropped. This is okay because in this case the lifetime of the reference is longer than that of the struct. There's no way the compiler could know this without lifetime annotations. We we create the `Point<'a, 'b>` here, the compiler fills in `'a` with the lifetime of `x = 1`, so when we do `v = f.x` the compiler knows v also has that same lifetime. Also in this example, if you tried to give both `x` and `y` the same lifetime annotation, this would fail to compile.
 
 :::tip
 

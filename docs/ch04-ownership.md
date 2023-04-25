@@ -8,9 +8,9 @@
 
 The idea of ownership is quite core to Rust. If you're coming from a language like Python or JavaScript, and you're not familiar with the idea of the [the stack and heap](https://www.geeksforgeeks.org/stack-vs-heap-memory-allocation/) it's worth reading up about them. We're going to assume you're familiar with them in this chapter.
 
-In a language like C, we allocate memory on the stack by declaring local variables in a function, and we allocate and free memory on the heap by explicitly calling `malloc` and `free`. All memory management is up to us, which means it's easy to make mistakes. In a language like Java or JavaScript, simple variables like numbers or booleans get allocated on the stack in much the same way, and objects get allocated on the heap. Memory is allocated automatically without us having to think about it, so memory allocation is very safe, but this incurs a runtime cost in the form of garbage collection.
+In a language like C, we can manage memory by explicitly calling `malloc` and `free`. All memory management is up to us, which means it's easy to make mistakes. In a language like Java or JavaScript, memory is allocated automatically without us having to think about it, so memory allocation is very safe, but this incurs a runtime cost in the form of garbage collection.
 
-In Rust, simple values get allocated on the stack much like in Java, but Rust is rather unique in how it manages the heap. In Rust, every value is _owned_ by some variable called the _owner_. Ownership of a particular value can be transferred from one variable to another, and in some cases memory can be _borrowed_. Once the variable that owns the value is no longer around we say that value has been _dropped_, and once that happens any memory it allocated can safely be freed.
+Rust is rather unique in how it manages memory. Aside from simple values such as `i32` or `f64`, In Rust, every value is _owned_ by some variable called the _owner_. Ownership of a particular value can be transferred from one variable to another, and in some cases memory can be _borrowed_. Once the variable that owns the value is no longer around we say that value has been _dropped_, and once that happens any memory it allocated can safely be freed. When a value is dropped, it can optionally run code in a _destructor_ (defined by implementing the `Drop` trait).
 
 ### Ownership Rules
 
@@ -20,11 +20,13 @@ From the original Rust Book:
 - There can only be one owner at a time.
 - When the owner goes out of scope, the value will be _dropped_.
 
-The _scope_ of a variable in Rust works much like it does in most other languages - inside a set of curly braces, any variables you declare can be accessed only after their declaration, and they go "out of scope" once we hit the closing brace. The key thing about Rust is that once a variable goes out of scope, if that variable currently owns some memory, then that memory will be freed.
+The _scope_ of a variable in Rust works much like it does in most other languages - inside a set of curly braces, any variable you declare can be accessed only after its declaration, and it goes "out of scope" once we hit the closing brace. The key thing about Rust is that once a variable goes out of scope, if that variable currently owns some memory, then that memory will be freed.
 
-::: info
+::: tip
 
 A variable can only have one owner at a time, but in [chapter 15][chap15] we'll talk about smart pointers like `Rc<T>` that let us get around this restriction.
+
+We also say that each value in Rust has an owner, but it's possible to [leak memory](./ch15-smart-pointers.md#156---reference-cycles-can-leak-memory) in Rust, which would technically end with values that have no owners.
 
 :::
 
@@ -38,7 +40,7 @@ fn foo() {
     if (true) {
         // Create the variable `s` to own a String.
         // Remember that Strings can store an arbitrary
-        // length of data, so it will allocate memory
+        // length of data, so this will allocate memory
         // on the heap.
         let s = String::from("hello");
 
@@ -55,28 +57,53 @@ You might read that and scratch your head and think "If everything disappears wh
 
 ```rust
 fn main() {
-    let s_main = foo();
-    println!("{}", s_main);
+    let outer_string = foo();
+    println!("{}", outer_string);
 }
 
 fn foo() -> String {
-    let s_foo = String::from("hello world");
-    s_foo
+    let inner_string = String::from("hello world");
+    inner_string
 }
 ```
 
-Here the `foo` function creates a `String` (which allocates some memory on the heap) and `s_foo` is the owner of that `String`. The `foo` function returns `s_foo`, so ownership of the String (and the associated memory) is moved to `s_main` in the caller. When we reach the end of `main`, then `s_main` falls out-of-scope. At this point the `String` doesn't have an owner anymore, so it will be dropped.
+Here the `foo` function creates a `String` (which allocates some memory on the heap) and `inner_string` is the owner of that `String`. The `foo` function returns `inner_string`, so ownership of the String (and the associated memory) is moved to `outer_string` in the caller. When we reach the end of `main`, then `outer_string` falls out-of-scope. At this point the `String` doesn't have an owner anymore, so it will be dropped.
+
+:::info
+
+When we move ownership of a variable, it's location in memory will change:
+
+```rust
+fn main() {
+    let x = String::from("hello world");
+    println!("Address: {:p}", &x);
+    let y = x;
+    println!("Address: {:p}", &y);
+}
+```
+
+The above example will print different addresses for `x` and `y`. In this example, the `String` has some memory stored on the heap (the "hello world" part) but also has some memory on the stack (a pointer to that value and a length, amongst other data). When we move ownership of `x` to `y`, we're also moving the data on the stack from one place to another with `memcpy`, although the heap part stays in the same place.
+
+If you need a piece of data to stay in one place in memory, see [`std::pin`](https://doc.rust-lang.org/std/pin/index.html).
+
+:::
 
 ### There Can Only Be One
 
 Remember that we said there can only be one owner at a time?
 
 ```rust
-fn strings() {
+fn strings() -> String {
+    // Create a string
     let s1 = String::from("hello");
+
+    // Move ownership from s1 to s2
     let s2 = s1;
 
+    // Can't use s1 anymore!
     println!("{}", s1);
+
+    s2
 }
 ```
 
@@ -84,22 +111,23 @@ This code fails to compile with the error:
 
 ```txt
 error[E0382]: borrow of moved value: `s1`
-  --> src/main.rs:23:20
-   |
- 2 |     let s1 = String::from("hello");
-   |         -- move occurs because `s1` has type `String`, which does not implement the `Copy` trait
- 3 |     let s2 = s1;
-   |              -- value moved here
- 4 |
- 5 |     println!("{}", s1);
-   |                    ^^ value borrowed here after move
+ --> src/main.rs:9:20
+  |
+3 |     let s1 = String::from("hello");
+  |         -- move occurs because `s1` has type `String`, which does not implement the `Copy` trait
+...
+6 |     let s2 = s1;
+  |              -- value moved here
+...
+9 |     println!("{}", s1);
+  |                    ^^ value borrowed here after move
 ```
 
 If you're coming from some other language, and you try to just pass values around and hope for the best without understanding ownership, you're going to see this error a lot.
 
 In this example, we create a variable `s1`, which owns the String. In most other languages, when we do `let s2 = s1;`, we'd now have two variables that point to the same underlying object, but not so in Rust. In Rust, we _move_ ownership of the value from `s1` to `s2`, so `s1` stops being valid and can't be used from that point forwards. This is exactly the same as when we returned a variable in the example above.
 
-If you think about this at the memory level, when we create `s1`, we allocate some memory on the heap. When we say `let s2 = s1;`, we're not creating a second `String` (we didn't call `clone` or `new`). If we allowed `s1` to be valid after this point then `s1` and `s2` would have to point to the same memory. When we reach the end of the function, let's say we returned `s2` but not `s1`. If `s1` and `s2` both owned this data, then here `s1` would go out of scope so we should drop the underlying `String`, but `s2` points to that same memory so we can't. Rust's answer to this problem is to never let this happen - only one owner at a time.
+If you think about this at the memory level, when we create `s1`, we allocate some memory. When we say `let s2 = s1;`, we're not creating a second `String` (we didn't call `clone` or `new`). If we allowed `s1` to be valid after this point then `s1` and `s2` would have to point to the same memory. When we reach the end of the function, we return `s2` but not `s1`, which means `s1` is going out of scope and should be dropped, but since `s2` is being moved and refers to the same underlying object `s1` can't be dropped. Rust's answer to this problem is to never let this happen - only one owner at a time.
 
 If we wanted to deep-copy the data in the String, we could use the `clone` method to allocate more memory on the heap:
 
@@ -151,6 +179,12 @@ pub struct MyStruct {
 }
 ```
 
+:::info
+
+Structs with the `Copy` trait are not allowed to implement the `Drop` trait, so they can't run any custom code when they go out of scope.
+
+:::
+
 ### Ownership and Functions
 
 We already saw that if you return a variable, then ownership of the variable is moved to the caller. We also move ownership when we pass a variable to a function:
@@ -192,7 +226,7 @@ Two things to note here - when we call `calculate_length` instead of passing `s1
 
 :::info
 
-The syntax for getting a reference to a value - `&x` - is exactly the same as getting a pointer to a value in C or Go, and references in Rust behave a lot like pointers. More so than C++ references.  [This Stack Overflow answer](https://stackoverflow.com/questions/64167637/is-the-concept-of-reference-different-in-c-and-rust) talks about ways that Rust references compare to C/C++ pointers.
+The syntax for getting a reference to a value - `&x` - is exactly the same as getting a pointer to a value in C or Go, and references in Rust behave a lot like pointers. [This Stack Overflow answer](https://stackoverflow.com/questions/64167637/is-the-concept-of-reference-different-in-c-and-rust/64167719#64167719) talks about ways that Rust references compare to C/C++ pointers.
 
 :::
 
@@ -237,6 +271,26 @@ let r2 = &mut s; // r1 is now out-of-scope, so we can create r2.
 println!("{}", r2);
 ```
 
+:::info
+
+Where you place the `mut` keyword changes how a reference can be used:
+
+```rust
+// x1 is a reference to y.  We can't update x or y:
+let x1 = &y;
+// x2 is a reference that can be used to change y:
+let x2 = &mut y;
+// x3 is is a reference that currently points to,
+// an immutable y, but we could change x3 to point
+// somewhere else.
+let mut x3 = &y;
+// x4 is a reference that can be used to change y,
+// and can also be updated to point somewhere else.
+let mut x4 = &mut y;
+```
+
+:::
+
 ## Dereferencing
 
 Rust has a `*` operator for dereferencing, very similar to C++ or Go:
@@ -271,14 +325,14 @@ fn dangle() -> &String {
 
 Here `s` goes out of scope at the end of the function, so the String will be dropped. That means if Rust let us return a reference to the String, it would be a reference to memory that had already been reclaimed.
 
-There's no `null` or `nil` in Rust. You can't have a nil pointer like you could in Go. (Instead there's something called an `Option` which we'll talk about in [chapter 6][chap6].)
+There's no `null` or `nil` in Rust. You can't have a null pointer like you could in C. (Instead there's something called an `Option` which we'll talk about in [chapter 6][chap6].)
 
 ### The Rules of References
 
 To sum up what we learned above:
 
 - At any given time, you can have _either_ one mutable reference _or_ any number of immutable references.
-- References must always be valid. No references to dropped memory or null pointers.
+- References must always be valid. You can't have references to dropped memory or null pointers.
 
 ## 4.3 - The Slice Type
 

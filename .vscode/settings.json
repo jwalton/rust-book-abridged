@@ -10,6 +10,7 @@
         "isize",
         "Klabnik",
         "malloc",
+        "memcpy",
         "metaprogramming",
         "metavariable",
         "metavariables",
