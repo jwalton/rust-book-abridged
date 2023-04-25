@@ -216,4 +216,4 @@ union MyUnion {
 
 Rust has no idea what's stored in this union, and you'll get back a `u32` or an `f32` depending on which one you access, but odds are only one of them contains a meaningful value. You can learn more about unions in [the Rust Reference](https://doc.rust-lang.org/stable/reference/items/unions.html).
 
-[chap3]: ./ch03-common-programming-concepts.md "Chapter 3: Common Programming Concepts"
+[chap3]: ../ch03-common-programming-concepts.md "Chapter 3: Common Programming Concepts"
