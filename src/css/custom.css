@@ -28,3 +28,11 @@
   --ifm-color-primary-lightest: #ffb3b3;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
 }
+
+/* This works around the issue of truncated code-blocks in https://github.com/signcl/docusaurus-prince-pdf/ */
+@media print {
+  code[class*='codeBlockLines'] {
+    float: none;
+    display: block;
+  }
+}
