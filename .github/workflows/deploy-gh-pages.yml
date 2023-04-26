@@ -9,11 +9,9 @@ on:
       - master
 
 jobs:
-  deploy:
-    name: Build and Deploy
+  build:
+    name: Build
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
@@ -24,6 +22,24 @@ jobs:
         run: npm ci
       - name: Build
         run: npm run build
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-output
+          path: build/
+
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      contents: write
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build-output
+          path: build/
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         if: ${{ github.ref == 'refs/heads/master' }}
@@ -33,3 +49,36 @@ jobs:
           publish_dir: ./build
           user_name: jwalton
           user_email: dev@lucid.thedreaming.org
+
+  pdf:
+    name: Generate PDF Version
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build-output
+          path: build/
+      - name: Install Prince (HTML to PDF converter)
+        run: |
+          curl https://www.princexml.com/download/prince-14.2-linux-generic-x86_64.tar.gz -O
+          tar zxf prince-14.2-linux-generic-x86_64.tar.gz
+          cd prince-14.2-linux-generic-x86_64
+          yes "" | sudo ./install.sh
+      - name: Start Server and Build PDF
+        run: |
+          # Symlink to make docusaurus `baseUrl` working
+          ln -s ./build rust-book-abridged
+          # Start local server and wait for it to be ready
+          npx serve . -p 1337 & npx wait-on http://localhost:1337/rust-book-abridged
+          # Generate PDF
+          npx docusaurus-prince-pdf -u http://localhost:1337/rust-book-abridged --output rust-book-abridged.pdf
+          # Kill server
+          fuser -k 1337/tcp 
+      - name: Upload PDF Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: rust-book-abridged.pdf
+          path: rust-book-abridged.pdf
+          if-no-files-found: error
