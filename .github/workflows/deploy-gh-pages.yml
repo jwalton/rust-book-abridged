@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - master
+    tags:
+      - "*"
   pull_request:
     branches:
       - master
@@ -32,6 +34,9 @@ jobs:
     name: Deploy
     runs-on: ubuntu-latest
     needs: build
+    # Only deploy non-tagged builds (otherwise we deploy twice when
+    # we tag a release).
+    if: "!startsWith(github.ref, 'refs/tags/')"
     permissions:
       contents: write
     steps:
@@ -53,7 +58,11 @@ jobs:
   pdf:
     name: Generate PDF Version
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     needs: build
+    # Generate a new release every time there's a tag.
+    if: startsWith(github.ref, 'refs/tags/')
     steps:
       - name: Download build artifacts
         uses: actions/download-artifact@v3
@@ -75,10 +84,9 @@ jobs:
           # Generate PDF
           npx docusaurus-prince-pdf -u http://localhost:1337/rust-book-abridged --output rust-book-abridged.pdf
           # Kill server
-          fuser -k 1337/tcp 
-      - name: Upload PDF Artifact
-        uses: actions/upload-artifact@v3
+          fuser -k 1337/tcp
+      - uses: ncipollo/release-action@v1
         with:
-          name: rust-book-abridged.pdf
-          path: rust-book-abridged.pdf
-          if-no-files-found: error
+          generateReleaseNotes: true
+          makeLatest: true
+          artifacts: "rust-book-abridged.pdf"
