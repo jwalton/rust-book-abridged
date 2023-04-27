@@ -12,6 +12,8 @@ hide_title: true
     <p>Based on <a href="https://doc.rust-lang.org/stable/book/">"The Rust Programming Language"</a> by Steve Klabnik and Carol Nichols.</p>
 </div>
 
+PDF version of this book is available [here](https://github.com/jwalton/rust-book-abridged/releases/latest/download/rust-book-abridged.pdf).
+
 ## What is this?
 
 This is an abridged - or perhaps a better word would be condensed - version of ["The Rust Programming Language"](https://doc.rust-lang.org/stable/book/title-page.html) (AKA "the Rust Book"). This is not an original work - all the chapter names and examples in this book have been copied verbatim from the original, but all of the prose has been rewritten from scratch, leaving out anything that's not about learning Rust. This book is about 1/2 the length of the original, but I don't think it is missing anything that an experienced software developer wouldn't already know.
