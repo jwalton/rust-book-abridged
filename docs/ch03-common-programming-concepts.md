@@ -29,7 +29,7 @@ Here `clear` will try to empty the string, but will fail with the error `` canno
 
 Variables cannot be declared at the global scope [unless they are `static`](#static-variables).
 
-::: info
+:::info
 
 You may have noticed that that "mostly" above when we were talking about immutable variables. Immutability prevents us from directly modifying members of a struct, however in [chapter 15][chap15] we're going to find out how you can modify parts of immutable objects through a concept call _interior mutability_, and that we can share mutable objects across multiple places in the code with smart pointers like `Rc<T>` and `Arc<T>`. A Rust mutex is an example of an object that is immutable, but you're allowed to change the value in it if you own the lock.
 
@@ -124,7 +124,7 @@ If you try to overflow an integer (e.g. you try to store 256 in a u8), what happ
 
 The standard library has functions that let you explicitly define how you want to handle overflows if you don't want to panic. For example [`wrapping_add`](https://doc.rust-lang.org/std/intrinsics/fn.wrapping_add.html) will add two numbers and let them wrap around. There are `wrapping_*`, `checked_*`, `overflowing_*`, and `saturating_*` functions for integer arithmetic.
 
-::: tip
+:::tip
 
 We can change how overflows are handled at runtime for development and release through [release profiles](./ch14-more-about-cargo.md#141---customizing-builds-with-release-profiles).
 

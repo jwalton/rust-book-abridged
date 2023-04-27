@@ -22,7 +22,7 @@ From the original Rust Book:
 
 The _scope_ of a variable in Rust works much like it does in most other languages - inside a set of curly braces, any variable you declare can be accessed only after its declaration, and it goes "out of scope" once we hit the closing brace. The key thing about Rust is that once a variable goes out of scope, if that variable currently owns some memory, then that memory will be freed.
 
-::: tip
+:::tip
 
 A variable can only have one owner at a time, but in [chapter 15][chap15] we'll talk about smart pointers like `Rc<T>` that let us get around this restriction.
 
