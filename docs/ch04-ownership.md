@@ -257,7 +257,7 @@ let r2 = &mut s; // This is an error!
 println!("{}, {}", r1, r2);
 ```
 
-This restriction is imposed because it prevents data races. The compiler will stop us from creating data races in multi-threaded code at compile time!
+This restriction is imposed because it prevents data races. The compiler will stop us from creating data races at compile time!
 
 The scope of a reference lasts only until it's last use, not until the end of the block, so this is fine:
 

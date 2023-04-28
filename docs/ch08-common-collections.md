@@ -4,7 +4,7 @@ Rust's standard library includes a number of _collections_ which store data on t
 
 - _`Vec<T>`_ (short for Vector) is essentially a variable length array.
 - _String_ is a variable length collection of characters - like a special vector just for characters.
-- _HashMap_ allows you to associate values with keys, and implements the [`Map` trait](https://doc.rust-lang.org/std/iter/struct.Map.html).
+- _HashMap_ allows you to associate values with keys.
 
 These are the most common collections, but if you check [the collections documentation](https://doc.rust-lang.org/stable/std/collections/index.html) you'll see there are many others.
 
