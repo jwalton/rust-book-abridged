@@ -265,7 +265,7 @@ fn iterator_demonstration() {
 }
 ```
 
-Calling `next` on an iterator changes it's internal state, which is why the `self` parameter on `next` is marked `&mut`. This means we need to declare `v1_iter` as `mut` here as well. In the example above where we used a for loop, you might notice we didn't make `v1_iter` mutable. This is because the `for` loop took ownership of the iterator and made it mutable - sneaky Rust.
+Calling `next` on an iterator changes it's internal state, which is why the `self` parameter on `next` is marked `&mut`. This means we need to declare `v1_iter` as `mut` here as well. In the example above where we used a for loop, you might notice we didn't make `v1_iter` mutable. This is because the `for` loop [took ownership of the iterator](https://doc.rust-lang.org/std/iter/index.html#for-loops-and-intoiterator) and made it mutable - sneaky Rust.
 
 Another thing to note is that the iterator returned by `iter` returns immutable references to the underlying collection. There's an `iter_mut` that returns mutable references, if we want to modify some or all of the members of a collection. There's also an `into_iter` which takes ownership of the receiver (`into` because it converts the underlying collection into an iterator, and you won't be able to access the underlying collection anymore) and returns owned values. For example, if you called `v1.into_iter` above, you'd get back an iterator of owned values, and wouldn't be able to use `v1` anymore.
 

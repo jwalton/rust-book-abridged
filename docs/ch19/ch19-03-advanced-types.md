@@ -129,7 +129,7 @@ fn say_hello(name: &str) {
 }
 ```
 
-Here `name` isn't actually a `str` but a `&str` or a string slice. The actual data from the string is stored somewhere on the heap (or if it's a string literal somewhere in the application binary), but the `name` variable itself is 16 bytes long on a 64-bit platform (two `usize`s). This is because `&str` is implemented as a pointer to the string data and a length value.
+Here `name` isn't actually a `str` but a `&str` or a string slice. The actual data from the string is stored "somewhere else" in memory, but the `name` variable itself is 16 bytes long on a 64-bit platform (two `usize`s). This is because `&str` is implemented as a pointer to the string data and a length value.
 
 As a rule, to pass around _dynamically sized types_ like a string, we need a pointer. This can be a `Box` or an `Rc` or a `&`, but some kind of pointer. Another example of a dynamically sized type is a trait object, which is why when we pass one it's usually in a `Box<dyn Trait>`. The size of the trait object itself is unknown, so we pass around a smart pointer to the trait object instead, allowing us to store the trait object on the heap.
 

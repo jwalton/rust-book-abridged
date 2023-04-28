@@ -91,7 +91,7 @@ Here `x` is of type `i32`, but `y` is of type `&i32`. `y` is essentially a point
 
 :::info
 
-If you're coming from a language like C or Go, this is probably second nature to you. If you're coming from JavaScript, this might be a new concept. Because `y` here points to the memory that stores the `x` value, you can think about `*y` as basically an alias for `x`. If `x` and `y` were mutable, we could use `*y` to change x because it points to the memory where `x` is stored:
+If you're coming from a language like C or Go, this is probably second nature to you. If you're coming from JavaScript, this might be a new concept. Because `y` here points to the memory that stores the `x` value, you can think about `*y` as basically an alias for `x`. If `x` were mutable and we declared `y` as `&mut`, we could use `*y` to change x because it points to the memory where `x` is stored:
 
 ```rust title="src/main.rs"
 fn main() {
@@ -128,15 +128,19 @@ In our Rust example, the `*y` is basically doing the same thing as `y.current` i
 
 ### Using `Box<T>` Like a Reference
 
-Because `Box<T>` implements `Deref`, we can use the `*` operator on it, and treat it just like a reference. This (combined with a Rust feature called _deref coercion_) means that any function that takes a `&i32` can also take a `Box<i32>`:
+Because `Box<T>` implements `Deref`, we can use the `*` operator on it, and treat it just like a reference. This (combined with a Rust feature called _deref coercion_) means that any function that takes a `&i32` can also take a `&Box<i32>`:
 
 ```rust title="src/main.rs"
+fn show_value(v: &i32) {
+    println!("{v}");
+}
+
 fn main() {
     let x = 5;
     let y = Box::new(x);
 
-    assert_eq!(5, x);
-    assert_eq!(5, *y);
+    show_value(&x); // Prints 5
+    show_value(&y); // Prints 5
 }
 ```
 
@@ -226,7 +230,7 @@ Obviously ownership rules prevent Rust from automatically converting a `&T` to a
 
 ## 15.3 - Running Code on Cleanup with the `Drop` trait
 
-The `Drop` trait allows us to specify some code that must be run whenever a struct is dropped (i.e. when it goes out of scope). The `Drop` trait is almost always used when implementing a smart pointer. `Box<T>` implements `Drop` so it can clean up the memory it is using on the heap. The `Rc<T>` type (which will talk about in the [next section](#154---rct-the-reference-counted-smart-pointer)) implements `Drop` so it can decrement a reference count.
+The `Drop` trait allows us to specify some code that must be run whenever a struct is dropped (i.e. when it goes out of scope). `Box<T>` implements `Drop` so it can clean up the memory it is using on the heap. The `Rc<T>` type (which will talk about in the [next section](#154---rct-the-reference-counted-smart-pointer)) implements `Drop` so it can decrement a reference count.
 
 `Drop` can also be used to clean up other resources. If you have a struct that opens a network connection in its constructor, you can implement the `Drop` trait to ensure the network connection is closed when the struct is dropped, ensuring you won't leak any resources. This is a pattern borrowed from C++ called ["Resource Acquisition Is Initialization" or RAII](https://en.cppreference.com/w/cpp/language/raii).
 
@@ -343,21 +347,42 @@ Since there are multiple references to the data held by `Rc<T>`, then by Rust ow
 
 ## 15.5 - `RefCell<T>` and the Interior Mutability Pattern
 
-Suppose for a moment that you're a Rust developer working on a bug in the Rust standard library. You want to keep track of how many times `to_lowercase` is called on a particular string. No problem, you can add a private member to the `String` struct called `to_lowercase_called` and increment it every time someone calls `to_lowercase`:
+Suppose for a moment that you're a Rust developer working on a bug in the Rust standard library. You want to keep track of how many times `to_lowercase` is called on a particular string. No problem, you can add a private field to the `String` struct called `to_lowercase_called` and increment it every time someone calls `to_lowercase`:
 
 ```rust
 pub fn to_lowercase(&self) -> String {
-    self.to_lowercase_called += 1;
+    self.to_lowercase_called += 1; // This won't compile.
     // --snip--
 ```
 
-This would work in most languages, but in Rust `to_lowercase` borrows an immutable reference to `self`, so we can't mutate self. And obviously we can't change the signature of `to_lowercase` without breaking a lot of code.
+This would work in most languages, but in Rust `to_lowercase` borrows an immutable reference to `self`, so we can't mutate `self`. And obviously we can't change the signature of `to_lowercase` without potentially breaking many places where it is called. The problem here is that Rust's concept of "immutability" is getting in the way. You and I know that incrementing a counter like this won't materially affect how this string looks from its outside API, and incrementing this counter won't affect any existing uses of String, but Rust has no way of knowing that.
 
-The borrow checker stops us here, because what we're doing isn't _safe_ - we're mutating an immutable data structure and this could cause a bug elsewhere in the code. But... you and I are smarter than the compiler here. You and I know that incrementing this counter and then reading it out somewhere else isn't going to hurt anything. From any code outside the standard library, this `String` will still look like an immutable `String`. This code isn't _safe_ from a Rust compiler perspective, but neither is in _incorrect_.
+There's a design pattern in Rust called _interior mutability_ which is designed to overcome this sort of problem. Essentially we have some data structure that as a whole is immutable, but we want to be able to mutate individual parts of it. The primitive that Rust uses to enable this is called [an `UnsafeCell<T>`](https://doc.rust-lang.org/core/cell/struct.UnsafeCell.html) which basically lets us "opt out" of immutability guarantees for references. Using an `UnsafeCell<T>` directly involves writing unsafe code (see [chapter 19](./ch19/ch19-01-unsafe.md)), but most commonly you'd use two "safe" wrappers around `UnsafeCell`, which are `Cell<T>` and `RefCell<T>`.
 
-Rust has a way of doing such things which is called writing _unsafe_ code, for cases where we're smarter than the compiler, and we know we can do something correctly. (Of course sometimes we only _think_ we're smarter than the compiler, and what we're doing is something that is both unsafe and incorrect, which will usually end in a panic at runtime. But in this case, where we're incrementing a counter, we're totally correct.)
+As a concrete example, here's how you might use a `Cell<T>` to implement our counter in `to_lowercase`:
 
-In this section we're not going to write any unsafe code ourselves (see [chapter 19](./ch19/ch19-01-unsafe.md)), but we're going to make use of `RefCell<T>` which is implemented with unsafe code. `RefCell<T>` is used in a pattern called _interior mutability_ which is essentially exactly what we just described with our `to_lowercase` example. We have some object that we want to look like an immutable object from the outside world, but we want to have some internal state we can still mutate.
+```rust
+pub struct String {
+    to_lowercase_called: RefCell<usize>,
+    // --snip--
+}
+
+impl String {
+    pub fn to_lowercase(&self) -> String {
+        let old_count = self.to_lowercase_called.get();
+        self.to_lowercase_called.set(old_count + 1);
+        // --snip--
+    }
+}
+```
+
+`Cell<T>` is a smart pointer, a bit like a `Box<T>` - it stores a single value, and you're allowed to `get` or `set` the value contained inside, even if all you have is an immutable reference to the `Cell<T>`. The problem with `Cell<T>` is that since you don't have Rust's compile time checks ensuring you only have a single mutable reference at a time, it's easy to write code with a `Cell<T>` that has race conditions.
+
+`RefCell<T>` is similar in concept, but it lets us borrow a reference to the value inside by calling the `borrow` and `borrow_mut` methods.  Those borrows are checked the same way normal borrows are - we can have a single mutable reference to the value inside, or multiple immutable references, but not both at the same time. As is usually the case where `unsafe` code is involved, `RefCell<T>` makes some trade offs that we need to be aware of. The difference between a `RefCell<T>` and normal mutability rules is that `RefCell<T>` enforces these checks at runtime instead of at compile time - if we try to take two mutable references to the value stored in a `RefCell<T>`, it will result in a panic instead of a compiler error.
+
+`RefCell<T>` is implemented using unsafe code, but it bundles it up behind an easy-to-understand API we can use. We say `RefCell<T>` provides a safe API around unsafe code, which is a common idiom for unsafe code in Rust.
+
+One final note about `RefCell<T>` is that, like `Rc<T>`, it is not thread safe.
 
 ### A Use Case for Interior Mutability: Mock Objects
 
@@ -443,13 +468,7 @@ mod tests {
 }
 ```
 
-`RefCell<T>` is essentially a new kind of smart pointer. It stores some value on the heap, but it lets us call `borrow` to get an immutable reference to that something and `borrow_mut` to get a mutable reference, even though the `RefCell<T>` itself is immutable.
-
-`RefCell<T>` enforces the exact same safety rules as the borrow checker does. You can only have a single mutable reference at a time, and if you have one you can't also have any immutable references. The key difference is that normally these checks happen at compile time, but with `RefCell<T>` they happen at runtime. If we get things wrong, instead of a compiler error before we ship, our users get a panic. You can think of `RefCell<T>` as two `Rc<T>` in one - it has a reference count for immutable references, and a second reference count for mutable references (which is always either 0 or 1).
-
-Inside `RefCell<T>` this is all managed with unsafe code, but it bundles it up behind an easy-to-understand API we can use. We say the `RefCell<T>` provides a safe API around unsafe code, which is a common idiom for unsafe code in Rust.
-
-One final note about `RefCell<T>` is that, like `Rc<T>`, it is not thread safe.
+Here in `MockMessenger::send` we're calling into `borrow_mut` to give us a mutable reference to the vector stored inside the `RefCell` so we can push values onto that vector, even though we only have an immutable reference to the `RefCell`.  In the test case, we call `borrow` to get an immutable reference so we can verify a message was sent.
 
 ### Having Multiple Owners of Mutable Data by Combining `Rc<T>` and `RefCell<T>`
 

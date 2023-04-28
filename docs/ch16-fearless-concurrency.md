@@ -82,7 +82,9 @@ Can you spot the problem? If you need a hint, notice that `v` gets declared in t
 
 The problem here is that immediately after spawning the thread, the `main` function drops `v`. This means the memory associated with the vector is going to be freed, possibly before the thread has even had a chance to run. The Rust compiler throws an error here, because the thread might not have a valid reference to `v` when it needs it. There's no way for the compiler to know.
 
-We an fix this with the `move` keyword, which forces the closure to take ownership of `v`:
+More formally, from a type safety perspective, the closure passed to `thread::spawn` has the trait bounds `F: FnOnce() -> T + Send + 'static`. The closure has a static lifetime, which may or may not overlap the lifetime of the vector, so the closure can't borrow from the vector.
+
+One way to fix this is with the `move` keyword, which forces the closure to take ownership of `v`:
 
 ```rust
     let handle = thread::spawn(move || {
@@ -90,6 +92,34 @@ We an fix this with the `move` keyword, which forces the closure to take ownersh
     });
 
 ```
+
+### Scoped Threads
+
+Another way to solve the example above is with `thread::scope`:
+
+```rust title="src/main.rs"
+use std::thread;
+
+fn main() {
+    let v = vec![1, 2, 3];
+    let mut i = 32;
+
+    let scope = thread::scope(|s| {
+        s.spawn(|| {
+            // Can borrow from the outer scope.
+            println!("Here's a vector: {:?}", v);
+        });
+
+        s.spawn(|| {
+            // Can even mutably borrow, so long as
+            // no other threads borrow same variable.
+            i = 7;
+        });
+    });
+}
+```
+
+`thread::scope` passes a `Scope` object to the passed in closure, which can be used to spawn new threads. All threads spawned this way are joined before `thread::scope` returns, so their lifetime is known. These threads can therefore borrow from the enclosing function. If any individual thread panics, then `thread::scope` will panic as well.
 
 ## 16.2 - Using Message Passing to Transfer Data Between Threads
 
@@ -175,7 +205,7 @@ fn main() {
 }
 ```
 
-We acquire the lock with `m.lock()`. Note that `lock` returns a `LockResult<T>`. If any thread panics while it holds the mutex, then the mutex will never be unlocked, so no other thread will ever be able to take the mutex again. In this case, other threads will get back an `Err` when they call `lock`.
+We acquire the lock with `m.lock().unwrap()`. If you're wondering what that `unwrap` is about: if a thread panics which it holds the mutex, then Rust marks this mutex as being [poisoned](https://doc.rust-lang.org/std/sync/struct.Mutex.html#poisoning). The call to `lock` actually returns a `LockResult<T>` which, in the case of a poisoned mutex, will be an `Err`. Generally here you would just call `unwrap` as we have done above, which would propagate the panic since, after a panic, you will have a hard time guaranteeing that anything is in a reasonable state. However you can [acquire the lock from the poisoned mutex](https://doc.rust-lang.org/std/sync/struct.PoisonError.html#method.into_inner) if you wish.
 
 After we `unwrap` the `LockResult`, the `num` value here is bound to a `MutexGuard`. When the `MutexGuard` is dropped at the end of our inner scope, the mutex's lock will be released.
 

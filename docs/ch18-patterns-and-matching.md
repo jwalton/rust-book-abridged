@@ -114,6 +114,18 @@ fn main() {
 }
 ```
 
+### The `matches!` Macro
+
+Rust provides a handy macro that can be used to check if a value matches a specific pattern:
+
+```rust
+let foo = 'f';
+assert!(matches!(foo, 'A'..='Z' | 'a'..='z'));
+
+let bar = Some(4);
+assert!(matches!(bar, Some(x) if x % 2 == 0));
+```
+
 ## 18.2 - Refutability: Whether a Pattern Might Fail to Match
 
 In this example:
@@ -437,6 +449,19 @@ match x {
 ```
 
 But unfortunately the compiler isn't smart enough to figure this out.
+
+One word of caution here (or any time you use a catch-all so you don't have to explicitly enumerate all cases):
+
+```rust
+let x = Some(8);
+match x {
+    Non => panic!("Nothing to print"),
+    Some(x) if x <= 2 => println!("Little {x}"),
+    Some(x) if x > 2 => println!("Big {x}"),
+}
+```
+
+You might expect this to print "Big 8", but it will actually print "Nothing to print" because we mistyped `None` and accidentally created a variable named `Non`.  Fortunately it's difficult to do this without getting a compiler warning for our unused `Non` variable.
 
 ### `@` Bindings
 

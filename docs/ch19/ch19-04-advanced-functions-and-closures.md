@@ -9,6 +9,8 @@ fn add_one(x: i32) -> i32 {
     x + 1
 }
 
+// Note that this takes a function pointer as
+// a parameter, and not a closure.
 fn do_twice(f: fn(i32) -> i32, arg: i32) -> i32 {
     f(arg) + f(arg)
 }
@@ -20,9 +22,11 @@ fn main() {
 }
 ```
 
-The `fn` type her is called a _function pointer_. You may recall [from chapter 13][chap13] that to pass a closure as a parameter, we declared a generic function and used a trait bound on the generic type to `FnOnce`, `FnMut`, or `Fn`. The difference between a closure and a function pointer is that the function pointer is a concrete type.
+The first parameter to `do_twice` is called a _function pointer_. You may recall [from chapter 13][chap13] that in order to pass a closure as a parameter, we declared a generic function and used a trait bound on the generic type to `FnOnce`, `FnMut`, or `Fn`. The difference between a closure and a function pointer is the function pointer is a named concrete type instead of a generic trait bound.  (Technically any given closure has a concrete type as well, generated at compile time, but these are unnameable types.)
 
-Function pointers implement all three generic traits (`FnOnce`, `FnMut`, and `Fn`) so you can always pass a function pointer to a function that expects a trait. For this reason, it's generally more flexible to write a function that takes a closure. You'll likely have to use a function pointer instead If you're interacting with C code.
+Because a function is like a closure that cannot capture any variables, function pointers implement all three generic traits (`FnOnce`, `FnMut`, and `Fn`) so you can always pass a function pointer to a function that expects a trait. For this reason, it's generally more flexible to write a function that takes a closure. You'll likely have to use a function pointer instead If you're interacting with C code.
+
+## Passing Functions In Place of a Closure
 
 Here's an example of using a function in place of a closure:
 
@@ -36,7 +40,7 @@ let list_of_strings2: Vec<String> =
     list_of_numbers.iter().map(ToString::to_string).collect();
 ```
 
-Each enum variant we define becomes an initializer function, so we can use them as function pointers:
+Each enum variant we define becomes an initializer function, so we can use them as function pointers (as we also could any constructor):
 
 ```rust
 enum Status {

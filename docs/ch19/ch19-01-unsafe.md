@@ -1,10 +1,16 @@
 # 19.1 - Unsafe Rust
 
+:::danger
+
+This chapter is meant as an introduction to unsafe code, but if you find yourself actually writing unsafe code, it would be a good idea to [read through the Rustonomicon](https://doc.rust-lang.org/nomicon/intro.html). There are many things you can do in unsafe code that will result in undefined behavior, some of which you might surprise you if you're coming from a language like C/C++.
+
+:::
+
 Rust enforces all sort of safety features for us, preventing us from dereferencing null pointers, preventing us from creating potential data races. Sometimes, though, we know better than the compiler.
 
 Imagine we have a vector with six elements in it. We could create a mutable slice to elements 0-2 and a second mutable slice from elements 3-5, and there'd be no chance of a data race, since these two mutable references point to different regions of memory. The problem with this is that when we call `&mut values[0..=2]`, we have a mutable reference to the underlying array, not to part of the array, and we won't be able to create a second one. Here the compiler is trying to protect us, but it's actually getting in our way.
 
-_Unsafe_ code in Rust is code where we're allowed to ignore or bypass some of the restrictions Rust places on us, and tell the compiler "Don't worry, I got this." Of course, sometimes we only think we know better than the compiler when in fact what we're actually doing is creating a hard-to-diagnose problem that we won't fund until our code is running in production. So it's not a bad idea to keep unsafe code to a minimum.
+_Unsafe_ code in Rust is code where we're allowed to ignore or bypass some of the restrictions Rust places on us, and tell the compiler "Don't worry, I got this." Of course, sometimes we only think we know better than the compiler when in fact what we're actually doing is creating dreaded [undefined behavior](https://doc.rust-lang.org/reference/behavior-considered-undefined.html). So it's not a bad idea to keep unsafe code to a minimum.
 
 But it's important to note that "unsafe" doesn't necessarily mean incorrect, it's just code that hasn't been inspected by the eagle eye of the Rust compiler. There are plenty of C programs in the world performing useful tasks that are correct (or reasonably correct) and C doesn't even have a borrow checker, so all C code is unsafe as far as a Rust programmer is concerned.
 
@@ -28,7 +34,7 @@ There are five _unsafe superpowers_. These are things you're allowed to do insid
 - Implement an unsafe trait
 - Access fields of a `union`
 
-Other than these five things, unsafe code is exactly like safe code. The borrow checker is still checking your borrows, immutable references are still immutable, the sun still rises in the east.
+Other than these five things, unsafe code is mostly like safe code. The borrow checker is still checking your borrows, immutable references are still immutable, the sun still rises in the east. These five things do let you get into a surprising amount of trouble though - it's important to document your assumptions and invariants, and carefully ensure you're meeting the assumptions and invariants of any unsafe functions you're calling into.
 
 ## Dereferencing a Raw Pointer
 
@@ -44,13 +50,10 @@ Since Rust doesn't make any guarantees about raw pointers, it's up to you to mak
 ```rust
 let mut num = 5;
 
-// Create a const and mutable pointer to the same memory.
-let r1 = &num as *const i32;
-let r2 = &mut num as *mut i32;
+// Create a mutable and const pointer to the same memory.
+let r1 = &mut num as *mut i32;
+let r2 = unsafe { &*r1 as *const i32 };
 
-// We can create the two pointers above in safe code!
-// We're just not allowed to dereference them until
-// we're in unsafe code:
 unsafe {
     println!("r1 is: {}", *r1);
     println!("r2 is: {}", *r2);
@@ -215,5 +218,27 @@ union MyUnion {
 ```
 
 Rust has no idea what's stored in this union, and you'll get back a `u32` or an `f32` depending on which one you access, but odds are only one of them contains a meaningful value. You can learn more about unions in [the Rust Reference](https://doc.rust-lang.org/stable/reference/items/unions.html).
+
+## Soundness
+
+This is an example of an unsafe function, taken from [the Rustonomicon](https://doc.rust-lang.org/nomicon/working-with-unsafe.html):
+
+```rust
+fn index(idx: usize, arr: &[u8]) -> Option<u8> {
+    if idx < arr.len() {
+        unsafe {
+            Some(*arr.get_unchecked(idx))
+        }
+    } else {
+        None
+    }
+}
+```
+
+This uses unsafe code, but it checks the bounds of the array before calling into `get_unchecked`, so we can prove this function is _sound_ (it can't cause undefined behavior).  Note that if you change the first line of this function to `if idx <= arr.len()` the function becomes unsound, even though we didn't modify any unsafe code!
+
+## Verifying unsafe code with Miri
+
+TODO: Add section here about using [Miri](https://github.com/rust-lang/miri) to test unsafe code.  The [Rust Playground](https://play.rust-lang.org/?version=stable&mode=debug&edition=2021) has a "Run with Miri" under "Tools" in the upper right corner, which is handy for checking a function.
 
 [chap3]: ../ch03-common-programming-concepts.md "Chapter 3: Common Programming Concepts"

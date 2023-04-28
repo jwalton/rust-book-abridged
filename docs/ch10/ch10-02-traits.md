@@ -18,7 +18,7 @@ Note that the trait only defines the method signatures - the contract, if you wi
 
 In languages like TypeScript and Go, if we have an interface, and we have a type that defines all the same methods that the interface declares, then the type implements that interface. There's no need to explicitly mark that the type implements the interface. This is called "duck typing", because, as the saying goes, "if it walks like a duck, and it quacks like a duck, then it must be a duck."
 
-Not so in Rust. Here we must explicitly declare that a type implements a trait. The syntax is `impl [TRAIT] for [STRUCT] {}`, and inside the curly braces we place all the methods we wish to implement:
+Not so in Rust. Here we must explicitly declare that a type implements a trait. The syntax is `impl [TRAIT] for [STRUCT] {}`, and inside the curly braces we place all the methods we need to implement:
 
 ```rust
 pub struct NewsArticle {
@@ -71,6 +71,12 @@ Other crates can use the `Summary` trait and implement it on their own types, ju
 
 This restriction is in place because of something called the _orphan rule_. Let's suppose there's a `color` crate out there. You implement a library crate that uses `color`, but you notice one of the types in `color` doesn't implement the `Display` trait and you want to `println!` a color, so you implement the `Display` trait on that type. Now suppose I'm writing a separate library crate, and I do the same thing. Now suppose someone adds your crate and my crate to their application. At this point, the Rust compiler has two competing implementations for `Display` on this type, so which one does it use? Since Rust has no way to know which is the "correct" one, Rust just stops this from ever happening by forcing the crate to own at least one of the type or trait.
 
+:::note
+
+The orphan rule is actually [slightly more complicated](https://rust-lang.github.io/rfcs/2451-re-rebalancing-coherence.html#concrete-orphan-rules) than mentioned above. Once generics start getting involved, it's possible to use a foreign trait and foreign type, given that one of the generic types is local. See the above link for full details.
+
+:::
+
 ## Default Implementations
 
 Remember how we said a trait just had signatures and no implementations? Well, we lied a little. Sometimes it's handy to be able to define default behavior for a method:
@@ -104,15 +110,7 @@ Some implementations might only implement `summarize_author()`, while some might
 
 ## Traits as Parameters
 
-We can use a trait as a type for a function parameter or variable using the `impl` keyword:
-
-```rust
-pub fn notify(item: &impl Summary) {
-    println!("Breaking news! {}", item.summarize());
-}
-```
-
-This is actually syntactic sugar for _trait bound_ syntax:
+When we define a generic function, we can limit what kinds of concrete types are allowed to be used in place of the generic type using a _trait bound_:
 
 ```rust
 pub fn notify<T: Summary>(item: &T) {
@@ -120,19 +118,28 @@ pub fn notify<T: Summary>(item: &T) {
 }
 ```
 
-Here we're declaring a generic function, but we're setting bounds on the type of T. Whatever you pass in for T has to satisfy the `Summary` trait. We can specify more than one trait bound:
+Here we're declaring a generic function, but we're setting bounds on the type of T. Whatever you pass in for T has to satisfy the `Summary` trait. This is a common thing to do, so there's a shortcut to specify this using the `impl` keyword:
 
 ```rust
-// Using the `impl` syntax:
-pub fn notify(item: &(impl Summary + Display)) {...}
+// This is syntactic sugar for the example above.
+pub fn notify(item: &impl Summary) {
+    println!("Breaking news! {}", item.summarize());
+}
+```
 
+We can specify more than one trait bound:
+
+```rust
 // Using a trait bound:
 pub fn notify<T: Summary + Display>(item: &T) {...}
+
+// Using the `impl` syntax:
+pub fn notify(item: &(impl Summary + Display)) {...}
 ```
 
 Here whatever we pass in for `T` must satisfy both our own `Summary` trait and the `Display` trait from the standard library (so we can use `{}` to display the item with `println!` or `format!`).
 
-This can get a bit hard to read if you have a lot of traits bounds. There ends up being a lot of clutter between the name of the function and the parameters. Borrowing a page from SQL, we can also write trait bounds using the `with` syntax. These two examples are equivalent:
+This can get a bit hard to read if you have a lot of traits bounds. There ends up being a lot of clutter between the name of the function and the parameters. Borrowing a page from SQL, we can also write trait bounds using a `where` clause. These two examples are equivalent:
 
 ```rust
 fn some_function<T: Display + Clone, U: Clone + Debug>(t: &T, u: &U) -> i32 {...}
@@ -146,7 +153,7 @@ where
 
 ## Returning Types that Implement Traits
 
-In addition to using traits as parameters, we can of course also return them. This lets us hide the concrete type from the caller:
+We can hide the concrete type returned by a function using an [_opaque type_](https://rustc-dev-guide.rust-lang.org/opaque-types-type-alias-impl-trait.html). This lets us hide the concrete type from the caller (and allows you to change the concrete type later without affecting callers):
 
 ```rust
 fn returns_summarizable() -> impl Summary {
@@ -161,9 +168,20 @@ fn returns_summarizable() -> impl Summary {
 }
 ```
 
-Specifying a trait as a return type can be very handy when using closures and iterators. Sometimes when using an iterator, the type inferred by the compiler can be quite long, and writing the full type out by hand would be a lot of work without much benefit. Being able to supply a trait here is much more concise.
+Note that even though this `impl` syntax looks similar to the shortcut we used to specify a trait bound above, this is not at all the same. This function is not generic. There is still a single concrete type being returned by this function (in this case `Tweet`), but callers are limited to only using the interface provided by the trait (in this case `Summary`).
 
-If you're coming from another language, you might think that `returns_summarizable()` would be able to return a `Tweet` in one branch and a `NewsArticle` in another, but it can't. This restriction is imposed by how this is implemented in the compiler. We'll see how to overcome this with trait objects in [chapter 17](../ch17-object-oriented-features.md#172---using-trait-objects-that-allow-for-values-of-different-types).
+The concrete type here is inferred by the compiler, but it's important to realize there is still one. If you were to add an `if` statement to this function, you would not be able to return a `Tweet` in one branch and a `NewsArticle` in the other. (We'll see how to overcome this with trait objects and dynamic dispatch in [chapter 17](../ch17-object-oriented-features.md#172---using-trait-objects-that-allow-for-values-of-different-types).)
+
+This syntax is useful if we want to return something that has a concrete type that can't be written down, like a closure:
+
+```rust
+fn thing_returning_closure() -> impl Fn(i32) -> bool {
+    println!("here's a closure for you!");
+    |x: i32| x % 3 == 0
+}
+```
+
+We haven't talked about iterators yet, but sometimes when using an iterator, the type inferred by the compiler can be quite long, and writing the full type out by hand would be a lot of work without much benefit. Being able to supply an opaque type here is much more concise.
 
 ## Using Trait Bounds to Conditionally Implement Methods
 

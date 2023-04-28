@@ -1,6 +1,12 @@
 # 10.3 - Validating References with Lifetimes
 
-Every reference in Rust has a _lifetime_ where the reference is valid. This has to do with [ownership][chap4], so it's a feature that's somewhat unique to Rust.
+:::info
+
+TODO: This section needs some rework.  If you want to get deep into how lifetimes work from the compiler's perspective, [this](https://doc.rust-lang.org/nomicon/subtyping.html) is a good read.
+
+:::
+
+Every value in Rust has a _lifetime_ - a point in the code where the value is created, and a point in the code where the value is destroyed. Every reference in Rust has two lifetimes - the lifetime of the reference itself (from where it's created until where it is last used) and a lifetime of the value it points to. The lifetime of the reference obviously needs to be shorter than the lifetime of the value, otherwise the reference will point to freed memory.
 
 Just as rustc infers the type of many of our parameters, in most cases Rust can infer the lifetime of a reference (usually from when it is created until it's last use in a function). Just as we can explicitly annotate a variable's type, we can also explicitly annotate the lifetime of a reference in cases where the compiler can't infer what we want.
 
@@ -21,7 +27,7 @@ fn main() {
 }                         // ---------+
 ```
 
-If you try this, it won't compile. The variable `r` is in scope for the entire `main()` function, but it's a reference to `x` which will be dropped when we reach the end of the inner scope. After we reach the end of that inner scope, `r` is now a reference to freed memory, so Rust's _borrow checker_ won't let us use it.
+This won't compile. The variable `r` is in scope for the entire `main()` function, but it's a reference to `x` which will be dropped when we reach the end of the inner scope. After we reach the end of that inner scope, `r` is now a reference to freed memory, so Rust's _borrow checker_ won't let us use it.
 
 More formally, we can say that `r` and `x` have different lifetimes, which we've marked in the comments of this example, using the labels `'a` and `'b` (strange names, but this is actually a bit of foreshadowing). The borrow checker sees that `r` has a lifetime of `'a`, but references memory that has the lifetime `'b`, and since `'b` is shorter than `'a`, the borrow checker won't allow this.
 
@@ -110,7 +116,7 @@ fn longest<'a>(x: &'a str, y: &'a str) -> &'a str {
 }
 ```
 
-Think about this a bit like a generic function (the syntax is similar for a good reason). We're saying here there exists some lifetime which we're going to call `'a`, and the variables `x` and `y` both life at least as long as this hypothetical `'a`'. They don't have to both be the same lifetime, they just both have to be valid at the start and end of `'a`. Then in the case of this function we're making the claim that the value we return is going to be valid for this same lifetime. At compile time, the compiler will see how long the passed in `x` lives, how long the passed in `y` lives, and then it will verify that the result of this function isn't used anywhere outside of that lifetime.
+Think about this a bit like a generic function (the syntax is similar for a good reason). We're saying here there exists some lifetime which we're going to call `'a`, and the variables `x` and `y` both life at least as long as this hypothetical `'a`. They don't have to both be the same lifetime, they just both have to be valid at the start and end of `'a`. Then in the case of this function we're making the claim that the value we return is going to be valid for this same lifetime. At compile time, the compiler will see how long the passed in `x` lives, how long the passed in `y` lives, and then it will verify that the result of this function isn't used anywhere outside of that lifetime.
 
 Putting this a bit more succinctly, we're telling the compiler that the return value of `longest()` will live at least as long as the shorter lifetime of `x` and `y`. When the rust compiler analyzes a call to `longest()` it can now mark it as an error if the two parameters passed in don't adhere to this constraint.
 
@@ -239,7 +245,7 @@ fn first_word(s: &str) -> &str {
 
 How come this compiles without lifetime annotations? Why don't we have to tell the compiler that the return value has the same lifetime as `s`? Actually, in the pre-1.0 days of Rust, lifetime annotations would have been mandatory here. But there are certain cases where Rust can now work out the lifetime on it's own. We call this _lifetime elision_, and say that the compiler _elides_ these lifetime annotations for us.
 
-What the compiler does is to assign a different lifecycle to every reference in the parameter list (`'a` for the first one, `'b` for the second, and so on...). If there is exactly one input lifetime parameter, that lifecycle is automatically assigned to all output parameters. If there is more than one input lifetime parameter but one of them is for `&self`, then the lifetime of `self` is assigned to all output parameters. Otherwise, the compiler will error.
+What the compiler does is to assign a different lifetime to every reference in the parameter list (`'a` for the first one, `'b` for the second, and so on...). If there is exactly one input lifetime parameter, that lifetime is automatically assigned to all output parameters. If there is more than one input lifetime parameter but one of them is for `&self`, then the lifetime of `self` is assigned to all output parameters. Otherwise, the compiler will error.
 
 In the case above, there's only one lifetime that `first_word` could really be returning; if `first_word` created a new `String` and tried to return a reference to it, the new `String` would be dropped when we leave the function and the reference would be invalid. The only sensible reference for it to return comes from `s`, so Rust infers this for us. (It _could_ be a static lifetime, but if it were we'd have to explicitly annotate it as such.)
 
