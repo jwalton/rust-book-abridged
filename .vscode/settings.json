@@ -35,6 +35,7 @@
         "SIGTERM",
         "structs",
         "subfolders",
+        "Subtyping",
         "supertrait",
         "supertraits",
         "tlsv",

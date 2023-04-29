@@ -304,8 +304,9 @@ This takes two string slices and returns whichever is longer. It also prints an 
 ## Further Reading
 
 - There are some advanced cases where lifetime annotations are required that we haven't discussed here (for example trait bounds sometimes require [lifetime annotations](https://doc.rust-lang.org/stable/reference/types/trait-object.html#trait-object-lifetime-bounds), but they are usually inferred). [The Rust Reference](https://doc.rust-lang.org/reference/index.html) is a good place to read about this sort of thing when you're a little more comfortable with the language.
-- [This stack overflow answer](https://stackoverflow.com/questions/27785671/why-can-the-lifetimes-not-be-elided-in-a-struct-definition/27785916#27785916) has an excellent explanation of how lifetime annotations work in structs.
+- The Rustonomicon has a section on [Subtyping and Variance](https://doc.rust-lang.org/nomicon/subtyping.html) which goes into the technical details of how references work within the type system in much greater detail than this chapter did.
 - [This excellent two part blog post](https://mobiarch.wordpress.com/2015/06/29/understanding-lifetime-in-rust-part-i/) gives another take on explaining lifetimes.
+- [This stack overflow answer](https://stackoverflow.com/questions/27785671/why-can-the-lifetimes-not-be-elided-in-a-struct-definition/27785916#27785916) has an excellent explanation of how lifetime annotations work in structs.
 
 Continue to [chapter 11][chap11].
 
