@@ -163,6 +163,6 @@ In other words, if we go back to the `fn largest<T>(list: &[T]) -> &T` we starte
     let result = largest(&char_list);
 ```
 
-then internally Rust would actually compile two different functions, a `largest<i32>` and a `largest<char>`. This means generic have no runtime performance impact (but they do make your executable slightly larger).
+then internally Rust would actually compile two different functions, a `largest<i32>` and a `largest<char>`. This means generics have no runtime performance impact (but they do make your executable slightly larger).
 
 Continue to [10.02 - Traits](./ch10-02-traits.md).
