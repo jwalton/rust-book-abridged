@@ -16,7 +16,7 @@ fn main() {
 }
 ```
 
-Immutability in Rust is similar to `const` in JavaScript, or `final` in Java. The value the reference points to can't be modified (mostly):
+Immutability in Rust is similar to `const` in JavaScript, or `final` in Java. The value the reference points to can't be modified (mostly - see the info box below):
 
 ```rust
 fn main() {
@@ -31,7 +31,7 @@ Variables cannot be declared at the global scope [unless they are `static`](#sta
 
 :::info
 
-You may have noticed that that "mostly" above when we were talking about immutable variables. Immutability prevents us from directly modifying members of a struct, however in [chapter 15][chap15] we're going to find out how you can modify parts of immutable objects through a concept call _interior mutability_, and that we can share mutable objects across multiple places in the code with smart pointers like `Rc<T>` and `Arc<T>`. A Rust mutex is an example of an object that is immutable, but you're allowed to change the value in it if you own the lock.
+You may have noticed that that "mostly" above when we were talking about immutable variables. Immutability prevents us from directly modifying members of a struct, however in [chapter 15][chap15] we're going to find out that sometimes you can modify individual parts of an immutable struct through a concept call _interior mutability_. A mutex is an example of an object that is immutable, but you're allowed to change the value in it if you own the lock.
 
 :::
 
@@ -270,7 +270,15 @@ let my_closure = |param1, param2| { /* function body goes here */ };
 
 /* You can use this style of comment too. */
 
-/// This is a doc comment - see chapter 14.
+/// This is a doc comment for the "next thing", in
+/// this case for the `foo` function.  Markdown is
+/// allowed here.  See chapter 14 for more details.
+fn foo() {}
+
+mod bar {
+    //! This is a doc comment for the "parent thing",
+    //! in this case the "bar" module.
+}
 ```
 
 ## 3.5 - Control Flow

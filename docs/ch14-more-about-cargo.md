@@ -327,6 +327,13 @@ Binaries you install this way get put in `~/.cargo/bin` (assuming you're running
 
 Much like git, you can create your own custom cargo commands. If there's an executable on your path called `cargo-something`, then you can run `cargo something` to run that executable. These custom commands will also show up in `cargo --list`.
 
+One handy command you can install this way is [cargo-audit](https://docs.rs/cargo-audit/latest/cargo_audit/), which will check your dependencies against the [rustsec security advisory database](https://rustsec.org/):
+
+```sh
+$ cargo install cargo-audit
+$ cargo audit
+```
+
 Continue to [chapter 15][chap15].
 
 [chap15]: ./ch15-smart-pointers.md "Chapter 15: Smart Pointers"
