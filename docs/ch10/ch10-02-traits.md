@@ -14,6 +14,18 @@ pub trait Summary {
 
 Note that the trait only defines the method signatures - the contract, if you will - that the types need to implement. Each type is free to implement this function differently.
 
+:::info
+
+When we name structs, we typically use a noun to name a struct. Functions are typically verbs. Traits in Rust are less consistently named.
+
+You might think from the name "trait" that these should be named after adjectives. Or perhaps since traits fill the same role as interfaces in other languages, a noun would be appropriate.  But the trait for a type that implements the `read` method is neither "Readable" nor "Reader", but `Read`.  A type that can be copied has the `Copy` marker trait, not the "Copyable" trait.
+
+From these examples - `Read` and `Copy` - clearly traits in Rust should be named after verbs! But there are plenty of examples in the standard library that seem to defy this such as `Iterator`, `Hasher`, or `Sized`, and the example in [Rust by Example](https://doc.rust-lang.org/rust-by-example/trait.html) is `Animal`.
+
+This ambiguous naming comes at least in part from the fact that traits are inspired in part by Haskell's typeclasses, which have similar naming weirdness. The best rule of thumb I've seen is that if a trait has a single well defined method (such as `write` or `read`) the the trait should be named after the method. Otherwise, the trait name should be a noun.
+
+:::
+
 ## Implementing a Trait on a Type
 
 In languages like TypeScript and Go, if we have an interface, and we have a type that defines all the same methods that the interface declares, then the type implements that interface. There's no need to explicitly mark that the type implements the interface. This is called "duck typing", because, as the saying goes, "if it walks like a duck, and it quacks like a duck, then it must be a duck."
