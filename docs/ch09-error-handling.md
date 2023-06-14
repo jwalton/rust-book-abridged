@@ -195,7 +195,7 @@ The `?` operator can be placed after any `Result`, and basically is the same as 
 
 Here we're adding a `?` to a `Result<*, io:Error>` and we're returning a `Result<*, io:Error>` - since the error types are the same, we can use `?`, but note that the error types don't have to be the same! The `?` operator will pass errors through the `from` function from the `From` trait on our return type to convert the error from one error type to another.
 
-For example, if we wanted to defined a custom error type named `OurError`, we could define `impl From<io::Error> for OurError` to tell Rust how to convert `io:Error`s to `OurError`s, without needing to add any more code to our example.
+For example, if we wanted to define a custom error type named `OurError`, we could define `impl From<io::Error> for OurError` to tell Rust how to convert `io:Error`s to `OurError`s, without needing to add any more code to our example.
 
 See [chapter 10](./ch10/ch10-02-traits.md#from-and-into) for more information about the `From` and `Into` traits.
 
