@@ -30,7 +30,7 @@ A _module_ is quite similar to a package in Go, and is somewhat similar to a pac
 - In _src/garden.rs_.
 - In _src/garden/mod.rs_ (older style)
 
-Similarly modules can defined submodules. _src/garden.rs_ can have a `mod vegetables` that might be defined in _src/garden/vegetables.rs_ (note that garden's submodules go in a folder named "garden", not in the same folder).
+Similarly modules can define submodules. _src/garden.rs_ can have a `mod vegetables` that might be defined in _src/garden/vegetables.rs_ (note that garden's submodules go in a folder named "garden", not in the same folder).
 
 Note that we've marked the _src/garden/mod.rs_ version as "older style". This is still supported (and as we'll see in [chapter 11][chap11] it's very handy for writing integration tests) but the _src/garden.rs_ is the one you should use by default. If you try to use the mix the `[name].rs` and `[name]/mod.rs` styles in the same module, you'll get a compiler error.
 
@@ -62,13 +62,13 @@ mod front_of_house {
 }
 ```
 
-We'll just defined the modules inline here, because this is convenient for the purposes of an example, but usually we'd split this modules up into multiple files.
+We've just defined the modules inline here, because this is convenient for the purposes of an example, but usually we'd split these modules up into multiple files.
 
 ## 7.3 Paths for Referring to an Item in the Module Tree
 
 To refer to an item in the module tree, we use a path. Paths come in two forms:
 
-- An _absolute path_ starts from the crate root. For external library creates we're using, this starts with the name of the crate (e.g. `rand`) and for code within the current crate it starts with `crate`.
+- An _absolute path_ starts from the crate root. For external library crates we're using, this starts with the name of the crate (e.g. `rand`) and for code within the current crate it starts with `crate`.
 - A _relative path_ starts from the current module. It starts with an identifier in the current module or with `self` or `super`.
 
 Using our restaurant example, let's say we want to call the `add_to_waitlist` function. From the top level of _src/lib.rs_ we could do this in two ways:
@@ -114,7 +114,7 @@ mod back_of_house {
 
 ### Making Structs and Enums Public
 
-`pub` is used to make an identifier visible outside of the module, but there are a few special considerations for structs and enums. When you make a `struct` public, by default all of it's fields are private and can only be accessed inside the module. You need to mark individual fields as `pub` if you want them to be visible to code outside the module:
+`pub` is used to make an identifier visible outside of the module, but there are a few special considerations for structs and enums. When you make a `struct` public, by default all of its fields are private and can only be accessed inside the module. You need to mark individual fields as `pub` if you want them to be visible to code outside the module:
 
 ```rust title="src/lib.rs"
 mod back_of_house {
