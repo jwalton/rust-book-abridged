@@ -91,7 +91,7 @@ When shadowing a variable, the new variable does not have to have the same type 
 
 ## 3.2 - Data Types
 
-Keep in mind that Rust is a statically typed language, so the type of every variable (and how much space it will occupy in memory, if it is stored on the stack) must be known at compile time. Rust's type inference is amazing, so frequently we don't have to tell Rust what type a variable is, but sometimes a variable's type is ambiguous in which case we need to _annotate_ it (e.g. `let guess: 32 = ...`).
+Keep in mind that Rust is a statically typed language, so the type of every variable (and how much space it will occupy in memory, if it is stored on the stack) must be known at compile time. Rust's type inference is amazing, so frequently we don't have to tell Rust what type a variable is, but sometimes a variable's type is ambiguous in which case we need to _annotate_ it (e.g. `let guess: u32 = ...`).
 
 A "scalar type" represents a single value. There are four kinds of scalar types in Rust: integers, floating-point numbers, Booleans, and characters.
 
