@@ -25,7 +25,7 @@ To do this in a class based language we might define a `Component` abstract clas
 
 At runtime, a trait object will be a pair of pointers in memory - one to the instance of a specific type that implements our trait, and another to a table of methods defined on the trait to call at runtime (similar to a v-table in C++). We create a trait object by specifying a pointer (this could be a simple reference or a smart pointer like a `Box<T>`) and the `dyn` keyword (for "dynamic"). In [chapter 19][chap19] we'll talk about the `Sized` trait, and why a pointer is required here.
 
-Fo our GUI library, we'll create a `Draw` trait, with a single method called `draw`. Instead of storing a vector of buttons or a vector of dialogs, we'll store a vector of _trait objects_:
+For our GUI library, we'll create a `Draw` trait, with a single method called `draw`. Instead of storing a vector of buttons or a vector of dialogs, we'll store a vector of _trait objects_:
 
 ```rust title="src/lib.rs"
 pub trait Draw {
