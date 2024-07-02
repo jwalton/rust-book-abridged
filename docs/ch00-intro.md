@@ -7,7 +7,7 @@ hide_title: true
 
 <div align="center">
     <h1>The Rust Book (Abridged)</h1>
-    <p>v0.3.0 - Draft</p>
+    <p>v1.0.0</p>
     <p>By Jason Walton</p>
     <p>Based on <a href="https://doc.rust-lang.org/stable/book/">"The Rust Programming Language"</a> by Steve Klabnik and Carol Nichols.</p>
 </div>
