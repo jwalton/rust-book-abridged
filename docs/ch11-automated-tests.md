@@ -363,6 +363,8 @@ Let's suppose we're working on a large project with several integration test fil
 
 To avoid this, we can use the older module naming style we mentioned in [chapter 7][chap7] and put our common code in _tests/common/mod.rs_. `cargo test` will not recurse into subdirectories, so it won't run these files as tests.
 
+One problem you'll quickly run into if you go down this path is that if you have multiple integration tests, you'll probably end up with some test submodules that are included in some tests but not in others.  This will trigger dead code warnings, since during the compilation of crates that don't use these tests, they'll appear to be unused. One solution to this is to [combine all your integration tests into a single crate](https://momori.dev/posts/organize-rust-integration-tests-without-dead-code-warning/), with tests in submodules of the crate.
+
 ### Integration Tests for Binary Crates
 
 If your project only has a binary crate and no library crate, you can't use integration tests to run anything in your project, because you can't `use` anything out of a binary crate. This is another good reason why it's a good idea to put as much of your logic as you can into a library crate, and then create a thin application wrapper around it in your binary crate.
