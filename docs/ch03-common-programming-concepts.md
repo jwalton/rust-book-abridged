@@ -344,7 +344,7 @@ let x = loop {
 // while loop in every other language.
 let mut number = 0;
 while number < 10 {
-    number++;
+    number += 1;
 }
 ```
 
@@ -358,7 +358,7 @@ for element in a {
 }
 
 // Count from 1 to 5
-for element in (1..6) {
+for element in 1..6 {
     println!("value is {element}");
 }
 ```

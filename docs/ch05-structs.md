@@ -30,7 +30,7 @@ fn main() {
 
     // Variable must be declared as `mut` if we want to be
     // able to modify the structure.
-    myUser.email = String::from("other_email@example,com");
+    myUser.email = String::from("other_email@example.com");
 }
 ```
 
