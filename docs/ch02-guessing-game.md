@@ -31,7 +31,7 @@ fn main() {
 
 You can run this with `cargo run`, and it should ask you to enter a value and then print out what you entered.
 
-In order to read user input, we're using the `io` library from the standard library, but to reference `io` more conveniently we bring it into _scope_. We do this with the first line, `use std::io`. This is a bit like an `import` statement in python or Java, but note that that don't need to explicitly import `io` to use it. We could remove the `use` line and replace `io::stdin()` with `std::io::stdin()`. There are a number of symbols that Rust brings into scope for you from the standard library automatically - things that get used in almost every program you're going to write. This set is called [the _prelude_](https://doc.rust-lang.org/stable/std/prelude/index.html).
+In order to read user input, we're using the `io` library from the standard library, but to reference `io` more conveniently we bring it into _scope_. We do this with the first line, `use std::io`. This is a bit like an `import` statement in python or Java, but note that don't need to explicitly import `io` to use it. We could remove the `use` line and replace `io::stdin()` with `std::io::stdin()`. There are a number of symbols that Rust brings into scope for you from the standard library automatically - things that get used in almost every program you're going to write. This set is called [the _prelude_](https://doc.rust-lang.org/stable/std/prelude/index.html).
 
 ## Storing Values with Variables
 

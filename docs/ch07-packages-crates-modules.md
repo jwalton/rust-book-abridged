@@ -30,7 +30,7 @@ A _module_ is quite similar to a package in Go, and is somewhat similar to a pac
 - In _src/garden.rs_.
 - In _src/garden/mod.rs_ (older style)
 
-Similarly modules can defined submodules. _src/garden.rs_ can have a `mod vegetables` that might be defined in _src/garden/vegetables.rs_ (note that garden's submodules go in a folder named "garden", not in the same folder).
+Similarly modules can define submodules. _src/garden.rs_ can have a `mod vegetables` that might be defined in _src/garden/vegetables.rs_ (note that garden's submodules go in a folder named "garden", not in the same folder).
 
 Note that we've marked the _src/garden/mod.rs_ version as "older style". This is still supported (and as we'll see in [chapter 11][chap11] it's very handy for writing integration tests) but the _src/garden.rs_ is the one you should use by default. If you try to use the mix the `[name].rs` and `[name]/mod.rs` styles in the same module, you'll get a compiler error.
 
